@@ -128,3 +128,15 @@
     @apply font-sans;
   }
 }
+
+@keyframes float {
+  from { transform: scale(1); }
+  to   { transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

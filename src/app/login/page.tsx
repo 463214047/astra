@@ -1,128 +1,85 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import { signIn } from '@/auth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Image from "next/image";
+import { signIn } from "@/auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: '登录',
+  title: "登录",
 };
 
-const GithubIcon = () => (
-  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      fillRule="evenodd"
-      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
+      <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.27 1.19-3.07-.12-.29-.52-1.45.11-3.02 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.57.23 2.73.11 3.02.74.8 1.19 1.82 1.19 3.07 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.04.77 2.1v3.11c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z" />
+    </svg>
+  );
+}
 
 export default function LoginPage() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50 px-4 py-10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* 背景装饰 */}
-      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl dark:bg-indigo-500/20" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl dark:bg-blue-500/20" />
+    <main className="relative grid min-h-dvh place-items-center overflow-hidden p-4">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(96,165,250,0.22),transparent_34%),radial-gradient(circle_at_82%_78%,rgba(56,189,248,0.18),transparent_36%),linear-gradient(180deg,#ffffff_0%,#f6f9ff_45%,#eef4ff_100%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(37,99,235,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(37,99,235,0.06)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(circle_at_center,black,transparent_72%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed left-[calc(50%-280px)] top-[calc(50%-280px)] size-[560px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.18),transparent_65%)] blur-2xl animate-[float_12s_ease-in-out_infinite_alternate]"
+      />
 
-      <Card className="relative w-full max-w-md border-border/60 shadow-2xl dark:border-border/40">
-        <CardHeader className="pb-2 pt-8">
-          <div className="mx-auto mb-5 h-28 w-28">
-            <div className="relative h-full w-full rounded-full p-1 bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-400 shadow-lg shadow-indigo-500/20">
-              <Image
-                src="/icon.png"
-                alt="Ayaka"
-                width={112}
-                height={112}
-                priority
-                unoptimized
-                className="h-full w-full rounded-full border-[3px] border-white object-cover dark:border-slate-900"
-              />
-            </div>
+      <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(37,99,235,0.10),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
+        <CardContent className="flex flex-col items-center px-8 pb-7 pt-10 text-center">
+          <div className="mb-5 flex size-28 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] p-[3px] shadow-[0_12px_28px_rgba(37,99,235,0.28)]">
+            <Image
+              src="/icon.png"
+              alt="Astra PT"
+              width={112}
+              height={112}
+              priority
+              unoptimized
+              className="h-full w-full rounded-full border-[3px] border-white object-cover"
+            />
           </div>
 
-          <div className="text-center space-y-1.5">
-            <h1 className="text-3xl font-bold tracking-tight">欢迎来到 Astra</h1>
-            <p className="text-sm text-muted-foreground">
-              使用 GitHub 账号或邮箱密码登录
-            </p>
-          </div>
-        </CardHeader>
+          <h1 className="mb-7 text-[28px] font-bold tracking-[-0.03em] text-[#0b1220]">
+            Astra PT
+          </h1>
 
-        <CardContent className="space-y-5 px-8 pb-8 pt-6">
-          {/* 邮箱密码登录 */}
           <form
-            className="space-y-4"
-            action={async (formData) => {
-              'use server';
-              const email = formData.get('email') as string;
-              const password = formData.get('password') as string;
-              await signIn('credentials', { email, password, redirectTo: '/' });
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                邮箱地址
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="h-11 rounded-xl border-border/70 bg-background/60 px-4 text-sm shadow-sm transition focus-visible:ring-2 focus-visible:ring-indigo-500/20"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                密码
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="h-11 rounded-xl border-border/70 bg-background/60 px-4 text-sm shadow-sm transition focus-visible:ring-2 focus-visible:ring-indigo-500/20"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              size="lg"
-              className="mt-1 h-11 w-full rounded-xl bg-indigo-600 text-sm font-medium shadow-md shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/30"
-            >
-              登录
-            </Button>
-          </form>
-
-          {/* 分割线 */}
-          <div className="relative flex items-center py-1">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-            <span className="mx-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              或
-            </span>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-          </div>
-
-          {/* GitHub 登录 */}
-          <form
+            className="w-full"
             action={async () => {
-              'use server';
-              await signIn('github', { redirectTo: '/' });
+              "use server";
+              await signIn("github", { redirectTo: "/" });
             }}
           >
             <Button
-              variant="outline"
               type="submit"
-              size="lg"
-              className="h-11 w-full gap-2 rounded-xl border-border/70 bg-background text-sm font-medium shadow-sm transition hover:-translate-y-0.5 hover:bg-accent/40"
+              className="h-[52px] w-full gap-2.5 rounded-[14px] bg-[#0b1220] text-[15px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-[#111827] hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb] active:translate-y-0"
             >
-              <GithubIcon />
-              使用 GitHub 登录
+              <GitHubIcon className="size-5" />
+              使用 GitHub 继续
             </Button>
           </form>
+
+          <p className="mt-4 text-xs leading-relaxed text-slate-500">
+            登录即表示你同意{" "}
+            <a
+              href="/rules"
+              className="font-semibold text-[#2563eb] hover:underline"
+            >
+              规则
+            </a>
+          </p>
         </CardContent>
       </Card>
     </main>

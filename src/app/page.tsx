@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const session = await auth();
   if (!session) redirect("/login");
-
   const { user } = session;
 
   return (
@@ -24,6 +23,7 @@ export default async function HomePage() {
             alt={user.name ?? "用户头像"}
             width={56}
             height={56}
+            unoptimized
             className="size-14 rounded-full border border-slate-200 object-cover"
           />
         ) : (
@@ -31,7 +31,6 @@ export default async function HomePage() {
             {user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
         )}
-
         <div>
           <h1 className="text-xl font-bold text-slate-900">
             {user?.name ?? "用户"}
@@ -39,7 +38,6 @@ export default async function HomePage() {
           <p className="text-sm text-slate-500">{user?.email}</p>
         </div>
       </div>
-
       <div className="mt-10">
         <form
           action={async () => {

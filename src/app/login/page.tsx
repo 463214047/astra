@@ -37,6 +37,7 @@ export default function LoginPage() {
                 width={112}
                 height={112}
                 priority
+                unoptimized
                 className="h-full w-full rounded-full border-[3px] border-white object-cover dark:border-slate-900"
               />
             </div>

@@ -5,7 +5,7 @@ export const metadata = { title: "论坛" };
 const topics = [
   {
     id: 1,
-    title: "NoviePilot怎么用？",
+    title: "MoviePilot怎么用？",
     author: "小林",
     replies: 24,
     views: 312,

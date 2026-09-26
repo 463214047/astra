@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-
-import { auth, signOut } from "@/auth";
-import { Button } from "@/components/ui/button";
+import { auth } from "@/auth";
 
 export default async function Navbar() {
   const hasNew = true;
@@ -20,6 +18,7 @@ export default async function Navbar() {
             width={28}
             height={28}
             priority
+            unoptimized
             className="size-7"
           />
           <span className="hidden text-lg font-bold tracking-tight text-slate-900 sm:inline">

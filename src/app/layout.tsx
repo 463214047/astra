@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Ayaka",
-    template: "%s - Ayaka",
+    default: "Astra",
+    template: "%s - Astra",
   },
 };
 

@@ -1,124 +1,151 @@
 import Link from "next/link";
+import { query, ensureSchema } from "@/lib/db";
+import { isRainbowName } from "@/lib/rainbow";
+import ForumList, { type ForumTopic } from "./ForumList";
 
 export const metadata = { title: "论坛" };
 
-const topics = [
-  {
-    id: 1,
-    title: "MoviePilot怎么用？",
-    author: "小林",
-    replies: 24,
-    views: 312,
-    updatedAt: "3 分钟前",
-    tag: "求助",
-  },
-  {
-    id: 2,
-    title: "M-Team 官方邀请",
-    author: "阿泽",
-    replies: 18,
-    views: 220,
-    updatedAt: "12 分钟前",
-    tag: "邀请",
-  },
-];
+// ---------- 类型 ----------
+type TopicTag = "求助" | "邀请" | "分享" | "讨论" | "公告";
 
-const tagStyles: Record<string, string> = {
-  求助: "bg-blue-50 text-blue-600 ring-blue-100",
-  邀请: "bg-violet-50 text-violet-600 ring-violet-100",
+type Topic = {
+  id: string;
+  title: string;
+  content: string | null;
+  author_name: string | null;
+  author_email: string;
+  author_uid: number | null;
+  avatar_url: string | null;
+  anonymous: boolean;
+  category: TopicTag;
+  comment_count: number;
+  created_at: string;
+  last_reply_at: string | null;
+  author_role: string | null;
+  author_rainbow_enabled: boolean | null;
+  author_rainbow_until: Date | string | null;
+  rainbow: boolean;
 };
 
-export default function ForumPage() {
+// ---------- 配置 ----------
+const TAG_STYLES: Record<TopicTag, string> = {
+  求助: "bg-blue-50 text-blue-600 ring-blue-200",
+  邀请: "bg-violet-50 text-violet-600 ring-violet-200",
+  分享: "bg-emerald-50 text-emerald-600 ring-emerald-200",
+  讨论: "bg-amber-50 text-amber-600 ring-amber-200",
+  公告: "bg-rose-50 text-rose-600 ring-rose-200",
+};
+
+const TAG_TABS: { key: TopicTag | "all"; label: string }[] = [
+  { key: "all", label: "全部" },
+  { key: "求助", label: "求助" },
+  { key: "分享", label: "分享" },
+  { key: "邀请", label: "邀请" },
+  { key: "讨论", label: "讨论" },
+  { key: "公告", label: "公告" },
+];
+
+const VALID_FORUM_TAGS: TopicTag[] = ["求助", "邀请", "分享", "讨论", "公告"];
+
+// ---------- 数据获取 ----------
+let schemaEnsured = false;
+async function fetchForumTopics(tag?: string): Promise<ForumTopic[]> {
+  if (!schemaEnsured) { await ensureSchema(); schemaEnsured = true; }
+  try {
+    const validTag = VALID_FORUM_TAGS.includes(tag as TopicTag) ? tag : undefined;
+    const rows = await query<Topic>(
+      `SELECT p.id, p.category, p.title, p.content,
+              p.author_email, p.author_name, p.anonymous,
+              u.avatar_url, u.uid AS author_uid,
+              u.role AS author_role,
+              u.rainbow_enabled AS author_rainbow_enabled,
+              u.rainbow_until AS author_rainbow_until,
+              p.comment_count, p.created_at,
+              (SELECT MAX(c.created_at) FROM public.post_comments c WHERE c.post_id = p.id) AS last_reply_at
+       FROM public.posts p
+       LEFT JOIN public.account_users u ON u.email = p.author_email
+       WHERE p.post_type = 'forum'
+         AND p.status = 'published'
+         ${validTag ? "AND p.category = $1" : ""}
+       ORDER BY COALESCE((SELECT MAX(c.created_at) FROM public.post_comments c WHERE c.post_id = p.id), p.created_at) DESC
+       LIMIT 50`,
+      validTag ? [validTag] : [],
+    );
+    return rows.map((r) => ({
+      ...r,
+      rainbow: !r.anonymous && isRainbowName({
+        role: r.author_role,
+        rainbow_enabled: r.author_rainbow_enabled,
+        rainbow_until: r.author_rainbow_until,
+      }),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "刚刚";
+  if (mins < 60) return `${mins} 分钟前`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} 天前`;
+  return d.toLocaleDateString("zh-CN");
+}
+
+// ---------- 页面 ----------
+export default async function ForumPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string }>;
+}) {
+  const { tag } = await searchParams;
+  const activeTag = VALID_FORUM_TAGS.includes(tag as TopicTag) ? (tag as TopicTag) : "all";
+  const topics = await fetchForumTopics(activeTag === "all" ? undefined : activeTag);
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
-      <header className="mb-6 flex items-center justify-between">
+      {/* 头部 */}
+      <header className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            论坛
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            交流、提问、分享，和同好一起成长
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">论坛</h1>
+          <p className="mt-1 text-sm text-slate-500">交流、提问、分享，和同好一起成长</p>
         </div>
-        <button
-          type="button"
-          className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 active:scale-95"
+        <Link
+          href="/forum/new"
+          className="shrink-0 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 active:scale-95"
         >
           发新帖
-        </button>
+        </Link>
       </header>
 
-      <ul className="space-y-2">
-        {topics.map((t) => (
-          <li key={t.id}>
+      {/* Tag tabs */}
+      <nav className="mb-5 flex flex-wrap gap-1.5">
+        {TAG_TABS.map((t) => {
+          const isActive = activeTag === t.key;
+          const href = t.key === "all" ? "/forum" : `/forum?tag=${encodeURIComponent(t.key)}`;
+          return (
             <Link
-              href={`/forum/${t.id}`}
-              className="group block rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5"
+              key={t.key}
+              href={href}
+              className={`rounded-full px-3.5 py-1 text-sm font-medium transition ${
+                isActive
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                        tagStyles[t.tag] ?? "bg-slate-50 text-slate-600 ring-slate-100"
-                      }`}
-                    >
-                      {t.tag}
-                    </span>
-                    <h2 className="truncate text-base font-semibold text-slate-900 transition group-hover:text-slate-700">
-                      {t.title}
-                    </h2>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-500">
-                    {t.author} · {t.updatedAt}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-4 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      className="size-3.5"
-                    >
-                      <path
-                        d="M4 4.5h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H8l-3.5 2.5V13.5H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {t.replies}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      className="size-3.5"
-                    >
-                      <path
-                        d="M10 4.5c-3.5 0-6.5 2.4-8 5.5 1.5 3.1 4.5 5.5 8 5.5s6.5-2.4 8-5.5c-1.5-3.1-4.5-5.5-8-5.5Z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                      <circle
-                        cx="10"
-                        cy="10"
-                        r="2"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                    {t.views}
-                  </span>
-                </div>
-              </div>
+              {t.label}
             </Link>
-          </li>
-        ))}
-      </ul>
+          );
+        })}
+      </nav>
+
+      {/* 帖子列表 */}
+      <ForumList topics={topics} />
     </div>
   );
 }

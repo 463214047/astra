@@ -7,3 +7,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+样式统一使用 Tailwind，不新增独立全局 CSS 样式
+修改代码前优先遵循项目现有风格
+禁止直接修改`/components/ui`源码

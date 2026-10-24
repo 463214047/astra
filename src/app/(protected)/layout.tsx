@@ -1,18 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/navbar";
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
   const session = await auth();
-
-  if (!session) {
+  if (!session?.user?.email) {
     redirect("/login");
   }
-
-  return (
-    <body>
-      <Navbar />
-      {children}
-    </body>
-  );
+  return <>{children}</>;
 }

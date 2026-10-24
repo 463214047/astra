@@ -1,8 +1,48 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
+
+/* base-ui Button 用 data-disabled="" 属性 + 原生 disabled 属性
+   custom-variant disabled 让 Tailwind 的 disabled: 变体同时匹配两者 */
+@custom-variant disabled (&[data-disabled], &:disabled);
+
+/* ============ base-ui Button disabled 态强制样式 ============
+   兜底覆盖：保证 pointer-events:none + cursor:not-allowed 始终生效 */
+button[data-disabled],
+button:disabled,
+[role="button"][data-disabled] {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+  user-select: none !important;
+}
+
+/* 让登录页按钮的 disabled 视觉更明显
+   不用属性选择器，用 Tailwind data-attr 变体更可靠 */
+.group\/button[data-disabled],
+.group\/button:disabled {
+  transform: none !important;
+}
+
+/* 主登录按钮 disabled: 深色底 → 灰色底 */
+.group\/button.disabled-primary[data-disabled],
+.group\/button.disabled-primary:disabled {
+  background-color: #cbd5e1 !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+/* GitHub 按钮 disabled: 白底 → 浅灰底 */
+.group\/button.disabled-outline[data-disabled],
+.group\/button.disabled-outline:disabled {
+  background-color: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -46,6 +86,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* 自定义 Spinner 旋转动画 — 注册到 Tailwind v4 theme 让编译器保留 */
+  --animate-astra-spin: astra-spin 1s linear infinite;
 }
 
 :root {
@@ -129,9 +171,58 @@
   }
 }
 
+/* ============ 全局滚动条 — 统一风格 ============
+   细、浅、不突兀 — 与项目 slate 灰色基调一致
+   WebKit (Chrome/Edge/Safari) + Firefox 全覆盖 */
+
+/* 所有可滚动容器 — 页面主滚动条 + 任意 overflow 容器 */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.55);   /* slate-500/55% */
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(71, 85, 105, 0.75);   /* slate-600/75% */
+  background-clip: content-box;
+  border: 1px solid transparent;
+}
+
+/* 暗色主题 */
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.45);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(203, 213, 225, 0.65);  /* slate-300/65% */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: rgba(100, 116, 139, 0.55) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
 @keyframes float {
   from { transform: scale(1); }
   to   { transform: scale(1.12); }
+}
+
+/* Spinner 旋转动画 — 唯一命名避免 Tailwind v4 自动生成的 spin keyframe 冲突 */
+@keyframes astra-spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -139,4 +230,60 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ============ Tiptap 编辑器代码块样式 ============
+   Tailwind v4 prose-pre: 修饰符不生效，硬写兜底 */
+
+/* Block code: <pre><code> — 整块深色背景 */
+.ProseMirror pre {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.ProseMirror pre code {
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border-radius: 0;
+  font-size: inherit;
+  white-space: pre;
+}
+
+/* Inline code: <code> outside <pre> — 浅灰小胶囊 */
+.ProseMirror :not(pre) > code {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.4rem;
+  font-size: 0.85em;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* 帖子详情页 prose 里的代码块同样兜底 */
+.prose pre {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.prose pre code {
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border-radius: 0;
+  font-size: inherit;
 }

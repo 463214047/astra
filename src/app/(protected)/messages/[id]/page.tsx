@@ -270,6 +270,7 @@ export default function ConversationPage() {
                         }`}
                       >
                         <div
+                          data-no-translate
                           className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm ${
                             message.is_me
                               ? "rounded-br-md bg-brand-600 text-white shadow-brand-600/10"

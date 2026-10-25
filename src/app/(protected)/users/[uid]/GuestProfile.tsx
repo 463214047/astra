@@ -149,12 +149,15 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/posts/${p.id}`}
+                    data-no-translate
                     className="block truncate text-[14px] font-medium text-slate-900 hover:text-slate-700"
                   >
                     {p.title}
                   </Link>
                   {p.subtitle && (
-                    <p className="mt-0.5 truncate text-[12px] text-slate-500">{p.subtitle}</p>
+                    <p data-no-translate className="mt-0.5 truncate text-[12px] text-slate-500">
+                      {p.subtitle}
+                    </p>
                   )}
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">

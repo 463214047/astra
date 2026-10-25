@@ -78,13 +78,18 @@ function PostsWaterfall({ posts, categoryMeta, fallbackGradient }: Props) {
             {/* 信息区 */}
             <div className="p-2.5">
               <h3
+                data-no-translate
                 className="line-clamp-2 text-[14px] font-semibold leading-snug text-slate-900"
                 title={post.title}
               >
                 {post.title}
               </h3>
               {post.subtitle && (
-                <p className="mt-0.5 line-clamp-1 text-[12px] text-slate-500" title={post.subtitle}>
+                <p
+                  data-no-translate
+                  className="mt-0.5 line-clamp-1 text-[12px] text-slate-500"
+                  title={post.subtitle}
+                >
                   {post.subtitle}
                 </p>
               )}

@@ -27,6 +27,7 @@ function RainbowName({ children, className = "" }: { children: ReactNode; classN
   return (
     <span
       ref={ref}
+      data-no-translate
       className={`bg-[repeating-linear-gradient(90deg,hsl(340_85%_70%)_0%,hsl(10_85%_68%)_4.1667%,hsl(40_85%_65%)_8.3333%,hsl(70_80%_62%)_12.5%,hsl(100_70%_60%)_16.6667%,hsl(130_70%_58%)_20.8333%,hsl(160_75%_60%)_25%,hsl(190_80%_65%)_29.1667%,hsl(220_85%_70%)_33.3333%,hsl(250_85%_72%)_37.5%,hsl(280_85%_72%)_41.6667%,hsl(310_85%_72%)_45.8333%,hsl(340_85%_70%)_50%)] bg-[length:200%_100%] bg-no-repeat bg-clip-text text-transparent [will-change:background-position] ${className}`}
     >
       {children}
@@ -44,6 +45,13 @@ export function UserName({
   rainbow: boolean;
   className?: string;
 }) {
-  if (!rainbow) return <>{name}</>;
+  const isAnonymousLabel = name === "匿名用户" || name === "匿名";
+  if (!rainbow)
+    return (
+      <span data-no-translate={!isAnonymousLabel} className={className}>
+        {name}
+      </span>
+    );
+  if (isAnonymousLabel) return <span className={className}>{name}</span>;
   return <RainbowName className={className}>{name}</RainbowName>;
 }

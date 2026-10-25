@@ -54,6 +54,7 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
               alt={info.title}
               loading="lazy"
               referrerPolicy="no-referrer"
+              data-no-translate
               className="h-[168px] w-[112px] rounded-xl border border-slate-200 object-cover transition hover:opacity-90"
             />
           </a>
@@ -62,7 +63,9 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
         <div className="min-w-0 flex-1">
           {/* 标题 + 年份 + 评分 */}
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <h2 className="text-lg font-bold leading-snug text-slate-900">{info.title}</h2>
+            <h2 data-no-translate className="text-lg font-bold leading-snug text-slate-900">
+              {info.title}
+            </h2>
             {info.year && <span className="text-sm text-slate-400">{info.year}</span>}
             {info.rating != null && (
               <>
@@ -81,7 +84,9 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
             )}
           </div>
           {info.originalTitle && info.originalTitle !== info.title && (
-            <p className="mt-0.5 text-[13px] text-slate-400">{info.originalTitle}</p>
+            <p data-no-translate className="mt-0.5 text-[13px] text-slate-400">
+              {info.originalTitle}
+            </p>
           )}
 
           {/* 导演 / 时长 / 类型 */}
@@ -89,7 +94,7 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-slate-500">
               {info.credits.length > 0 && (
                 <span>
-                  {creditLabel} {info.credits.join("、")}
+                  {creditLabel} <span data-no-translate>{info.credits.join("、")}</span>
                 </span>
               )}
               {info.duration && <span>{info.duration}</span>}

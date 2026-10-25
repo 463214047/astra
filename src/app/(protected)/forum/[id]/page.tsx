@@ -192,7 +192,9 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
           论坛
         </Link>
         <span>/</span>
-        <span className="truncate text-slate-500">{post.title}</span>
+        <span className="truncate text-slate-500" data-no-translate>
+          {post.title}
+        </span>
       </nav>
 
       {/* 主卡 */}
@@ -207,7 +209,10 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
               </span>
             </div>
 
-            <h1 className="mt-3 text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+            <h1
+              data-no-translate
+              className="mt-3 text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
+            >
               {post.title}
             </h1>
 

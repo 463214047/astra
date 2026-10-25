@@ -32,6 +32,7 @@ export default function ExpandableText({
     <div className={className}>
       <p
         ref={ref}
+        data-no-translate
         className={`whitespace-pre-wrap text-[14px] leading-6 text-slate-600 ${
           open ? "" : "line-clamp-4"
         }`}

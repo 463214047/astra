@@ -184,6 +184,7 @@ function TorrentRow({ item }: { item: PostItem }) {
         <div className="flex items-center gap-2">
           <Link
             href={`/posts/${item.id}`}
+            data-no-translate
             className="truncate text-sm font-medium text-slate-800 group-hover:text-slate-900"
           >
             {item.title}
@@ -204,7 +205,11 @@ function TorrentRow({ item }: { item: PostItem }) {
                 {meta.label}
               </span>
             )}
-            {item.subtitle && <span className="truncate">{item.subtitle}</span>}
+            {item.subtitle && (
+              <span data-no-translate className="truncate">
+                {item.subtitle}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -224,6 +229,7 @@ function ForumRow({ item }: { item: PostItem }) {
         <div className="flex items-center gap-2">
           <Link
             href={`/forum/${item.id}`}
+            data-no-translate
             className="truncate text-[14px] font-medium text-slate-900 hover:text-brand-700"
           >
             {item.title}
@@ -235,7 +241,9 @@ function ForumRow({ item }: { item: PostItem }) {
           )}
         </div>
         {item.subtitle && (
-          <p className="mt-0.5 truncate text-[12px] text-slate-500">{item.subtitle}</p>
+          <p data-no-translate className="mt-0.5 truncate text-[12px] text-slate-500">
+            {item.subtitle}
+          </p>
         )}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
           <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">

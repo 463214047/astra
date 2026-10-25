@@ -258,11 +258,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                     </span>
                   )}
                 </div>
-                <h1 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+                <h1
+                  data-no-translate
+                  className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
+                >
                   {post.title}
                 </h1>
                 {(post.subtitle || (post.tags && post.tags.length > 0)) && (
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  <p data-no-translate className="mt-2 text-sm leading-relaxed text-slate-600">
                     {post.subtitle}
                     {post.tags && post.tags.length > 0 && (
                       <span

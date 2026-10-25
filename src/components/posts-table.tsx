@@ -148,7 +148,10 @@ function PostsTable({ posts, categoryMeta }: Props) {
                 <td className="px-4 py-3">
                   <Link href={`/posts/${post.id}`} className="block min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="truncate text-sm font-medium text-slate-800 group-hover:text-slate-900">
+                      <span
+                        data-no-translate
+                        className="truncate text-sm font-medium text-slate-800 group-hover:text-slate-900"
+                      >
                         {post.title}
                       </span>
                       {post.hot && (
@@ -166,7 +169,11 @@ function PostsTable({ posts, categoryMeta }: Props) {
                             {meta.label}
                           </span>
                         )}
-                        {post.subtitle && <span className="truncate">{post.subtitle}</span>}
+                        {post.subtitle && (
+                          <span data-no-translate className="truncate">
+                            {post.subtitle}
+                          </span>
+                        )}
                         {tags.length > 0 && (
                           <span className="flex shrink-0 items-center gap-1">
                             {tags.map((t: string, i: number) => (

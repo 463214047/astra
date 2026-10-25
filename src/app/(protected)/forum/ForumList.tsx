@@ -99,7 +99,7 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
                     />
                   ) : (
                     <span className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 text-sm font-semibold text-slate-600">
-                      {initial}
+                      <span data-no-translate>{initial}</span>
                     </span>
                   )}
                 </div>
@@ -112,7 +112,10 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
                     >
                       {t.category}
                     </span>
-                    <h2 className="truncate text-base font-semibold text-slate-900 transition group-hover:text-slate-700">
+                    <h2
+                      data-no-translate
+                      className="truncate text-base font-semibold text-slate-900 transition group-hover:text-slate-700"
+                    >
                       {t.title}
                     </h2>
                   </div>

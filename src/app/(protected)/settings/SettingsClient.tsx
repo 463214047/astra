@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import {
   Check,
   Image as ImageIcon,
+  Languages,
   Palette,
   Paperclip,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { useLocale } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
 import { DEFAULT_THEME } from "@/lib/themes";
 
@@ -29,11 +31,12 @@ export type SettingsProfile = {
   rainbowPrizeDays: number;
 };
 
-type TabKey = "profile" | "appearance" | "security" | "danger";
+type TabKey = "profile" | "appearance" | "language" | "security" | "danger";
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "profile", label: "个人资料", icon: User },
   { key: "appearance", label: "外观", icon: Palette },
+  { key: "language", label: "语言", icon: Languages },
   { key: "security", label: "账号安全", icon: ShieldCheck },
   { key: "danger", label: "危险操作", icon: Trash2 },
 ];
@@ -98,6 +101,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
         <div className="min-w-0">
           {tab === "profile" && <ProfilePanel profile={initialProfile} />}
           {tab === "appearance" && <AppearancePanel />}
+          {tab === "language" && <LanguagePanel />}
           {tab === "security" && <SecurityPanel />}
           {tab === "danger" && <DangerPanel />}
         </div>
@@ -766,6 +770,58 @@ function AppearancePanel() {
             恢复默认
           </button>
         )}
+      </div>
+    </section>
+  );
+}
+
+function LanguagePanel() {
+  const { locale: activeLocale, setLocale, locales } = useLocale();
+
+  return (
+    <section className={CARD}>
+      <div className="border-b border-slate-100 p-5 sm:p-6">
+        <h2 className="text-base font-semibold text-slate-900">界面语言</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          选择你希望使用的界面语言。用户发布的内容不会被翻译。
+        </p>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {locales.map((item) => {
+            const active = item.id === activeLocale;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setLocale(item.id)}
+                className={`relative flex min-h-28 flex-col items-start rounded-xl border p-4 text-left transition ${
+                  active
+                    ? "border-brand-300 bg-brand-50/70 ring-2 ring-brand-500/15"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+                <span className="mt-1 text-xs text-slate-500">{item.description}</span>
+                {active && (
+                  <span className="absolute right-3 top-3 grid size-5 place-items-center rounded-full bg-brand-600 text-white">
+                    <Check className="size-3.5" strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+          <p className="text-xs font-medium text-slate-500">预览</p>
+          <div className="mt-3 space-y-1.5">
+            <p className="text-sm font-semibold text-slate-900">发现同好，分享热爱</p>
+            <p className="text-xs text-slate-500">切换后立即生效，仅影响界面文案。</p>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -571,7 +571,11 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
             }`}
           >
             {sentByMe && <span className="text-slate-400">你：</span>}
-            {conversation.last_message || "（暂无消息）"}
+            {conversation.last_message ? (
+              <span data-no-translate>{conversation.last_message}</span>
+            ) : (
+              "（暂无消息）"
+            )}
           </span>
         </span>
 

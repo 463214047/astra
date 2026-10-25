@@ -8,8 +8,10 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { renderBBCode } from "@/lib/bbcode";
+import { useLocale } from "@/components/language-provider";
 import ImagePickerDialog from "@/components/image-picker-dialog";
 import LinkPickerDialog from "@/components/link-picker-dialog";
+import { translateText } from "@/lib/i18n";
 
 /** 正文编辑区样式（默认尺寸，发布页 / 论坛用） */
 const CONTENT_CLASS =
@@ -49,6 +51,8 @@ export default function Editor({
 }) {
   // 用于强制 React 重渲染 — tiptap 的 isActive 只在组件重渲染时才重新计算
   const [, forceRender] = useState(0);
+  const { locale } = useLocale();
+  const localizedPlaceholder = translateText(placeholder, locale) ?? placeholder;
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -67,7 +71,7 @@ export default function Editor({
         },
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: localizedPlaceholder,
       }),
     ],
     content,
@@ -97,6 +101,17 @@ export default function Editor({
     onSelectionUpdate: () => forceRender((n) => n + 1),
     onTransaction: () => forceRender((n) => n + 1),
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    const placeholderExtension = editor.extensionManager.extensions.find(
+      (extension) => extension.name === "placeholder",
+    );
+    if (!placeholderExtension) return;
+
+    (placeholderExtension.options as { placeholder?: string }).placeholder = localizedPlaceholder;
+    editor.view.dispatch(editor.state.tr);
+  }, [editor, localizedPlaceholder]);
 
   // ---------- 内联插入条状态（替代 window.prompt）----------
   const [insertMode, setInsertMode] = useState<"image" | "link" | null>(null);

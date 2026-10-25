@@ -103,6 +103,7 @@ function ThumbItem({
       <img
         src={url}
         alt={isCover ? `${title} 封面` : `${title} 图片`}
+        data-no-translate
         className="h-full w-full object-contain transition group-hover:scale-[1.02]"
         loading="lazy"
       />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "重置密码 - Astra PT",
+  title: "重置密码",
 };
 
 export default function ForgotPasswordPage() {

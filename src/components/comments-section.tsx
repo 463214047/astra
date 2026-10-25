@@ -230,7 +230,7 @@ export default function CommentsSection({ postId }: Props) {
               </span>
               ：
             </span>
-            <span className="min-w-0 flex-1 truncate text-slate-400">
+            <span data-no-translate className="min-w-0 flex-1 truncate text-slate-400">
               {quoteExcerpt(replyTo.content)}
             </span>
             <button
@@ -356,7 +356,11 @@ function CommentItem({
               <span className="font-medium text-slate-600">
                 @<UserName name={displayNameOf(parent)} rainbow={parent.rainbow} />
               </span>
-              {quote ? <span>：{quote}</span> : null}
+              {quote ? (
+                <span>
+                  ：<span data-no-translate>{quote}</span>
+                </span>
+              ) : null}
             </div>
           )}
 
@@ -367,7 +371,10 @@ function CommentItem({
               dangerouslySetInnerHTML={{ __html: safeHtml }}
             />
           ) : (
-            <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-800">
+            <p
+              data-no-translate
+              className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-800"
+            >
               {comment.content}
             </p>
           )}

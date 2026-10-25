@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "规则",
@@ -20,7 +19,9 @@ export default function RulesPage() {
         <section>
           <SectionTitle num="01">总则</SectionTitle>
           <List>
-            <li>为了网站能够稳定运行，请避免在能够被搜索引擎检索到以及与PT无关的公共场合提及本站。</li>
+            <li>
+              为了网站能够稳定运行，请避免在能够被搜索引擎检索到以及与PT无关的公共场合提及本站。
+            </li>
           </List>
         </section>
 
@@ -32,7 +33,6 @@ export default function RulesPage() {
           <List>
             <li>转种请勿重新制种，种子内文件不要包含与资源无关的内容或广告信息。</li>
           </List>
-        
         </section>
       </div>
     </main>
@@ -51,31 +51,11 @@ function SectionTitle({ num, children }: { num: string; children: React.ReactNod
   );
 }
 
-function SubTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="mt-7 text-base font-semibold tracking-tight text-slate-900">{children}</h3>;
-}
-
 function List({ children }: { children: React.ReactNode }) {
-  return <ul className="mt-3 list-disc space-y-2 pl-6 text-[15px] leading-7 text-slate-700">{children}</ul>;
-}
-
-function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[12px] text-slate-700">{children}</code>
-  );
-}
-
-function Format({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="mt-3 rounded-xl bg-slate-900 px-4 py-3 font-mono text-xs leading-6 text-slate-100">{children}</p>
-  );
-}
-
-function Example({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-3 space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3 font-mono text-xs leading-6 text-slate-600">
+    <ul className="mt-3 list-disc space-y-2 pl-6 text-[15px] leading-7 text-slate-700">
       {children}
-    </div>
+    </ul>
   );
 }
 

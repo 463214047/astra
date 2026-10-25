@@ -174,7 +174,7 @@ export default function LinkPickerDialog({
               maxLength={120}
               autoComplete="off"
               aria-required="true"
-              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             />
 
             <label
@@ -199,7 +199,7 @@ export default function LinkPickerDialog({
               autoComplete="url"
               spellCheck={false}
               aria-required="true"
-              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             />
 
             {error && (
@@ -212,11 +212,11 @@ export default function LinkPickerDialog({
               <button
                 type="submit"
                 disabled={busy}
-                className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (
                   <>
-                    <span className="size-3.5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     处理中…
                   </>
                 ) : (

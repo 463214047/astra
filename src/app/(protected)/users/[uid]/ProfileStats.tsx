@@ -23,12 +23,12 @@ export default function ProfileStats({
   subtitle?: string;
   metrics: StatMetric[];
 }) {
-  const gridClass = metrics.length === 4
-    ? "grid-cols-2 sm:grid-cols-4"
-    : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5";
-  const borderClass = metrics.length === 4
-    ? "sm:border-l sm:border-slate-100"
-    : "md:border-l md:border-slate-100";
+  const gridClass =
+    metrics.length === 4
+      ? "grid-cols-2 sm:grid-cols-4"
+      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5";
+  const borderClass =
+    metrics.length === 4 ? "sm:border-l sm:border-slate-100" : "md:border-l md:border-slate-100";
   const spanLast = metrics.length % 2 === 1;
 
   return (
@@ -38,7 +38,11 @@ export default function ProfileStats({
           <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">{title}</h2>
           {subtitle && <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>}
         </div>
-        <BarChart3 aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-violet-400" strokeWidth={2} />
+        <BarChart3
+          aria-hidden="true"
+          className="mt-0.5 size-4 shrink-0 text-brand-400"
+          strokeWidth={2}
+        />
       </div>
 
       <div className={`grid ${gridClass}`}>
@@ -57,15 +61,22 @@ export default function ProfileStats({
               } ${index > 0 ? borderClass : ""}`}
             >
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-                <Icon className={`size-3.5 shrink-0 ${metric.iconClass ?? "text-slate-400"}`} strokeWidth={2} />
+                <Icon
+                  className={`size-3.5 shrink-0 ${metric.iconClass ?? "text-slate-400"}`}
+                  strokeWidth={2}
+                />
                 <span className="truncate">{metric.label}</span>
               </div>
-              <div className={`flex items-baseline gap-1 ${span ? "mt-0 shrink-0 sm:mt-2" : "mt-2"}`}>
+              <div
+                className={`flex items-baseline gap-1 ${span ? "mt-0 shrink-0 sm:mt-2" : "mt-2"}`}
+              >
                 <span className="truncate text-[20px] font-semibold leading-none tracking-tight tabular-nums text-slate-900">
                   {metric.value}
                 </span>
                 {metric.unit && (
-                  <span className="shrink-0 text-[11px] font-medium text-slate-400">{metric.unit}</span>
+                  <span className="shrink-0 text-[11px] font-medium text-slate-400">
+                    {metric.unit}
+                  </span>
                 )}
               </div>
             </div>
@@ -103,12 +114,12 @@ export function ProfileStatsInline({ metrics }: { metrics: StatMetric[] }) {
           : "";
 
         return (
-          <div
-            key={metric.label}
-            className={`min-w-0 ${spanClass}`}
-          >
+          <div key={metric.label} className={`min-w-0 ${spanClass}`}>
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-              <Icon className={`size-3.5 shrink-0 ${metric.iconClass ?? "text-slate-400"}`} strokeWidth={2} />
+              <Icon
+                className={`size-3.5 shrink-0 ${metric.iconClass ?? "text-slate-400"}`}
+                strokeWidth={2}
+              />
               <span className="truncate">{metric.label}</span>
             </div>
             <div className="mt-1 flex items-baseline gap-1">
@@ -116,7 +127,9 @@ export function ProfileStatsInline({ metrics }: { metrics: StatMetric[] }) {
                 {metric.value}
               </span>
               {metric.unit && (
-                <span className="shrink-0 text-[11px] font-medium text-slate-400">{metric.unit}</span>
+                <span className="shrink-0 text-[11px] font-medium text-slate-400">
+                  {metric.unit}
+                </span>
               )}
             </div>
           </div>

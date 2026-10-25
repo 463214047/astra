@@ -17,10 +17,7 @@ async function ensureOnce() {
   schemaEnsured = true;
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const { id } = await params;
@@ -63,27 +60,23 @@ export async function GET(
 
     const comments = rows.map((c) => ({
       ...c,
-      rainbow: !c.anonymous && isRainbowName({
-        role: c.author_role,
-        rainbow_enabled: c.author_rainbow_enabled,
-        rainbow_until: c.author_rainbow_until,
-      }),
+      rainbow:
+        !c.anonymous &&
+        isRainbowName({
+          role: c.author_role,
+          rainbow_enabled: c.author_rainbow_enabled,
+          rainbow_until: c.author_rainbow_until,
+        }),
     }));
 
     return NextResponse.json({ ok: true, comments });
   } catch (err) {
     console.error(`[GET /api/posts/:id/comments] 失败:`, err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误" }, { status: 500 });
   }
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const { id } = await params;
@@ -100,10 +93,7 @@ export async function POST(
     const anonymous = Boolean(body.anonymous);
 
     if (!content) {
-      return NextResponse.json(
-        { ok: false, message: "评论内容不能为空" },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, message: "评论内容不能为空" }, { status: 400 });
     }
 
     // 确认帖子存在
@@ -160,18 +150,17 @@ export async function POST(
       ok: true,
       comment: {
         ...comment,
-        rainbow: !anonymous && isRainbowName({
-          role: user?.role,
-          rainbow_enabled: user?.rainbow_enabled,
-          rainbow_until: user?.rainbow_until,
-        }),
+        rainbow:
+          !anonymous &&
+          isRainbowName({
+            role: user?.role,
+            rainbow_enabled: user?.rainbow_enabled,
+            rainbow_until: user?.rainbow_until,
+          }),
       },
     });
   } catch (err) {
     console.error(`[POST /api/posts/:id/comments] 失败:`, err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误" }, { status: 500 });
   }
 }

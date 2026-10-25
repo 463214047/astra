@@ -140,7 +140,9 @@ export function renderBBCode(src: string): string {
       }
       case "url": {
         const href = sanitizeUrl(attr ?? "");
-        out += href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">` : "";
+        out += href
+          ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">`
+          : "";
         break;
       }
       case "quote":
@@ -152,7 +154,9 @@ export function renderBBCode(src: string): string {
         break;
       case "img": {
         const srcUrl = sanitizeUrl(attr ?? "");
-        out += srcUrl ? `<img src="${escapeHtml(srcUrl)}" class="inline-block max-w-full max-h-40 rounded my-1" alt="" />` : "";
+        out += srcUrl
+          ? `<img src="${escapeHtml(srcUrl)}" class="inline-block max-w-full max-h-40 rounded my-1" alt="" />`
+          : "";
         break;
       }
     }

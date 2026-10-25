@@ -15,8 +15,8 @@ import LinkPickerDialog from "@/components/link-picker-dialog";
 const CONTENT_CLASS =
   "prose prose-slate max-w-none min-h-[400px] px-5 py-4 outline-none " +
   "prose-headings:font-bold prose-headings:tracking-tight " +
-  "prose-blockquote:border-l-4 prose-blockquote:border-violet-300 " +
-  "prose-blockquote:bg-violet-50/50 prose-blockquote:py-1 prose-blockquote:not-italic " +
+  "prose-blockquote:border-l-4 prose-blockquote:border-brand-300 " +
+  "prose-blockquote:bg-brand-50/50 prose-blockquote:py-1 prose-blockquote:not-italic " +
   "prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 " +
   "prose-code:before:content-none prose-code:after:content-none " +
   "prose-img:rounded-xl prose-img:border prose-img:border-slate-200";
@@ -25,8 +25,8 @@ const CONTENT_CLASS =
 const CONTENT_CLASS_COMPACT =
   "prose prose-slate max-w-none min-h-[140px] px-4 py-3 text-sm outline-none " +
   "prose-headings:font-bold prose-headings:tracking-tight " +
-  "prose-blockquote:border-l-4 prose-blockquote:border-violet-300 " +
-  "prose-blockquote:bg-violet-50/50 prose-blockquote:py-1 prose-blockquote:not-italic " +
+  "prose-blockquote:border-l-4 prose-blockquote:border-brand-300 " +
+  "prose-blockquote:bg-brand-50/50 prose-blockquote:py-1 prose-blockquote:not-italic " +
   "prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 " +
   "prose-code:before:content-none prose-code:after:content-none " +
   "prose-img:rounded-xl prose-img:border prose-img:border-slate-200";
@@ -63,7 +63,7 @@ export default function Editor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-violet-600 underline underline-offset-2",
+          class: "text-brand-700 underline underline-offset-2",
         },
       }),
       Placeholder.configure({
@@ -107,18 +107,21 @@ export default function Editor({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // 打开插入条时自动聚焦并预填当前 link href（如果是编辑链接）
-  const openInsert = useCallback((mode: "image" | "link") => {
-    if (!editor) return;
-    if (mode === "link") {
-      const existing = editor.getAttributes("link").href as string | undefined;
-      setInsertValue(existing ?? "");
-    } else {
-      setInsertValue("");
-    }
-    setInsertMode(mode);
-    // 等 DOM 渲染后聚焦（preventScroll 避免页面跳动）
-    setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
-  }, [editor]);
+  const openInsert = useCallback(
+    (mode: "image" | "link") => {
+      if (!editor) return;
+      if (mode === "link") {
+        const existing = editor.getAttributes("link").href as string | undefined;
+        setInsertValue(existing ?? "");
+      } else {
+        setInsertValue("");
+      }
+      setInsertMode(mode);
+      // 等 DOM 渲染后聚焦（preventScroll 避免页面跳动）
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
+    },
+    [editor],
+  );
 
   const closeInsert = useCallback(() => {
     setInsertMode(null);
@@ -196,7 +199,10 @@ export default function Editor({
 
   return (
     <>
-      <div ref={wrapperRef} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div
+        ref={wrapperRef}
+        className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+      >
         {/* 工具栏 + 插入条共用 relative 容器 */}
         <div className="relative">
           <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 bg-slate-50/70 px-2 py-2">
@@ -338,45 +344,45 @@ export default function Editor({
               data-insert-bar
               className="absolute left-0 right-0 top-full z-10 flex items-center gap-2 border border-slate-100 bg-white px-3 py-2 shadow-md"
             >
-            <span className="shrink-0 text-[11px] font-medium text-slate-500">
-              {insertMode === "image" ? "图片 URL" : "🔗 链接"}
-            </span>
-            <input
-              ref={inputRef}
-              type="url"
-              value={insertValue}
-              onChange={(e) => setInsertValue(e.target.value)}
-              placeholder={insertMode === "image" ? "https://example.com/image.jpg" : ""}
-              className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
-              spellCheck={false}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  confirmInsert();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  closeInsert();
-                }
-              }}
-            />
-            <div className="flex shrink-0 items-center gap-1">
-              <button
-                type="button"
-                onClick={confirmInsert}
-                disabled={!insertValue.trim()}
-                className="rounded-md bg-slate-900 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                插入
-              </button>
-              <button
-                type="button"
-                onClick={closeInsert}
-                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                取消
-              </button>
+              <span className="shrink-0 text-[11px] font-medium text-slate-500">
+                {insertMode === "image" ? "图片 URL" : "🔗 链接"}
+              </span>
+              <input
+                ref={inputRef}
+                type="url"
+                value={insertValue}
+                onChange={(e) => setInsertValue(e.target.value)}
+                placeholder={insertMode === "image" ? "https://example.com/image.jpg" : ""}
+                className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
+                spellCheck={false}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    confirmInsert();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeInsert();
+                  }
+                }}
+              />
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={confirmInsert}
+                  disabled={!insertValue.trim()}
+                  className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  插入
+                </button>
+                <button
+                  type="button"
+                  onClick={closeInsert}
+                  className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                >
+                  取消
+                </button>
+              </div>
             </div>
-          </div>
           )}
         </div>
 
@@ -449,7 +455,7 @@ function ToolbarButton({
         disabled
           ? "cursor-not-allowed text-slate-300"
           : active
-            ? "bg-slate-900 text-white"
+            ? "bg-brand-600 text-white"
             : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900"
       }`}
     >
@@ -466,7 +472,12 @@ function Divider() {
 function IconList() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M7 5h9M7 10h9M7 15h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M7 5h9M7 10h9M7 15h9"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
       <circle cx="4" cy="5" r="1" fill="currentColor" />
       <circle cx="4" cy="10" r="1" fill="currentColor" />
       <circle cx="4" cy="15" r="1" fill="currentColor" />
@@ -477,10 +488,21 @@ function IconList() {
 function IconOrderedList() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M8 5h8M8 10h8M8 15h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <text x="3" y="7" fontSize="6" fill="currentColor">1</text>
-      <text x="3" y="12" fontSize="6" fill="currentColor">2</text>
-      <text x="3" y="17" fontSize="6" fill="currentColor">3</text>
+      <path
+        d="M8 5h8M8 10h8M8 15h8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <text x="3" y="7" fontSize="6" fill="currentColor">
+        1
+      </text>
+      <text x="3" y="12" fontSize="6" fill="currentColor">
+        2
+      </text>
+      <text x="3" y="17" fontSize="6" fill="currentColor">
+        3
+      </text>
     </svg>
   );
 }
@@ -489,7 +511,12 @@ function IconQuote() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
       <path d="M6 8v7M3 8h6M3 11h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M13 6h4M13 10h4M13 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M13 6h4M13 10h4M13 14h4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -497,7 +524,13 @@ function IconQuote() {
 function IconCode() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M7 6l-4 4 4 4M13 6l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M7 6l-4 4 4 4M13 6l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -505,8 +538,18 @@ function IconCode() {
 function IconLink() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M9 11a3 3 0 0 0 4 0l3-3a3 3 0 0 0-4-4l-1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M11 9a3 3 0 0 0-4 0l-3 3a3 3 0 0 0 4 4l1-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M9 11a3 3 0 0 0 4 0l3-3a3 3 0 0 0-4-4l-1 1"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M11 9a3 3 0 0 0-4 0l-3 3a3 3 0 0 0 4 4l1-1"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -516,7 +559,12 @@ function IconImage() {
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
       <rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="7.5" cy="8.5" r="1" fill="currentColor" />
-      <path d="M4 14l3.5-3.5a1.5 1.5 0 0 1 2 0L13 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M4 14l3.5-3.5a1.5 1.5 0 0 1 2 0L13 14"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -524,7 +572,13 @@ function IconImage() {
 function IconUndo() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M7 6L3 10l4 4M3 10h9a4 4 0 0 1 0 8H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M7 6L3 10l4 4M3 10h9a4 4 0 0 1 0 8H9"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -532,7 +586,13 @@ function IconUndo() {
 function IconRedo() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path d="M13 6l4 4-4 4M17 10H8a4 4 0 0 0 0 8h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M13 6l4 4-4 4M17 10H8a4 4 0 0 0 0 8h3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

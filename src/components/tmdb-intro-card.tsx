@@ -15,8 +15,7 @@ function formatVotes(n: number): string {
 
 export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
   const creditLabel = info.mediaType === "tv" ? "主创" : "导演";
-  const hasMeta =
-    info.credits.length > 0 || Boolean(info.duration) || info.genres.length > 0;
+  const hasMeta = info.credits.length > 0 || Boolean(info.duration) || info.genres.length > 0;
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
@@ -63,9 +62,7 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
         <div className="min-w-0 flex-1">
           {/* 标题 + 年份 + 评分 */}
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <h2 className="text-lg font-bold leading-snug text-slate-900">
-              {info.title}
-            </h2>
+            <h2 className="text-lg font-bold leading-snug text-slate-900">{info.title}</h2>
             {info.year && <span className="text-sm text-slate-400">{info.year}</span>}
             {info.rating != null && (
               <>

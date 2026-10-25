@@ -63,14 +63,9 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
     return e;
   };
 
-  const hasChanges =
-    nickname !== initial.nickname ||
-    avatarUrl !== initial.avatar_url;
+  const hasChanges = nickname !== initial.nickname || avatarUrl !== initial.avatar_url;
 
-  const canSubmit =
-    !loading &&
-    hasChanges &&
-    Object.keys(validateLocal()).length === 0;
+  const canSubmit = !loading && hasChanges && Object.keys(validateLocal()).length === 0;
 
   const rainbowRemainingDays = rainbowUntil
     ? Math.max(0, Math.ceil((new Date(rainbowUntil).getTime() - rainbowNow) / 86400000))
@@ -178,7 +173,7 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
       <button
         type="button"
         onClick={handleOpen}
-        className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-slate-700 active:scale-95"
+        className="rounded-full bg-brand-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-brand-700 active:scale-95"
       >
         编辑资料
       </button>
@@ -199,7 +194,10 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
               {/* 昵称 */}
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">
-                  昵称 <span className="text-slate-400">({nickname.trim().length}/{NICKNAME_MAX})</span>
+                  昵称{" "}
+                  <span className="text-slate-400">
+                    ({nickname.trim().length}/{NICKNAME_MAX})
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -213,12 +211,10 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
                   className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                     errors.nickname
                       ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                      : "border-slate-200 focus:border-[#2563eb] focus:ring-[#2563eb]/20"
+                      : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/20"
                   }`}
                 />
-                {errors.nickname && (
-                  <p className="mt-1 text-xs text-red-600">{errors.nickname}</p>
-                )}
+                {errors.nickname && <p className="mt-1 text-xs text-red-600">{errors.nickname}</p>}
               </div>
 
               {/* 头像 */}
@@ -233,11 +229,11 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
                     setAvatarUrl(e.target.value);
                     setErrors((prev) => ({ ...prev, avatar_url: "" }));
                   }}
-               
+
                   className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                     errors.avatar_url
                       ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                      : "border-slate-200 focus:border-[#2563eb] focus:ring-[#2563eb]/20"
+                      : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/20"
                   }`}
                 />
                 {errors.avatar_url && (
@@ -351,7 +347,7 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-60"
+                  className="flex-1 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   {loading ? "保存中…" : "保存"}
                 </button>

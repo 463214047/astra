@@ -16,7 +16,7 @@ import { query, ensureSchema } from "@/lib/db";
 import type { TmdbRef } from "@/lib/tmdb-link";
 
 export { extractTmdbRef } from "@/lib/tmdb-link";
-export type { TmdbMediaType, TmdbRef } from "@/lib/tmdb-link";
+export type { TmdbRef } from "@/lib/tmdb-link";
 
 export interface TmdbInfo extends TmdbRef {
   title: string;
@@ -67,9 +67,7 @@ async function ensureOnce() {
 }
 
 /** 读本地缓存；未命中 / 读库失败返回 null */
-async function readCache(
-  ref: TmdbRef,
-): Promise<{ data: TmdbInfo; fresh: boolean } | null> {
+async function readCache(ref: TmdbRef): Promise<{ data: TmdbInfo; fresh: boolean } | null> {
   try {
     await ensureOnce();
     const rows = await query<{ data: TmdbInfo; fetched_at: Date | string }>(
@@ -107,20 +105,14 @@ function toTmdbInfo(ref: TmdbRef, d: TmdbApiResponse): TmdbInfo {
   const isTv = ref.mediaType === "tv";
 
   const title =
-    (isTv ? d.name : d.title) ||
-    d.original_title ||
-    d.original_name ||
-    `TMDB #${ref.id}`;
+    (isTv ? d.name : d.title) || d.original_title || d.original_name || `TMDB #${ref.id}`;
   const originalTitle = (isTv ? d.original_name : d.original_title) || title;
 
   const date = isTv ? d.first_air_date : d.release_date;
   const year = date ? date.slice(0, 4) : null;
 
   const voteCount = d.vote_count ?? 0;
-  const rating =
-    d.vote_average && d.vote_average > 0 && voteCount > 0
-      ? d.vote_average
-      : null;
+  const rating = d.vote_average && d.vote_average > 0 && voteCount > 0 ? d.vote_average : null;
 
   let duration: string | null = null;
   if (isTv) {
@@ -137,9 +129,7 @@ function toTmdbInfo(ref: TmdbRef, d: TmdbApiResponse): TmdbInfo {
 
   const credits = isTv
     ? (d.created_by ?? []).map((c) => c.name ?? "")
-    : (d.credits?.crew ?? [])
-        .filter((c) => c.job === "Director")
-        .map((c) => c.name ?? "");
+    : (d.credits?.crew ?? []).filter((c) => c.job === "Director").map((c) => c.name ?? "");
 
   return {
     ...ref,
@@ -151,9 +141,7 @@ function toTmdbInfo(ref: TmdbRef, d: TmdbApiResponse): TmdbInfo {
     genres: (d.genres ?? []).map((g) => g.name ?? "").filter(Boolean),
     duration,
     overview: d.overview?.trim() || null,
-    posterUrl: d.poster_path
-      ? `https://image.tmdb.org/t/p/w342${d.poster_path}`
-      : null,
+    posterUrl: d.poster_path ? `https://image.tmdb.org/t/p/w342${d.poster_path}` : null,
     credits: [...new Set(credits)].filter(Boolean).slice(0, 2),
     url: `https://www.themoviedb.org/${ref.mediaType}/${ref.id}`,
   };
@@ -169,13 +157,10 @@ async function fetchFromTmdb(ref: TmdbRef): Promise<TmdbInfo | null> {
   if (ref.mediaType === "movie") params.set("append_to_response", "credits");
 
   try {
-    const res = await fetch(
-      `${base}/${ref.mediaType}/${ref.id}?${params.toString()}`,
-      {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(8000),
-      },
-    );
+    const res = await fetch(`${base}/${ref.mediaType}/${ref.id}?${params.toString()}`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) {
       console.warn(`[TMDB] 拉取 ${ref.mediaType}/${ref.id} 失败: HTTP ${res.status}`);
       return null;

@@ -75,6 +75,17 @@ button:disabled,
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -99,6 +110,17 @@ button:disabled,
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
+  --brand-50: #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-200: #ddd6fe;
+  --brand-300: #c4b5fd;
+  --brand-400: #a78bfa;
+  --brand-500: #8b5cf6;
+  --brand-600: #7c3aed;
+  --brand-700: #6d28d9;
+  --brand-800: #5b21b6;
+  --brand-900: #4c1d95;
+  --brand-950: #2e1065;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -186,14 +208,14 @@ button:disabled,
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 116, 139, 0.55);   /* slate-500/55% */
+  background-color: rgba(100, 116, 139, 0.55); /* slate-500/55% */
   border-radius: 999px;
   border: 1px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(71, 85, 105, 0.75);   /* slate-600/75% */
+  background-color: rgba(71, 85, 105, 0.75); /* slate-600/75% */
   background-clip: content-box;
   border: 1px solid transparent;
 }
@@ -203,7 +225,7 @@ button:disabled,
   background-color: rgba(148, 163, 184, 0.45);
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(203, 213, 225, 0.65);  /* slate-300/65% */
+  background-color: rgba(203, 213, 225, 0.65); /* slate-300/65% */
 }
 
 /* Firefox */
@@ -216,17 +238,25 @@ button:disabled,
 }
 
 @keyframes float {
-  from { transform: scale(1); }
-  to   { transform: scale(1.12); }
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
 }
 
 /* Spinner 旋转动画 — 唯一命名避免 Tailwind v4 自动生成的 spin keyframe 冲突 */
 @keyframes astra-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation: none !important;
     transition: none !important;
   }

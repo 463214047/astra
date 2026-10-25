@@ -24,7 +24,7 @@
  * Bit rate                         : 256 kbps
  */
 
-export interface MediaInfoStream {
+interface MediaInfoStream {
   type: "Video" | "Audio" | "Text" | "Menu" | "Other";
   index: number;
   entries: { key: string; value: string }[];
@@ -90,7 +90,7 @@ export function parseMediaInfo(text: string | null | undefined): ParsedMediaInfo
 
     if (currentSection === "general") {
       general.push({ key, value });
-    } else if (currentSection && currentSection !== "general") {
+    } else if (currentSection) {
       currentSection.entries.push({ key, value });
     }
     // 没 section header 之前的键值 → 也归 general

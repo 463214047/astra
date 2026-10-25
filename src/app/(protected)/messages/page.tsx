@@ -115,10 +115,7 @@ async function requestInbox(): Promise<InboxData> {
     notifications: nd.items ?? [],
     notificationUnread: Number(nd.unread?.total ?? 0),
     conversations,
-    conversationUnread: conversations.reduce(
-      (sum, conversation) => sum + conversation.unread,
-      0,
-    ),
+    conversationUnread: conversations.reduce((sum, conversation) => sum + conversation.unread, 0),
   };
 }
 
@@ -289,10 +286,7 @@ export default function MessagesPage() {
       )}
 
       <div className="grid gap-5 min-[900px]:grid-cols-[220px_minmax(0,1fr)] min-[900px]:items-start min-[900px]:gap-6">
-        <nav
-          aria-label="消息分类"
-          className="min-[900px]:sticky min-[900px]:top-24"
-        >
+        <nav aria-label="消息分类" className="min-[900px]:sticky min-[900px]:top-24">
           <div className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm shadow-slate-900/[0.03] min-[900px]:flex-col">
             {TABS.map(({ key, label, icon: Icon }) => {
               const active = tab === key;
@@ -306,9 +300,9 @@ export default function MessagesPage() {
                     setActionError(null);
                   }}
                   aria-current={active ? "page" : undefined}
-                  className={`flex shrink-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 min-[900px]:w-full min-[900px]:justify-start min-[900px]:px-3.5 ${
+                  className={`flex shrink-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-500/40 min-[900px]:w-full min-[900px]:justify-start min-[900px]:px-3.5 ${
                     active
-                      ? "bg-[#2563eb] text-white shadow-sm shadow-blue-600/20"
+                      ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
@@ -445,10 +439,8 @@ function NotificationRow({
       <button
         type="button"
         onClick={handleClick}
-        className={`group flex w-full items-start gap-3.5 px-5 py-4 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/30 sm:px-6 ${
-          notification.is_read
-            ? "hover:bg-slate-50"
-            : "bg-blue-50/30 hover:bg-blue-50/60"
+        className={`group flex w-full items-start gap-3.5 px-5 py-4 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/30 sm:px-6 ${
+          notification.is_read ? "hover:bg-slate-50" : "bg-brand-50/30 hover:bg-brand-50/60"
         }`}
       >
         <span className="relative mt-0.5 shrink-0">
@@ -465,8 +457,8 @@ function NotificationRow({
             <span
               className={`grid size-11 place-items-center rounded-2xl ${
                 isReply
-                  ? "bg-violet-50 text-violet-600 ring-1 ring-violet-100"
-                  : "bg-blue-50 text-blue-600 ring-1 ring-blue-100"
+                  ? "bg-brand-50 text-brand-700 ring-1 ring-brand-100"
+                  : "bg-brand-50 text-brand-700 ring-1 ring-brand-100"
               }`}
             >
               {isReply ? (
@@ -477,7 +469,7 @@ function NotificationRow({
             </span>
           )}
           {!notification.is_read && (
-            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-blue-500 ring-2 ring-white" />
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-brand-500 ring-2 ring-white" />
           )}
         </span>
 
@@ -485,9 +477,7 @@ function NotificationRow({
           <span className="flex items-start justify-between gap-3">
             <span
               className={`truncate text-sm leading-6 ${
-                notification.is_read
-                  ? "font-medium text-slate-700"
-                  : "font-semibold text-slate-900"
+                notification.is_read ? "font-medium text-slate-700" : "font-semibold text-slate-900"
               }`}
             >
               {notification.title}
@@ -525,15 +515,14 @@ function NotificationRow({
 function ConversationRow({ conversation }: { conversation: Conversation }) {
   const unread = conversation.unread > 0;
   const sentByMe =
-    conversation.last_sender_email &&
-    conversation.last_sender_email !== conversation.other_email;
+    conversation.last_sender_email && conversation.last_sender_email !== conversation.other_email;
 
   return (
     <li>
       <Link
         href={`/messages/${conversation.id}`}
-        className={`group flex items-center gap-3.5 px-5 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/30 sm:px-6 ${
-          unread ? "bg-blue-50/30 hover:bg-blue-50/60" : "hover:bg-slate-50"
+        className={`group flex items-center gap-3.5 px-5 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/30 sm:px-6 ${
+          unread ? "bg-brand-50/30 hover:bg-brand-50/60" : "hover:bg-slate-50"
         }`}
       >
         <span className="relative shrink-0">
@@ -547,14 +536,14 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
               className="size-11 rounded-full object-cover ring-2 ring-white"
             />
           ) : (
-            <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-blue-100 via-violet-100 to-pink-100 text-sm font-semibold text-slate-600 ring-2 ring-white">
+            <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 text-sm font-semibold text-slate-600 ring-2 ring-white">
               {conversation.other_name[0]?.toUpperCase() ?? "U"}
             </span>
           )}
           {unread && (
             <span
               aria-hidden="true"
-              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-blue-500 ring-2 ring-white"
+              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-brand-500 ring-2 ring-white"
             />
           )}
         </span>
@@ -566,10 +555,7 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
                 unread ? "font-semibold text-slate-900" : "font-medium text-slate-700"
               }`}
             >
-              <UserName
-                name={conversation.other_name}
-                rainbow={conversation.other_rainbow}
-              />
+              <UserName name={conversation.other_name} rainbow={conversation.other_rainbow} />
             </span>
             <time
               dateTime={conversation.last_message_time}

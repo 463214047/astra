@@ -9,13 +9,7 @@ import { useEffect, useRef, type ReactNode } from "react";
  * 渐变按一个完整色环写成一个周期（0% ~ 50%），再重复铺满 200% 的背景；
  * 动画只移动一个周期，因此 0% 和 100% 的画面完全一致，循环处没有跳变。
  */
-export function RainbowName({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+function RainbowName({ children, className = "" }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -23,10 +17,7 @@ export function RainbowName({
     if (!el) return;
 
     const anim = el.animate(
-      [
-        { backgroundPosition: "0% 50%" },
-        { backgroundPosition: "100% 50%" },
-      ],
+      [{ backgroundPosition: "0% 50%" }, { backgroundPosition: "100% 50%" }],
       { duration: 8000, iterations: Infinity, easing: "linear" },
     );
 

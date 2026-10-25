@@ -26,7 +26,11 @@ export default function DownloadButton({ torrentName, href }: Props) {
       ta.style.opacity = "0";
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand("copy"); } catch { /* noop */ }
+      try {
+        document.execCommand("copy");
+      } catch {
+        /* noop */
+      }
       document.body.removeChild(ta);
     }
     setShowToast(true);
@@ -34,7 +38,12 @@ export default function DownloadButton({ torrentName, href }: Props) {
     timerRef.current = setTimeout(() => setShowToast(false), 1400);
   };
 
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,11 +56,17 @@ export default function DownloadButton({ torrentName, href }: Props) {
         href={href}
         download={torrentName}
         onContextMenu={handleContextMenu}
-        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-violet-300 hover:text-violet-700"
+        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-brand-300 hover:text-brand-800"
         title="右键复制链接"
       >
         <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-          <path d="M10 3v10m0 0-3.5-3.5M10 13l3.5-3.5M4 15.5h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path
+            d="M10 3v10m0 0-3.5-3.5M10 13l3.5-3.5M4 15.5h12"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         下载
       </a>

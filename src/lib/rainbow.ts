@@ -11,9 +11,10 @@ export type RainbowState = {
 export function hasRainbowAccess(u: RainbowState, now = Date.now()): boolean {
   if (u.role && RAINBOW_ROLES.has(u.role)) return true;
   if (!u.rainbow_until) return false;
-  const t = u.rainbow_until instanceof Date
-    ? u.rainbow_until.getTime()
-    : new Date(u.rainbow_until).getTime();
+  const t =
+    u.rainbow_until instanceof Date
+      ? u.rainbow_until.getTime()
+      : new Date(u.rainbow_until).getTime();
   return Number.isFinite(t) && t > now;
 }
 

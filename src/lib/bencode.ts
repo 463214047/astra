@@ -11,10 +11,10 @@ import { createHash } from "node:crypto";
  */
 
 export type BencodeValue =
-  | Uint8Array                         // byte string（原始 bytes，不转 string！）
-  | number                             // integer
-  | BencodeValue[]                     // list
-  | { [key: string]: BencodeValue };   // dict（key 是 ASCII string）
+  | Uint8Array // byte string（原始 bytes，不转 string！）
+  | number // integer
+  | BencodeValue[] // list
+  | { [key: string]: BencodeValue }; // dict（key 是 ASCII string）
 
 /* ==================== 解码 ==================== */
 
@@ -88,7 +88,10 @@ function concatUint8s(arrays: Uint8Array[]): Uint8Array {
   for (const a of arrays) total += a.length;
   const out = new Uint8Array(total);
   let off = 0;
-  for (const a of arrays) { out.set(a, off); off += a.length; }
+  for (const a of arrays) {
+    out.set(a, off);
+    off += a.length;
+  }
   return out;
 }
 

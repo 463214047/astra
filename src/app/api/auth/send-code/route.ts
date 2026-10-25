@@ -50,7 +50,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, message: "请求格式错误" }, { status: 400 });
   }
 
-  const rawEmail = String(body.email ?? "").trim().toLowerCase();
+  const rawEmail = String(body.email ?? "")
+    .trim()
+    .toLowerCase();
   const purpose = body.purpose === "reset_password" ? "reset_password" : "register";
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
@@ -81,10 +83,7 @@ export async function POST(req: Request) {
         [rawEmail],
       );
       if (existing.length === 0) {
-        return NextResponse.json(
-          { ok: false, message: "该邮箱未注册" },
-          { status: 404 },
-        );
+        return NextResponse.json({ ok: false, message: "该邮箱未注册" }, { status: 404 });
       }
       if (!existing[0].password_hash) {
         return NextResponse.json(
@@ -150,25 +149,17 @@ export async function POST(req: Request) {
     emailCooldown.set(rawEmail, now);
 
     if (!result.ok) {
-      return NextResponse.json(
-        { ok: false, message: "邮件发送失败，请稍后再试" },
-        { status: 502 },
-      );
+      return NextResponse.json({ ok: false, message: "邮件发送失败，请稍后再试" }, { status: 502 });
     }
 
     return NextResponse.json({
       ok: true,
       message: "验证码已发送，10 分钟内有效",
       // 仅在 fallback（开发环境）返回预览方便调试
-      ...(result.method === "fallback" && result.preview
-        ? { _dev_code: code }
-        : {}),
+      ...(result.method === "fallback" && result.preview ? { _dev_code: code } : {}),
     });
   } catch (err) {
     console.error("[send-code] 服务器错误:", err);
-    return NextResponse.json(
-      { ok: false, message: "服务器内部错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器内部错误" }, { status: 500 });
   }
 }

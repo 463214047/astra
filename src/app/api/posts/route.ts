@@ -98,7 +98,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "MediaInfo 格式错误" }, { status: 400 });
     }
     if (mediainfo && String(mediainfo).trim().length > 50000) {
-      return NextResponse.json({ ok: false, message: "MediaInfo 过长（最多 50000 字）" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, message: "MediaInfo 过长（最多 50000 字）" },
+        { status: 400 },
+      );
     }
 
     // external_links：外部链接数组 {name, url}
@@ -109,30 +112,39 @@ export async function POST(req: Request) {
     const externalLinks = serializeExternalLinks(extResult.value);
 
     const tagArr = Array.isArray(tags)
-      ? tags.filter((t) => typeof t === "string" && t.trim()).slice(0, 5).map((t) => t.trim())
+      ? tags
+          .filter((t) => typeof t === "string" && t.trim())
+          .slice(0, 5)
+          .map((t) => t.trim())
       : [];
 
     const cover = typeof cover_url === "string" && cover_url.trim() ? cover_url.trim() : null;
 
     const shotArr = Array.isArray(screenshots)
-      ? screenshots.filter((s) => typeof s === "string" && s.trim()).slice(0, 5).map((s) => s.trim())
+      ? screenshots
+          .filter((s) => typeof s === "string" && s.trim())
+          .slice(0, 5)
+          .map((s) => s.trim())
       : [];
 
     const isAnonymous = Boolean(anonymous);
     const isAdult = Boolean(is_adult);
 
-    const torrentName = torrent && typeof torrent === "object" && typeof (torrent as any).name === "string"
-      ? (torrent as any).name
-      : null;
+    const torrentName =
+      torrent && typeof torrent === "object" && typeof (torrent as any).name === "string"
+        ? (torrent as any).name
+        : null;
 
     // 后端权威解析：前端传 torrent.data (base64) 时，后端自己用 bencode 算真实总大小
-    let torrentSize: number | null = torrent && typeof torrent === "object" && typeof (torrent as any).size === "number"
-      ? (torrent as any).size
-      : null;
+    let torrentSize: number | null =
+      torrent && typeof torrent === "object" && typeof (torrent as any).size === "number"
+        ? (torrent as any).size
+        : null;
 
-    const torrentData = torrent && typeof torrent === "object" && typeof (torrent as any).data === "string"
-      ? (torrent as any).data
-      : null;
+    const torrentData =
+      torrent && typeof torrent === "object" && typeof (torrent as any).data === "string"
+        ? (torrent as any).data
+        : null;
 
     let torrentInfoHash: string | null = null;
     if (torrentData) {
@@ -226,10 +238,7 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error("[POST /api/posts] 发布失败:", err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误，请稍后再试" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误，请稍后再试" }, { status: 500 });
   }
 }
 
@@ -286,9 +295,7 @@ export async function GET(req: Request) {
 
     // 按 hot 置顶 → 再按 created_at DESC 或 like_count DESC
     const orderBy =
-      sort === "hot"
-        ? "hot DESC, like_count DESC, created_at DESC"
-        : "hot DESC, created_at DESC";
+      sort === "hot" ? "hot DESC, like_count DESC, created_at DESC" : "hot DESC, created_at DESC";
 
     params.push(limit, offset);
     const rows = await query<any>(
@@ -341,9 +348,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, items: list });
   } catch (err) {
     console.error("[GET /api/posts] 列表失败:", err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误" }, { status: 500 });
   }
 }

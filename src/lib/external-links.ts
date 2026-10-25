@@ -21,7 +21,7 @@ export interface ExternalLink {
 const HTTP_URL_RE = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 
 /** 校验 URL 是否合法 http(s) */
-export function isValidHttpUrl(url: string): boolean {
+function isValidHttpUrl(url: string): boolean {
   return HTTP_URL_RE.test(url.trim());
 }
 
@@ -33,7 +33,10 @@ export function validateExternalLinks(
   if (!Array.isArray(links)) {
     // 旧格式：换行分隔字符串 — 自动转新格式
     if (typeof links === "string") {
-      const lines = links.split("\n").map((l) => l.trim()).filter(Boolean);
+      const lines = links
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
       const arr: ExternalLink[] = [];
       for (const url of lines) {
         if (!isValidHttpUrl(url)) {
@@ -83,7 +86,9 @@ export function parseExternalLinks(raw: string | null | undefined): ExternalLink
             url: String(x.url).trim(),
           }));
       }
-    } catch { /* fallthrough */ }
+    } catch {
+      /* fallthrough */
+    }
   }
 
   // 旧格式：每行一个 URL

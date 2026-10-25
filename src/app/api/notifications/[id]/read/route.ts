@@ -15,10 +15,7 @@ async function ensureOnce() {
   schemaEnsured = true;
 }
 
-export async function PATCH(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const session = await auth();

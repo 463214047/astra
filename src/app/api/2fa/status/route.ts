@@ -30,7 +30,8 @@ export async function GET() {
       [email],
     );
 
-    if (rows.length === 0) return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
+    if (rows.length === 0)
+      return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
     const r = rows[0];
 
     return NextResponse.json({

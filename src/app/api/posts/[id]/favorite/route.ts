@@ -61,10 +61,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ ok: false, message: "未登录" }, { status: 401 });
     }
 
-    await query(
-      `DELETE FROM public.post_favorites WHERE user_email = $1 AND post_id = $2`,
-      [email, id],
-    );
+    await query(`DELETE FROM public.post_favorites WHERE user_email = $1 AND post_id = $2`, [
+      email,
+      id,
+    ]);
     await query(
       `UPDATE public.posts SET favorite_count = (SELECT COUNT(*) FROM public.post_favorites WHERE post_id = $1) WHERE id = $1`,
       [id],

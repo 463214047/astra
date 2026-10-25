@@ -117,10 +117,9 @@ export async function POST(request: Request) {
     }
 
     // 一次性使用 — 标记为已用
-    await query(
-      "UPDATE public.email_verification_codes SET used = TRUE WHERE id = $1",
-      [codes[0].id],
-    );
+    await query("UPDATE public.email_verification_codes SET used = TRUE WHERE id = $1", [
+      codes[0].id,
+    ]);
 
     // 5. 哈希密码
     const passwordHash = await hashPassword(password);

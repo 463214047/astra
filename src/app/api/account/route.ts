@@ -39,7 +39,8 @@ export async function DELETE(req: Request) {
       `SELECT password_hash FROM public.account_users WHERE email = $1 LIMIT 1`,
       [email],
     );
-    if (rows.length === 0) return NextResponse.json({ ok: false, message: "账号不存在" }, { status: 404 });
+    if (rows.length === 0)
+      return NextResponse.json({ ok: false, message: "账号不存在" }, { status: 404 });
 
     // GitHub 登录的账号没有 password_hash → 不支持密码验证
     if (!rows[0].password_hash) {
@@ -64,10 +65,9 @@ export async function DELETE(req: Request) {
         [email],
       );
       if (convIds.length > 0) {
-        await q(
-          `DELETE FROM public.conversation_reads WHERE conversation_id = ANY($1)`,
-          [convIds.map((c) => c.id)],
-        );
+        await q(`DELETE FROM public.conversation_reads WHERE conversation_id = ANY($1)`, [
+          convIds.map((c) => c.id),
+        ]);
       }
 
       // 删除用户（messages 和 conversations 通过 FK ON DELETE CASCADE 自动清理）

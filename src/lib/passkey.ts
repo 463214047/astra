@@ -2,7 +2,7 @@ import { query } from "./db";
 import { randomBytes } from "node:crypto";
 
 /** 生成 32 字符 hex passkey */
-export function generatePasskey(): string {
+function generatePasskey(): string {
   return randomBytes(16).toString("hex");
 }
 

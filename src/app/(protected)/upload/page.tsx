@@ -4,14 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  Check,
-  ChevronDown,
-  Save,
-  Send,
-  ShieldAlert,
-  ShieldCheck,
-} from "lucide-react";
+import { Check, ChevronDown, Save, Send, ShieldAlert, ShieldCheck } from "lucide-react";
 import Editor from "@/components/editor";
 import { parseTorrentTotalSize } from "@/lib/bencode";
 import { extractTmdbRef } from "@/lib/tmdb-link";
@@ -21,27 +14,36 @@ import { tagStyle } from "@/lib/tags";
 type Category = "游戏" | "漫画" | "动漫" | "电影" | "剧集" | "音乐" | "体育" | "综艺";
 
 const CATEGORIES: { key: Category; style: string }[] = [
-  { key: "游戏",   style: "bg-blue-600 text-white" },
-  { key: "漫画",   style: "bg-emerald-600 text-white" },
-  { key: "动漫",   style: "bg-violet-600 text-white" },
-  { key: "电影",   style: "bg-amber-500 text-white" },
+  { key: "游戏", style: "bg-blue-600 text-white" },
+  { key: "漫画", style: "bg-emerald-600 text-white" },
+  { key: "动漫", style: "bg-violet-600 text-white" },
+  { key: "电影", style: "bg-amber-500 text-white" },
   { key: "剧集", style: "bg-rose-500 text-white" },
-  { key: "音乐",   style: "bg-cyan-600 text-white" },
-  { key: "体育",   style: "bg-lime-600 text-white" },
-  { key: "综艺",   style: "bg-fuchsia-500 text-white" },
+  { key: "音乐", style: "bg-cyan-600 text-white" },
+  { key: "体育", style: "bg-lime-600 text-white" },
+  { key: "综艺", style: "bg-fuchsia-500 text-white" },
 ];
 
 // 预置标签（多选，配色与详情页/列表共用 src/lib/tags.ts）
 const PRESET_TAGS: { key: string; style: string }[] = [
-  "禁转", "LGBTQ+", "特效字幕", "中字", "合集",
+  "禁转",
+  "LGBTQ+",
+  "特效字幕",
+  "中字",
+  "合集",
 ].map((key) => ({ key, style: tagStyle(key) }));
 
-const NSFW_TAGS: { key: string; style: string }[] = [
-  "无码", "NTR",
-].map((key) => ({ key, style: tagStyle(key) }));
+const NSFW_TAGS: { key: string; style: string }[] = ["无码", "NTR"].map((key) => ({
+  key,
+  style: tagStyle(key),
+}));
 const NSFW_TAG_KEYS = new Set(NSFW_TAGS.map((t) => t.key));
 
-function switchAdult(v: boolean, setIsAdult: (v: boolean) => void, setTags: React.Dispatch<React.SetStateAction<string[]>>) {
+function switchAdult(
+  v: boolean,
+  setIsAdult: (v: boolean) => void,
+  setTags: React.Dispatch<React.SetStateAction<string[]>>,
+) {
   setIsAdult(v);
   if (!v) setTags((prev) => prev.filter((t) => !NSFW_TAG_KEYS.has(t)));
 }
@@ -155,7 +157,9 @@ export default function UploadPage() {
     const onDown = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setCatOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCatOpen(false);
+    };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -212,7 +216,10 @@ export default function UploadPage() {
       const data = await res.json().catch(() => ({ ok: false, message: "响应解析失败" }));
 
       if (!res.ok || !data.ok) {
-        setSubmitResult({ ok: false, message: data.message || (editing ? "保存失败" : "发布失败") });
+        setSubmitResult({
+          ok: false,
+          message: data.message || (editing ? "保存失败" : "发布失败"),
+        });
         // 失败也不解锁 — 按钮一直灰，防止连点重复提交；用户看完错误刷新页面重试
         return;
       }
@@ -262,7 +269,11 @@ export default function UploadPage() {
                   : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100"
               }`}
             >
-              {isAdult ? <ShieldAlert size={14} strokeWidth={2.25} /> : <ShieldCheck size={14} strokeWidth={2.25} />}
+              {isAdult ? (
+                <ShieldAlert size={14} strokeWidth={2.25} />
+              ) : (
+                <ShieldCheck size={14} strokeWidth={2.25} />
+              )}
               {isAdult ? "NSFW" : "SFW"}
             </button>
           }
@@ -280,7 +291,7 @@ export default function UploadPage() {
                     onChange={(e) => setRulesAgreed(e.target.checked)}
                     className="peer sr-only"
                   />
-                  <span className="grid size-[18px] shrink-0 place-items-center rounded-md border border-slate-300 bg-white transition-all group-hover:border-slate-400 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-focus-visible:ring-2 peer-focus-visible:ring-slate-900/20 peer-focus-visible:ring-offset-2">
+                  <span className="grid size-[18px] shrink-0 place-items-center rounded-md border border-slate-300 bg-white transition-all group-hover:border-slate-400 peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/20 peer-focus-visible:ring-offset-2">
                     {rulesAgreed && <Check size={12} strokeWidth={3} className="text-white" />}
                   </span>
                   我已阅读
@@ -288,7 +299,7 @@ export default function UploadPage() {
                 <Link
                   href="/rules"
                   target="_blank"
-                  className="text-sm font-medium text-blue-600 underline-offset-2 hover:text-blue-700 hover:underline"
+                  className="text-sm font-medium text-brand-700 underline-offset-2 hover:text-brand-800 hover:underline"
                 >
                   上传规则
                 </Link>
@@ -299,11 +310,11 @@ export default function UploadPage() {
                 type="button"
                 disabled={!canSubmit || submitting}
                 onClick={handleSubmit}
-                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-slate-900/25 focus-visible:ring-offset-2 active:scale-[0.98] sm:w-auto sm:min-w-[8.5rem] ${
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-brand-500/30 focus-visible:ring-offset-2 active:scale-[0.98] sm:w-auto sm:min-w-[8.5rem] ${
                   submitting
-                    ? "cursor-wait bg-slate-800 text-white shadow-lg shadow-slate-900/15"
+                    ? "cursor-wait bg-brand-600 text-white shadow-lg shadow-brand-600/20"
                     : canSubmit
-                      ? "bg-slate-900 text-white shadow-lg shadow-slate-900/15 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20"
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-600/20 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30"
                       : "cursor-not-allowed bg-slate-100 text-slate-400 ring-1 ring-inset ring-slate-200"
                 }`}
               >
@@ -332,15 +343,23 @@ export default function UploadPage() {
               {torrentName ? (
                 <div className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-white px-4 py-3 transition-all hover:border-slate-300 hover:shadow-sm">
                   <div className="min-w-0 flex items-center gap-3">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 text-base ring-1 ring-inset ring-slate-200">📀</span>
+                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 text-base ring-1 ring-inset ring-slate-200">
+                      📀
+                    </span>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-900">{torrentName}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">{formatTorrentSize(torrentSize)}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {formatTorrentSize(torrentSize)}
+                      </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => { setTorrentName(""); setTorrentSize(0); setTorrentBase64(""); }}
+                    onClick={() => {
+                      setTorrentName("");
+                      setTorrentSize(0);
+                      setTorrentBase64("");
+                    }}
                     className="shrink-0 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200 transition hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 active:scale-[0.96]"
                   >
                     移除
@@ -375,8 +394,12 @@ export default function UploadPage() {
                       reader.readAsArrayBuffer(f);
                     }}
                   />
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-base ring-1 ring-inset ring-slate-200 transition group-hover:-translate-y-0.5">📀</span>
-                  <span className="text-sm font-medium text-slate-800 group-hover:text-slate-900">点击选择 .torrent 文件</span>
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-base ring-1 ring-inset ring-slate-200 transition group-hover:-translate-y-0.5">
+                    📀
+                  </span>
+                  <span className="text-sm font-medium text-slate-800 group-hover:text-slate-900">
+                    点击选择 .torrent 文件
+                  </span>
                 </label>
               )}
             </Field>
@@ -400,7 +423,7 @@ export default function UploadPage() {
                 className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-900/5"
               />
             </Field>
-  {/* TMDB 链接 */}
+            {/* TMDB 链接 */}
             <Field label="TMDB 链接">
               <div>
                 <input
@@ -411,7 +434,9 @@ export default function UploadPage() {
                   className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-900/5"
                 />
                 {tmdbLink.trim() !== "" && (
-                  <p className={`mt-1.5 text-xs ${tmdbLinkValid ? "text-emerald-600" : "text-rose-500"}`}>
+                  <p
+                    className={`mt-1.5 text-xs ${tmdbLinkValid ? "text-emerald-600" : "text-rose-500"}`}
+                  >
                     {tmdbRef
                       ? `已识别 TMDB ${tmdbRef.mediaType === "tv" ? "剧集" : "电影"} #${tmdbRef.id}，详情页将展示作品介绍`
                       : "不是有效的 TMDB 链接（应为 themoviedb.org 的 movie / tv 页面）"}
@@ -425,7 +450,7 @@ export default function UploadPage() {
                 <Editor content={content} onChange={setContent} minimal />
               </div>
             </Field>
-  {/* MediaInfo */}
+            {/* MediaInfo */}
             <Field label="MediaInfo">
               <textarea
                 rows={8}
@@ -464,7 +489,10 @@ export default function UploadPage() {
                         <button
                           key={c.key}
                           type="button"
-                          onClick={() => { setCategory(c.key); setCatOpen(false); }}
+                          onClick={() => {
+                            setCategory(c.key);
+                            setCatOpen(false);
+                          }}
                           className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                             active
                               ? `${c.style} shadow-sm`
@@ -487,23 +515,36 @@ export default function UploadPage() {
                 {PRESET_TAGS.map((t) => {
                   const selected = tags.includes(t.key);
                   return (
-                    <TagChip key={t.key} tag={t} selected={selected} onToggle={() => {
-                      setTags((prev) => selected ? prev.filter((x) => x !== t.key) : [...prev, t.key]);
-                    }} />
+                    <TagChip
+                      key={t.key}
+                      tag={t}
+                      selected={selected}
+                      onToggle={() => {
+                        setTags((prev) =>
+                          selected ? prev.filter((x) => x !== t.key) : [...prev, t.key],
+                        );
+                      }}
+                    />
                   );
                 })}
-                {isAdult && NSFW_TAGS.map((t) => {
-                  const selected = tags.includes(t.key);
-                  return (
-                    <TagChip key={t.key} tag={t} selected={selected} onToggle={() => {
-                      setTags((prev) => selected ? prev.filter((x) => x !== t.key) : [...prev, t.key]);
-                    }} />
-                  );
-                })}
+                {isAdult &&
+                  NSFW_TAGS.map((t) => {
+                    const selected = tags.includes(t.key);
+                    return (
+                      <TagChip
+                        key={t.key}
+                        tag={t}
+                        selected={selected}
+                        onToggle={() => {
+                          setTags((prev) =>
+                            selected ? prev.filter((x) => x !== t.key) : [...prev, t.key],
+                          );
+                        }}
+                      />
+                    );
+                  })}
               </div>
             </Field>
-
-          
 
             {/* 提交结果反馈 */}
             {submitResult && (
@@ -527,7 +568,6 @@ export default function UploadPage() {
                 )}
               </div>
             )}
-
           </div>
         </Card>
       </div>
@@ -538,7 +578,11 @@ export default function UploadPage() {
 // ============== 小组件 ==============
 
 function Card({
-  section, icon, children, headerRight, footer,
+  section,
+  icon,
+  children,
+  headerRight,
+  footer,
 }: {
   section: string;
   icon: string;
@@ -557,9 +601,7 @@ function Card({
         {headerRight && <div className="ml-auto">{headerRight}</div>}
       </div>
       {/* 内容 */}
-      <div className="px-5 py-5 sm:px-6 sm:py-6">
-        {children}
-      </div>
+      <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
       {/* 底部操作栏 */}
       {footer && (
         <div className="rounded-b-2xl border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
@@ -571,8 +613,14 @@ function Card({
 }
 
 function TagChip({
-  tag, selected, onToggle,
-}: { tag: { key: string; style: string }; selected: boolean; onToggle: () => void }) {
+  tag,
+  selected,
+  onToggle,
+}: {
+  tag: { key: string; style: string };
+  selected: boolean;
+  onToggle: () => void;
+}) {
   return (
     <button
       type="button"
@@ -606,9 +654,11 @@ function Field({
   children: React.ReactNode;
 }) {
   const counterColor =
-    counterState === "error" ? "text-rose-500" :
-    counterState === "warn" ? "text-amber-500" :
-    "text-slate-400";
+    counterState === "error"
+      ? "text-rose-500"
+      : counterState === "warn"
+        ? "text-amber-500"
+        : "text-slate-400";
 
   return (
     <div className="flex flex-col gap-1.5 md:flex-row md:items-start md:gap-4">
@@ -617,21 +667,21 @@ function Field({
         <label className="text-sm font-medium leading-6 text-slate-700">
           {label}
           {required && <span className="ml-0.5 text-rose-500">*</span>}
-          {hint && (
-            <span className="ml-1.5 text-xs font-normal text-slate-400">{hint}</span>
-          )}
+          {hint && <span className="ml-1.5 text-xs font-normal text-slate-400">{hint}</span>}
         </label>
         {counter && (
-          <span className={`shrink-0 text-xs tabular-nums md:hidden ${counterColor}`}>{counter}</span>
+          <span className={`shrink-0 text-xs tabular-nums md:hidden ${counterColor}`}>
+            {counter}
+          </span>
         )}
       </div>
       {/* 右侧输入区 */}
-      <div className="min-w-0 flex-1">
-        {children}
-      </div>
+      <div className="min-w-0 flex-1">{children}</div>
       {/* 桌面端 counter 放在最右侧 */}
       {counter && (
-        <span className={`hidden shrink-0 text-xs tabular-nums md:block ${counterColor}`}>{counter}</span>
+        <span className={`hidden shrink-0 text-xs tabular-nums md:block ${counterColor}`}>
+          {counter}
+        </span>
       )}
     </div>
   );

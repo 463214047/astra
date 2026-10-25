@@ -13,12 +13,12 @@ import { createHmac, randomBytes, createCipheriv, createDecipheriv, scryptSync }
 
 /* ======================== 常量 ======================== */
 
-const SECRET_BYTES = 20;                  // 160-bit = 标准 TOTP secret 长度
-const TIME_STEP = 30;                     // 30 秒
-const CODE_DIGITS = 6;                    // 6 位数字验证码
-const VERIFY_WINDOW = 1;                  // ±1 步容差（处理时钟偏移）
-const RECOVERY_COUNT = 8;                 // 8 个恢复码
-const RECOVERY_BYTES = 10;                // 每个恢复码 10 字节 base32 → 16 字符
+const SECRET_BYTES = 20; // 160-bit = 标准 TOTP secret 长度
+const TIME_STEP = 30; // 30 秒
+const CODE_DIGITS = 6; // 6 位数字验证码
+const VERIFY_WINDOW = 1; // ±1 步容差（处理时钟偏移）
+const RECOVERY_COUNT = 8; // 8 个恢复码
+const RECOVERY_BYTES = 10; // 每个恢复码 10 字节 base32 → 16 字符
 
 /* ======================== Base32 编解码（RFC 4648） ======================== */
 
@@ -94,7 +94,7 @@ export function generateSecret(): string {
 }
 
 /** 根据时间 counter 生成 6 位验证码 */
-export function generateCode(secret: string, counter?: number): string {
+function generateCode(secret: string, counter?: number): string {
   const key = base32Decode(secret);
   const c = counter ?? currentCounter();
   const hmac = hmacSha1(key, counterBytes(c));
@@ -125,11 +125,7 @@ export function verifyCode(secret: string, input: string, window = VERIFY_WINDOW
  * 格式：otpauth://totp/{issuer}:{label}?secret={secret}&issuer={issuer}
  *        &algorithm=SHA1&digits=6&period=30
  */
-export function generateAuthUrl(params: {
-  issuer: string;
-  label: string;
-  secret: string;
-}): string {
+export function generateAuthUrl(params: { issuer: string; label: string; secret: string }): string {
   const { issuer, label, secret } = params;
   const path = encodeURIComponent(`${issuer}:${label}`);
   const qs = new URLSearchParams({
@@ -221,7 +217,10 @@ export function consumeRecoveryCode(
   const decrypted = decryptSecret(encrypted);
   if (!decrypted) return { valid: false, remainingEncrypted: null };
 
-  const codes = decrypted.split(",").map((c) => c.trim().toUpperCase()).filter(Boolean);
+  const codes = decrypted
+    .split(",")
+    .map((c) => c.trim().toUpperCase())
+    .filter(Boolean);
   const cleanInput = input.trim().toUpperCase();
   const idx = codes.indexOf(cleanInput);
 

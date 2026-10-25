@@ -181,9 +181,7 @@ export default function ConversationPage() {
               <AlertCircle className="size-6" strokeWidth={1.6} />
             </span>
             <p className="mt-4 text-sm font-semibold text-slate-700">加载失败</p>
-            <p className="mt-1 max-w-sm break-words text-xs leading-5 text-slate-400">
-              {error}
-            </p>
+            <p className="mt-1 max-w-sm break-words text-xs leading-5 text-slate-400">{error}</p>
             <button
               type="button"
               onClick={fetchConv}
@@ -220,18 +218,14 @@ export default function ConversationPage() {
               className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white"
             />
           ) : (
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-100 via-violet-100 to-pink-100 text-sm font-semibold text-slate-600">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 text-sm font-semibold text-slate-600">
               {conv?.other_name?.[0]?.toUpperCase() ?? "U"}
             </span>
           )}
 
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-sm font-semibold text-slate-900">
-              {conv ? (
-                <UserName name={conv.other_name} rainbow={conv.other_rainbow} />
-              ) : (
-                "加载中…"
-              )}
+              {conv ? <UserName name={conv.other_name} rainbow={conv.other_rainbow} /> : "加载中…"}
             </h1>
             <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
               <Lock className="size-3" strokeWidth={1.8} />
@@ -278,7 +272,7 @@ export default function ConversationPage() {
                         <div
                           className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm ${
                             message.is_me
-                              ? "rounded-br-md bg-[#2563eb] text-white shadow-blue-600/10"
+                              ? "rounded-br-md bg-brand-600 text-white shadow-brand-600/10"
                               : "rounded-bl-md border border-slate-200/80 bg-white text-slate-800 shadow-slate-900/[0.03]"
                           }`}
                         >
@@ -295,19 +289,15 @@ export default function ConversationPage() {
                             (message.recipient_has_seen ? (
                               <>
                                 <CheckCheck
-                                  className="size-3 text-blue-500"
+                                  className="size-3 text-brand-600"
                                   strokeWidth={2}
                                   aria-hidden="true"
                                 />
-                                <span className="text-blue-500">已读</span>
+                                <span className="text-brand-600">已读</span>
                               </>
                             ) : (
                               <>
-                                <Check
-                                  className="size-3"
-                                  strokeWidth={2}
-                                  aria-hidden="true"
-                                />
+                                <Check className="size-3" strokeWidth={2} aria-hidden="true" />
                                 <span>已发送</span>
                               </>
                             ))}
@@ -335,7 +325,7 @@ function MessageSkeleton() {
         <div className="h-16 w-2/3 animate-pulse rounded-2xl rounded-bl-md bg-slate-200/60" />
       </div>
       <div className="flex justify-end">
-        <div className="h-10 w-1/2 animate-pulse rounded-2xl rounded-br-md bg-blue-100" />
+        <div className="h-10 w-1/2 animate-pulse rounded-2xl rounded-br-md bg-brand-100" />
       </div>
       <div className="flex justify-start">
         <div className="h-10 w-3/5 animate-pulse rounded-2xl rounded-bl-md bg-slate-200/60" />

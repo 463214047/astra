@@ -34,23 +34,24 @@ export default function MediaGallery({ coverUrl, screenshotUrls, title }: Props)
   });
 
   // 网格响应式列数
-  const gridCols = items.length === 1
-    ? "grid-cols-1"
-    : items.length === 2
-      ? "grid-cols-2"
-      : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4";
+  const gridCols =
+    items.length === 1
+      ? "grid-cols-1"
+      : items.length === 2
+        ? "grid-cols-2"
+        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4";
 
   return (
     <>
       <figure className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <figcaption className="flex items-center gap-2 border-b border-slate-200 bg-slate-50/70 px-5 py-3">
-          <span className="inline-flex size-6 items-center justify-center rounded-md bg-slate-900 text-slate-50 text-[10px] font-bold">🖼</span>
+          <span className="inline-flex size-6 items-center justify-center rounded-md bg-slate-900 text-slate-50 text-[10px] font-bold">
+            🖼
+          </span>
           <span className="text-sm font-semibold text-slate-800">
             {coverUrl ? "封面与截图" : "截图"}
             {items.length > 0 && (
-              <span className="ml-2 text-[11px] font-medium text-slate-400">
-                {items.length} 张
-              </span>
+              <span className="ml-2 text-[11px] font-medium text-slate-400">{items.length} 张</span>
             )}
           </span>
         </figcaption>
@@ -82,9 +83,15 @@ export default function MediaGallery({ coverUrl, screenshotUrls, title }: Props)
 }
 
 function ThumbItem({
-  url, isCover, title, onClick,
+  url,
+  isCover,
+  title,
+  onClick,
 }: {
-  url: string; isCover: boolean; title: string; onClick: () => void;
+  url: string;
+  isCover: boolean;
+  title: string;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -101,14 +108,20 @@ function ThumbItem({
       />
       {/* 封面徽章 */}
       {isCover && (
-        <span className="absolute left-2 top-2 rounded-md bg-violet-600/95 px-2 py-0.5 text-[13px] font-semibold text-white shadow-sm backdrop-blur">
+        <span className="absolute left-2 top-2 rounded-md bg-brand-600/95 px-2 py-0.5 text-[13px] font-semibold text-white shadow-sm backdrop-blur">
           封面
         </span>
       )}
       {/* hover 放大指示 */}
       <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/15 group-hover:opacity-100">
         <svg viewBox="0 0 20 20" fill="none" className="size-5 drop-shadow">
-          <path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path
+            d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </span>
     </button>

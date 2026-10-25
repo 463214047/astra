@@ -11,11 +11,11 @@ import NextImage from "next/image";
 type TopicTag = "求助" | "邀请" | "分享" | "讨论" | "公告";
 
 const TAG_STYLES: Record<TopicTag, string> = {
-  "求助": "bg-blue-50 text-blue-700 ring-blue-200",
-  "分享": "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  "邀请": "bg-violet-50 text-violet-700 ring-violet-200",
-  "讨论": "bg-amber-50 text-amber-700 ring-amber-200",
-  "公告": "bg-rose-50 text-rose-700 ring-rose-200",
+  求助: "bg-blue-50 text-blue-700 ring-blue-200",
+  分享: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  邀请: "bg-violet-50 text-violet-700 ring-violet-200",
+  讨论: "bg-amber-50 text-amber-700 ring-amber-200",
+  公告: "bg-rose-50 text-rose-700 ring-rose-200",
 };
 
 type ForumDetail = {
@@ -44,7 +44,9 @@ async function fetchForumPost(id: string): Promise<ForumDetail | null> {
     await ensureSchema();
     schemaEnsured = true;
   }
-  const rows = await query<ForumDetail & { author_uid_raw: string | null; author_avatar_raw: string | null }>(
+  const rows = await query<
+    ForumDetail & { author_uid_raw: string | null; author_avatar_raw: string | null }
+  >(
     `SELECT p.id, p.title, p.content, p.category,
             p.anonymous, p.author_email, p.author_name,
             p.comment_count, p.favorite_count, p.created_at, p.updated_at,
@@ -70,13 +72,39 @@ async function fetchForumPost(id: string): Promise<ForumDetail | null> {
 function sanitizeHtml(html: string): string {
   if (!html) return "";
   const stripped = html
-    .replace(/<\s*(script|iframe|object|embed|style|form|input|textarea|button|link|meta)[^>]*>/gi, "")
-    .replace(/<\s*\/\s*(script|iframe|object|embed|style|form|input|textarea|button|link|meta)[^>]*>/gi, "");
+    .replace(
+      /<\s*(script|iframe|object|embed|style|form|input|textarea|button|link|meta)[^>]*>/gi,
+      "",
+    )
+    .replace(
+      /<\s*\/\s*(script|iframe|object|embed|style|form|input|textarea|button|link|meta)[^>]*>/gi,
+      "",
+    );
   const ALLOWED_TAGS = new Set([
-    "p", "br", "h1", "h2", "h3", "h4", "h5", "h6",
-    "strong", "em", "b", "i", "u", "s", "del",
-    "ul", "ol", "li",
-    "blockquote", "code", "pre", "img", "a", "hr",
+    "p",
+    "br",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "strong",
+    "em",
+    "b",
+    "i",
+    "u",
+    "s",
+    "del",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "code",
+    "pre",
+    "img",
+    "a",
+    "hr",
   ]);
   const ALLOWED_ATTRS: Record<string, Set<string>> = {
     img: new Set(["src", "alt", "class"]),
@@ -85,29 +113,32 @@ function sanitizeHtml(html: string): string {
     pre: new Set(["class"]),
     blockquote: new Set(["class"]),
   };
-  return stripped.replace(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)(\s[^>]*)?\s*>/g, (_m, slash, tag, attrs) => {
-    const tagLower = tag.toLowerCase();
-    if (!ALLOWED_TAGS.has(tagLower)) return "";
-    if (!slash) {
-      let cleanAttrs = "";
-      const allowedForTag = ALLOWED_ATTRS[tagLower] ?? new Set();
-      if (attrs) {
-        const attrMatches = attrs.matchAll(/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
-        for (const a of attrMatches) {
-          const name = a[1].toLowerCase();
-          const value = a[2] ?? a[3] ?? a[4] ?? "";
-          if (allowedForTag.has(name)) {
-            if ((tagLower === "img" && name === "src") || (tagLower === "a" && name === "href")) {
-              if (!/^https?:\/\/[^\s"<>]+$/i.test(value)) continue;
+  return stripped.replace(
+    /<(\/?)([a-zA-Z][a-zA-Z0-9]*)(\s[^>]*)?\s*>/g,
+    (_m, slash, tag, attrs) => {
+      const tagLower = tag.toLowerCase();
+      if (!ALLOWED_TAGS.has(tagLower)) return "";
+      if (!slash) {
+        let cleanAttrs = "";
+        const allowedForTag = ALLOWED_ATTRS[tagLower] ?? new Set();
+        if (attrs) {
+          const attrMatches = attrs.matchAll(/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
+          for (const a of attrMatches) {
+            const name = a[1].toLowerCase();
+            const value = a[2] ?? a[3] ?? a[4] ?? "";
+            if (allowedForTag.has(name)) {
+              if ((tagLower === "img" && name === "src") || (tagLower === "a" && name === "href")) {
+                if (!/^https?:\/\/[^\s"<>]+$/i.test(value)) continue;
+              }
+              cleanAttrs += ` ${name}="${value.replace(/"/g, "&quot;")}"`;
             }
-            cleanAttrs += ` ${name}="${value.replace(/"/g, "&quot;")}"`;
           }
         }
+        return `<${tagLower}${cleanAttrs}>`;
       }
-      return `<${tagLower}${cleanAttrs}>`;
-    }
-    return `</${tagLower}>`;
-  });
+      return `</${tagLower}>`;
+    },
+  );
 }
 
 function formatTime(iso: string): string {
@@ -124,18 +155,14 @@ function formatTime(iso: string): string {
   return d.toLocaleDateString("zh-CN");
 }
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const post = await fetchForumPost(id);
   if (!post) return { title: "帖子不存在" };
   return { title: `${post.title} · 论坛` };
 }
 
-export default async function ForumDetailPage(
-  { params }: { params: Promise<{ id: string }> },
-) {
+export default async function ForumDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const post = await fetchForumPost(id);
   if (!post) notFound();
@@ -147,11 +174,13 @@ export default async function ForumDetailPage(
   const displayName = post.anonymous
     ? "匿名用户"
     : (post.author_name ?? post.author_email.split("@")[0]);
-  const rainbow = !post.anonymous && isRainbowName({
-    role: post.author_role,
-    rainbow_enabled: post.author_rainbow_enabled,
-    rainbow_until: post.author_rainbow_until,
-  });
+  const rainbow =
+    !post.anonymous &&
+    isRainbowName({
+      role: post.author_role,
+      rainbow_enabled: post.author_rainbow_enabled,
+      rainbow_until: post.author_rainbow_until,
+    });
 
   const tagStyle = TAG_STYLES[post.category] ?? "bg-slate-100 text-slate-700 ring-slate-200";
 
@@ -159,7 +188,9 @@ export default async function ForumDetailPage(
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       {/* 面包屑 */}
       <nav className="mb-5 flex items-center gap-1.5 text-xs text-slate-400">
-        <Link href="/forum" className="hover:text-slate-700">论坛</Link>
+        <Link href="/forum" className="hover:text-slate-700">
+          论坛
+        </Link>
         <span>/</span>
         <span className="truncate text-slate-500">{post.title}</span>
       </nav>
@@ -169,7 +200,9 @@ export default async function ForumDetailPage(
         <div className="p-5 sm:p-7">
           <header>
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${tagStyle}`}>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${tagStyle}`}
+              >
                 {post.category}
               </span>
             </div>
@@ -206,7 +239,7 @@ export default async function ForumDetailPage(
                       {displayName[0]}
                     </span>
                   )}
-                  <span className="text-[13px] font-medium text-slate-700 group-hover:text-violet-700">
+                  <span className="text-[13px] font-medium text-slate-700 group-hover:text-brand-800">
                     <UserName name={displayName} rainbow={rainbow} />
                   </span>
                 </Link>
@@ -255,7 +288,7 @@ export default async function ForumDetailPage(
       {post.content && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] p-5 sm:p-7">
           <div
-            className="prose prose-slate max-w-none break-words text-[15px] leading-[2] text-slate-800 prose-p:my-3 prose-headings:mt-6 prose-headings:mb-2 prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-ul:my-3 prose-ol:my-3 prose-li:my-0.5 prose-blockquote:my-4 prose-img:my-4 prose-img:rounded-xl prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-slate-900 prose-pre:text-slate-100"
+            className="prose prose-slate max-w-none break-words text-[15px] leading-[2] text-slate-800 prose-p:my-3 prose-headings:mt-6 prose-headings:mb-2 prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-ul:my-3 prose-ol:my-3 prose-li:my-0.5 prose-blockquote:my-4 prose-img:my-4 prose-img:rounded-xl prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-slate-900 prose-pre:text-slate-100"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
         </div>

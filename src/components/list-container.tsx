@@ -18,7 +18,11 @@ type View = "table" | "waterfall";
 // 轮询间隔 — tracker 上报间隔通常 30-60 秒，15 秒一次够实时又不浪费
 const POLL_MS = 15_000;
 
-export default function ListContainer({ posts: initialPosts, categoryMeta, fallbackGradient }: Props) {
+export default function ListContainer({
+  posts: initialPosts,
+  categoryMeta,
+  fallbackGradient,
+}: Props) {
   // 默认列表视图，不持久化
   const [view, setView] = useState<View>("table");
   const [posts, setPosts] = useState<HomePost[]>(initialPosts);
@@ -84,9 +88,15 @@ export default function ListContainer({ posts: initialPosts, categoryMeta, fallb
     const t1 = setTimeout(refresh, 3000);
     const t2 = setInterval(refresh, POLL_MS);
     // 页面可见性变化时立刻刷一次（用户从后台切回来）
-    const onVis = () => { if (!document.hidden) refresh(); };
+    const onVis = () => {
+      if (!document.hidden) refresh();
+    };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearTimeout(t1); clearInterval(t2); document.removeEventListener("visibilitychange", onVis); };
+    return () => {
+      clearTimeout(t1);
+      clearInterval(t2);
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, [refresh]);
 
   return (
@@ -100,12 +110,17 @@ export default function ListContainer({ posts: initialPosts, categoryMeta, fallb
             onClick={() => setView("waterfall")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition ${
               view === "waterfall"
-                ? "bg-slate-900 text-white shadow-sm"
+                ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
             <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-              <path d="M4 4h5v6H4zM11 4h5v10h-5zM4 12h5v4H4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              <path
+                d="M4 4h5v6H4zM11 4h5v10h-5zM4 12h5v4H4z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
             </svg>
             瀑布流
           </button>
@@ -114,12 +129,17 @@ export default function ListContainer({ posts: initialPosts, categoryMeta, fallb
             onClick={() => setView("table")}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition ${
               view === "table"
-                ? "bg-slate-900 text-white shadow-sm"
+                ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
             <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M3 5h14M3 10h14M3 15h14"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             列表
           </button>
@@ -127,7 +147,11 @@ export default function ListContainer({ posts: initialPosts, categoryMeta, fallb
       </div>
 
       {view === "waterfall" ? (
-        <PostsWaterfall posts={posts} categoryMeta={categoryMeta} fallbackGradient={fallbackGradient} />
+        <PostsWaterfall
+          posts={posts}
+          categoryMeta={categoryMeta}
+          fallbackGradient={fallbackGradient}
+        />
       ) : (
         <PostsTable posts={posts} categoryMeta={categoryMeta} />
       )}

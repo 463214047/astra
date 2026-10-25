@@ -39,7 +39,10 @@ function formatTime(iso: string): string {
 
 /** 取 HTML 的纯文本（摘要 / 判空用） */
 function plainText(html: string): string {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** 评论是否为空：无文字且无图片才算空 */
@@ -53,9 +56,7 @@ const SAFE_URL_RE = /^https?:\/\//i;
 
 /** 从标签属性区里取指定属性值（双引号 / 单引号 / 裸值） */
 function extractAttr(rest: string, name: string): string | null {
-  const m = rest.match(
-    new RegExp(`\\s${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"),
-  );
+  const m = rest.match(new RegExp(`\\s${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"));
   if (!m) return null;
   return (m[2] ?? m[3] ?? m[4] ?? "").trim();
 }
@@ -74,8 +75,27 @@ function safeUrl(raw: string | null): string | null {
 function sanitizeCommentHtml(html: string): string {
   if (!html) return "";
   const allowedTags = new Set([
-    "p", "br", "strong", "em", "s", "del", "b", "i", "u", "a", "img",
-    "h1", "h2", "h3", "ul", "ol", "li", "blockquote", "pre", "code", "hr",
+    "p",
+    "br",
+    "strong",
+    "em",
+    "s",
+    "del",
+    "b",
+    "i",
+    "u",
+    "a",
+    "img",
+    "h1",
+    "h2",
+    "h3",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "pre",
+    "code",
+    "hr",
   ]);
   return html.replace(
     /<\/?([a-zA-Z][a-zA-Z0-9]*)([^>]*)>/g,
@@ -91,9 +111,7 @@ function sanitizeCommentHtml(html: string): string {
       }
       if (tag === "img") {
         const src = safeUrl(extractAttr(rest, "src"));
-        return src
-          ? `<img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer">`
-          : "";
+        return src ? `<img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer">` : "";
       }
       return `<${tag}>`;
     },
@@ -241,7 +259,7 @@ export default function CommentsSection({ postId }: Props) {
           <button
             onClick={submit}
             disabled={!hasContent || submitting}
-            className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:active:scale-100"
+            className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition hover:bg-brand-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:active:scale-100"
           >
             {submitting ? "发送中…" : "发送"}
           </button>
@@ -304,7 +322,7 @@ function CommentItem({
             className={`grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold ${
               comment.anonymous
                 ? "border border-slate-200 bg-slate-100 text-slate-500"
-                : "bg-slate-900 text-white"
+                : "bg-brand-600 text-white"
             }`}
           >
             {displayName[0]}
@@ -317,7 +335,9 @@ function CommentItem({
               <UserName name={displayName} rainbow={comment.rainbow} />
             </span>
             {comment.anonymous && (
-              <span className="rounded bg-slate-100 px-1.5 py-px text-[10px] text-slate-400">匿名</span>
+              <span className="rounded bg-slate-100 px-1.5 py-px text-[10px] text-slate-400">
+                匿名
+              </span>
             )}
             <span className="text-slate-300">·</span>
             <time className="text-slate-400">{formatTime(comment.created_at)}</time>

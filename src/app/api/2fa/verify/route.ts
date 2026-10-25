@@ -33,17 +33,25 @@ export async function PUT(req: Request) {
       `SELECT id, totp_secret_enc, totp_enabled FROM public.account_users WHERE email = $1 LIMIT 1`,
       [email],
     );
-    if (users.length === 0) return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
+    if (users.length === 0)
+      return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
     const user = users[0];
 
-    if (user.totp_enabled) return NextResponse.json({ ok: false, message: "2FA 已启用" }, { status: 400 });
-    if (!user.totp_secret_enc) return NextResponse.json({ ok: false, message: "请先执行 setup" }, { status: 400 });
+    if (user.totp_enabled)
+      return NextResponse.json({ ok: false, message: "2FA 已启用" }, { status: 400 });
+    if (!user.totp_secret_enc)
+      return NextResponse.json({ ok: false, message: "请先执行 setup" }, { status: 400 });
 
     const secret = decryptSecret(user.totp_secret_enc);
-    if (!secret) return NextResponse.json({ ok: false, message: "secret 解密失败，请重新 setup" }, { status: 500 });
+    if (!secret)
+      return NextResponse.json(
+        { ok: false, message: "secret 解密失败，请重新 setup" },
+        { status: 500 },
+      );
 
     const offset = verifyCode(secret, code);
-    if (offset === null) return NextResponse.json({ ok: false, message: "验证码错误" }, { status: 400 });
+    if (offset === null)
+      return NextResponse.json({ ok: false, message: "验证码错误" }, { status: 400 });
 
     await query(
       `UPDATE public.account_users

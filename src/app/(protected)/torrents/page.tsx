@@ -10,25 +10,25 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 const CATEGORY_META: Record<string, { label: string; tagBg: string; tagText: string }> = {
-  "游戏":   { label: "游戏",   tagBg: "bg-blue-600",   tagText: "text-white" },
-  "漫画":   { label: "漫画",   tagBg: "bg-emerald-600",tagText: "text-white" },
-  "动漫":   { label: "动漫",   tagBg: "bg-violet-600", tagText: "text-white" },
-  "电影":   { label: "电影",   tagBg: "bg-amber-500",  tagText: "text-white" },
-  "剧集": { label: "剧集", tagBg: "bg-rose-500",   tagText: "text-white" },
-  "音乐":   { label: "音乐",   tagBg: "bg-cyan-600",   tagText: "text-white" },
-  "体育":   { label: "体育",   tagBg: "bg-lime-600",   tagText: "text-white" },
-  "综艺":   { label: "综艺",   tagBg: "bg-fuchsia-500",tagText: "text-white" },
+  游戏: { label: "游戏", tagBg: "bg-blue-600", tagText: "text-white" },
+  漫画: { label: "漫画", tagBg: "bg-emerald-600", tagText: "text-white" },
+  动漫: { label: "动漫", tagBg: "bg-violet-600", tagText: "text-white" },
+  电影: { label: "电影", tagBg: "bg-amber-500", tagText: "text-white" },
+  剧集: { label: "剧集", tagBg: "bg-rose-500", tagText: "text-white" },
+  音乐: { label: "音乐", tagBg: "bg-cyan-600", tagText: "text-white" },
+  体育: { label: "体育", tagBg: "bg-lime-600", tagText: "text-white" },
+  综艺: { label: "综艺", tagBg: "bg-fuchsia-500", tagText: "text-white" },
 };
 
 const FALLBACK_GRADIENT: Record<string, string> = {
-  "游戏":   "from-sky-400 to-indigo-500",
-  "漫画":   "from-emerald-400 to-teal-500",
-  "动漫":   "from-violet-400 to-fuchsia-500",
-  "电影":   "from-rose-400 to-orange-400",
-  "剧集": "from-amber-400 to-yellow-600",
-  "音乐":   "from-cyan-400 to-blue-500",
-  "体育":   "from-lime-400 to-green-500",
-  "综艺":   "from-fuchsia-400 to-pink-500",
+  游戏: "from-sky-400 to-indigo-500",
+  漫画: "from-emerald-400 to-teal-500",
+  动漫: "from-violet-400 to-fuchsia-500",
+  电影: "from-rose-400 to-orange-400",
+  剧集: "from-amber-400 to-yellow-600",
+  音乐: "from-cyan-400 to-blue-500",
+  体育: "from-lime-400 to-green-500",
+  综艺: "from-fuchsia-400 to-pink-500",
 };
 
 export type TorrentPost = {
@@ -54,7 +54,10 @@ export type TorrentPost = {
 
 let schemaEnsured = false;
 async function fetchPosts(): Promise<TorrentPost[]> {
-  if (!schemaEnsured) { await ensureSchema(); schemaEnsured = true; }
+  if (!schemaEnsured) {
+    await ensureSchema();
+    schemaEnsured = true;
+  }
   try {
     const rows = await query<TorrentPost>(
       `SELECT p.id, p.category, p.title, p.subtitle,
@@ -91,7 +94,11 @@ export default async function TorrentsPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-      <ListContainer posts={posts} categoryMeta={CATEGORY_META} fallbackGradient={FALLBACK_GRADIENT} />
+      <ListContainer
+        posts={posts}
+        categoryMeta={CATEGORY_META}
+        fallbackGradient={FALLBACK_GRADIENT}
+      />
     </div>
   );
 }

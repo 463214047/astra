@@ -5,14 +5,14 @@ import Link from "next/link";
 
 // 与首页 CATEGORY_META 保持一致
 const CATEGORY_META: Record<string, { label: string; tagBg: string; tagText: string }> = {
-  "游戏":   { label: "游戏",   tagBg: "bg-blue-600",   tagText: "text-white" },
-  "漫画":   { label: "漫画",   tagBg: "bg-emerald-600",tagText: "text-white" },
-  "动漫":   { label: "动漫",   tagBg: "bg-violet-600", tagText: "text-white" },
-  "电影":   { label: "电影",   tagBg: "bg-amber-500",  tagText: "text-white" },
-  "剧集": { label: "剧集", tagBg: "bg-rose-500",   tagText: "text-white" },
-  "音乐":   { label: "音乐",   tagBg: "bg-cyan-600",   tagText: "text-white" },
-  "体育":   { label: "体育",   tagBg: "bg-lime-600",   tagText: "text-white" },
-  "综艺":   { label: "综艺",   tagBg: "bg-fuchsia-500",tagText: "text-white" },
+  游戏: { label: "游戏", tagBg: "bg-blue-600", tagText: "text-white" },
+  漫画: { label: "漫画", tagBg: "bg-emerald-600", tagText: "text-white" },
+  动漫: { label: "动漫", tagBg: "bg-violet-600", tagText: "text-white" },
+  电影: { label: "电影", tagBg: "bg-amber-500", tagText: "text-white" },
+  剧集: { label: "剧集", tagBg: "bg-rose-500", tagText: "text-white" },
+  音乐: { label: "音乐", tagBg: "bg-cyan-600", tagText: "text-white" },
+  体育: { label: "体育", tagBg: "bg-lime-600", tagText: "text-white" },
+  综艺: { label: "综艺", tagBg: "bg-fuchsia-500", tagText: "text-white" },
 };
 
 type PostItem = {
@@ -99,25 +99,29 @@ export default function ProfileTabs() {
         ) : items.length === 0 ? (
           <Empty
             text={
-              tab === "torrents" ? "还没发布过种子"
-              : tab === "forums" ? "还没发过论坛帖子"
-              : "还没有收藏，帖子详情页点 ⭐ 收藏"
+              tab === "torrents"
+                ? "还没发布过种子"
+                : tab === "forums"
+                  ? "还没发过论坛帖子"
+                  : "还没有收藏，帖子详情页点 ⭐ 收藏"
             }
             action={
-              tab === "torrents" ? { label: "去发布", href: "/upload" }
-              : tab === "forums" ? { label: "去论坛", href: "/forum" }
-              : null
+              tab === "torrents"
+                ? { label: "去发布", href: "/upload" }
+                : tab === "forums"
+                  ? { label: "去论坛", href: "/forum" }
+                  : null
             }
           />
         ) : (
           <ul className="divide-y divide-slate-100">
-            {items.map((p) => (
+            {items.map((p) =>
               tab === "forums" ? (
                 <ForumRow key={p.id} item={p} />
               ) : (
                 <TorrentRow key={p.id} item={p} />
-              )
-            ))}
+              ),
+            )}
           </ul>
         )}
       </div>
@@ -125,7 +129,15 @@ export default function ProfileTabs() {
   );
 }
 
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
@@ -134,20 +146,26 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       }`}
     >
       {children}
-      {active && (
-        <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-slate-900" />
-      )}
+      {active && <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-brand-600" />}
     </button>
   );
 }
 
-function Empty({ text, action }: { text: string; action?: { label: string; href: string } | null }) {
+function Empty({
+  text,
+  action,
+}: {
+  text: string;
+  action?: { label: string; href: string } | null;
+}) {
   return (
     <div className="py-12 text-center">
       <p className="text-sm text-slate-400">{text}</p>
       {action && (
-        <Link href={action.href}
-          className="mt-3 inline-block rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-700 active:scale-95">
+        <Link
+          href={action.href}
+          className="mt-3 inline-block rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-brand-700 active:scale-95"
+        >
           {action.label}
         </Link>
       )}
@@ -164,25 +182,29 @@ function TorrentRow({ item }: { item: PostItem }) {
       <div className="min-w-0 flex-1">
         {/* 第一行：主标题 + 隐藏标记 */}
         <div className="flex items-center gap-2">
-          <Link href={`/posts/${item.id}`}
-            className="truncate text-sm font-medium text-slate-800 group-hover:text-slate-900">
+          <Link
+            href={`/posts/${item.id}`}
+            className="truncate text-sm font-medium text-slate-800 group-hover:text-slate-900"
+          >
             {item.title}
           </Link>
           {item.status === "hidden" && (
-            <span className="shrink-0 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">隐藏</span>
+            <span className="shrink-0 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">
+              隐藏
+            </span>
           )}
         </div>
         {/* 第二行：彩色分类 pill + 副标题 */}
         {(meta || item.subtitle) && (
           <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[13px] text-slate-500">
             {meta && (
-              <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}>
+              <span
+                className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}
+              >
                 {meta.label}
               </span>
             )}
-            {item.subtitle && (
-              <span className="truncate">{item.subtitle}</span>
-            )}
+            {item.subtitle && <span className="truncate">{item.subtitle}</span>}
           </div>
         )}
       </div>
@@ -194,28 +216,40 @@ function TorrentRow({ item }: { item: PostItem }) {
 function ForumRow({ item }: { item: PostItem }) {
   return (
     <li className="group flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-      <div className="shrink-0 grid h-14 w-20 place-items-center rounded-lg bg-violet-50 text-2xl ring-1 ring-violet-100">
+      <div className="shrink-0 grid h-14 w-20 place-items-center rounded-lg bg-brand-50 text-2xl ring-1 ring-brand-100">
         💬
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <Link href={`/forum/${item.id}`}
-            className="truncate text-[14px] font-medium text-slate-900 hover:text-violet-600">
+          <Link
+            href={`/forum/${item.id}`}
+            className="truncate text-[14px] font-medium text-slate-900 hover:text-brand-700"
+          >
             {item.title}
           </Link>
           {item.status === "hidden" && (
-            <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-600 ring-1 ring-rose-200">隐藏</span>
+            <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-600 ring-1 ring-rose-200">
+              隐藏
+            </span>
           )}
         </div>
         {item.subtitle && (
           <p className="mt-0.5 truncate text-[12px] text-slate-500">{item.subtitle}</p>
         )}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">{item.category}</span>
-          {typeof item.comment_count === "number" && item.comment_count > 0 && <span>💬 {item.comment_count}</span>}
-          {typeof item.like_count === "number" && item.like_count > 0 && <span>♥ {item.like_count}</span>}
-          <span className="text-slate-400">{new Date(item.created_at).toLocaleDateString("zh-CN")}</span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
+            {item.category}
+          </span>
+          {typeof item.comment_count === "number" && item.comment_count > 0 && (
+            <span>💬 {item.comment_count}</span>
+          )}
+          {typeof item.like_count === "number" && item.like_count > 0 && (
+            <span>♥ {item.like_count}</span>
+          )}
+          <span className="text-slate-400">
+            {new Date(item.created_at).toLocaleDateString("zh-CN")}
+          </span>
         </div>
       </div>
     </li>

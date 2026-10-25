@@ -17,7 +17,7 @@ export interface SendEmailResult {
 }
 
 /** 发送纯文本/HTML 邮件 */
-export async function sendEmail(params: {
+async function sendEmail(params: {
   to: string;
   subject: string;
   text?: string;

@@ -111,10 +111,10 @@ func handleAnnounce(store *peerStore) http.HandlerFunc {
 
 		snapshot := store.snapshot(infoHashHex)
 		resp := bencodeDict{
-			"interval":    bencodeInt(300),
-			"complete":    bencodeInt(int64(seeds)),
-			"incomplete":  bencodeInt(int64(leeches)),
-			"tracker id":  bencodeString("astra-pt-go"),
+			"interval":   bencodeInt(300),
+			"complete":   bencodeInt(int64(seeds)),
+			"incomplete": bencodeInt(int64(leeches)),
+			"tracker id": bencodeString("astra-pt-go"),
 		}
 
 		if compact == 1 {

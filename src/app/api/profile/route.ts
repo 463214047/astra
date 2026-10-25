@@ -45,7 +45,8 @@ export async function GET() {
          FROM public.account_users WHERE email = $1 LIMIT 1`,
       [email],
     );
-    if (rows.length === 0) return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
+    if (rows.length === 0)
+      return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
     return NextResponse.json({ ok: true, ...rows[0] });
   } catch (e) {
     console.error("[profile] GET error:", e);
@@ -132,12 +133,12 @@ export async function PATCH(req: Request) {
     if (body.avatar_url !== undefined) {
       sets.push(`avatar_url = $${idx++}`);
       const v = body.avatar_url;
-      params.push(typeof v === "string" ? (v.trim() || null) : null);
+      params.push(typeof v === "string" ? v.trim() || null : null);
     }
     if (body.signature !== undefined) {
       sets.push(`signature = $${idx++}`);
       const v = body.signature;
-      params.push(typeof v === "string" ? (v.trim() || null) : null);
+      params.push(typeof v === "string" ? v.trim() || null : null);
     }
     if (body.rainbow_enabled !== undefined) {
       sets.push(`rainbow_enabled = $${idx++}`);
@@ -163,7 +164,8 @@ export async function PATCH(req: Request) {
       params,
     );
 
-    if (rows.length === 0) return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
+    if (rows.length === 0)
+      return NextResponse.json({ ok: false, message: "用户不存在" }, { status: 404 });
 
     return NextResponse.json({ ok: true, ...rows[0] });
   } catch (e) {

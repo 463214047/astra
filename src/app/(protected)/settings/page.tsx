@@ -63,14 +63,10 @@ export default async function SettingsPage() {
 
   const rainbowUntil = user.rainbow_until ? new Date(user.rainbow_until) : null;
   const rainbowUntilIso =
-    rainbowUntil && Number.isFinite(rainbowUntil.getTime())
-      ? rainbowUntil.toISOString()
-      : null;
+    rainbowUntil && Number.isFinite(rainbowUntil.getTime()) ? rainbowUntil.toISOString() : null;
 
   const claimedTs = Number(user.rainbow_claimed_ts) || 0;
-  const rainbowPrizeDays = rainbowPrivileged
-    ? 0
-    : pendingRainbowDays(user.rainbow_ids, claimedTs);
+  const rainbowPrizeDays = rainbowPrivileged ? 0 : pendingRainbowDays(user.rainbow_ids, claimedTs);
 
   return (
     <SettingsClient

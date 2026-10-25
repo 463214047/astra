@@ -14,10 +14,7 @@ function formatFileSize(bytes: number): string {
 }
 
 function isImageUrl(value: string): boolean {
-  return (
-    /^https?:\/\/[^\s"<>]+$/i.test(value) ||
-    /^\/uploads\/[^\s"<>]+$/i.test(value)
-  );
+  return /^https?:\/\/[^\s"<>]+$/i.test(value) || /^\/uploads\/[^\s"<>]+$/i.test(value);
 }
 
 type ImagePickerDialogProps = {
@@ -238,12 +235,11 @@ export default function ImagePickerDialog({
               disabled={busy}
               autoComplete="off"
               spellCheck={false}
-              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             />
 
             <div className="mt-5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
               <p className="text-sm font-medium text-slate-700">或上传本地图片</p>
-            
             </div>
             <label
               htmlFor={fileInputId}
@@ -258,9 +254,9 @@ export default function ImagePickerDialog({
                 }
               }}
               onDrop={handleDrop}
-              className={`mt-2 flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-8 text-center transition focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/10 ${
+              className={`mt-2 flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-8 text-center transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-400/10 ${
                 dragging
-                  ? "border-amber-400 bg-amber-50/60"
+                  ? "border-brand-400 bg-brand-50/60"
                   : "border-slate-300 bg-slate-50/40 hover:border-slate-400 hover:bg-slate-50"
               } ${busy ? "pointer-events-none opacity-60" : "cursor-pointer"}`}
             >
@@ -274,10 +270,8 @@ export default function ImagePickerDialog({
                 disabled={busy}
                 className="sr-only"
               />
-              <ImageIcon className="size-9 text-amber-400" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-slate-700">
-                点击或拖动图片到此处上传
-              </span>
+              <ImageIcon className="size-9 text-brand-500" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-slate-700">点击或拖动图片到此处上传</span>
             </label>
 
             {files.length > 0 && (
@@ -318,11 +312,11 @@ export default function ImagePickerDialog({
               <button
                 type="submit"
                 disabled={busy || (files.length === 0 && !url.trim())}
-                className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (
                   <>
-                    <span className="size-3.5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     处理中…
                   </>
                 ) : (

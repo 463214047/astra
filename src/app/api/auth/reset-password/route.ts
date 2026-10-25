@@ -30,7 +30,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const email = String(body.email ?? "").trim().toLowerCase();
+  const email = String(body.email ?? "")
+    .trim()
+    .toLowerCase();
   const code = String(body.code ?? "").trim();
   const password = String(body.password ?? "");
   const confirmPassword = String(body.confirmPassword ?? "");
@@ -40,13 +42,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: { message: "邮箱格式不正确" } }, { status: 400 });
   }
   if (!/^\d{6}$/.test(code)) {
-    return NextResponse.json({ ok: false, error: { message: "验证码应为 6 位数字" } }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: { message: "验证码应为 6 位数字" } },
+      { status: 400 },
+    );
   }
   if (password.length < 6) {
-    return NextResponse.json({ ok: false, error: { message: "密码长度至少 6 位" } }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: { message: "密码长度至少 6 位" } },
+      { status: 400 },
+    );
   }
   if (password !== confirmPassword) {
-    return NextResponse.json({ ok: false, error: { message: "两次输入的密码不一致" } }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: { message: "两次输入的密码不一致" } },
+      { status: 400 },
+    );
   }
 
   try {
@@ -88,10 +99,9 @@ export async function POST(request: Request) {
     }
 
     // 3. 一次性使用 — 标记为已用
-    await query(
-      "UPDATE public.email_verification_codes SET used = TRUE WHERE id = $1",
-      [codes[0].id],
-    );
+    await query("UPDATE public.email_verification_codes SET used = TRUE WHERE id = $1", [
+      codes[0].id,
+    ]);
 
     // 4. 哈希新密码 + 更新
     const passwordHash = await hashPassword(password);

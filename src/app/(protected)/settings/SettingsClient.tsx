@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  CircleHelp,
+  Check,
   Image as ImageIcon,
+  Palette,
   Paperclip,
   ShieldCheck,
   Sparkles,
@@ -16,6 +17,8 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
+import { DEFAULT_THEME } from "@/lib/themes";
 
 export type SettingsProfile = {
   nickname: string;
@@ -26,10 +29,11 @@ export type SettingsProfile = {
   rainbowPrizeDays: number;
 };
 
-type TabKey = "profile" | "security" | "danger";
+type TabKey = "profile" | "appearance" | "security" | "danger";
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "profile", label: "个人资料", icon: User },
+  { key: "appearance", label: "外观", icon: Palette },
   { key: "security", label: "账号安全", icon: ShieldCheck },
   { key: "danger", label: "危险操作", icon: Trash2 },
 ];
@@ -37,7 +41,7 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 const CARD =
   "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]";
 const PRIMARY_BUTTON =
-  "inline-flex items-center justify-center rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1d4ed8] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-blue-300";
+  "inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-brand-300";
 const SECONDARY_BUTTON =
   "inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50";
 
@@ -79,7 +83,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
                   aria-current={active ? "page" : undefined}
                   className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors min-[900px]:w-full min-[900px]:px-3.5 ${
                     active
-                      ? "bg-[#2563eb] text-white shadow-sm shadow-blue-600/20"
+                      ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
@@ -93,6 +97,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
 
         <div className="min-w-0">
           {tab === "profile" && <ProfilePanel profile={initialProfile} />}
+          {tab === "appearance" && <AppearancePanel />}
           {tab === "security" && <SecurityPanel />}
           {tab === "danger" && <DangerPanel />}
         </div>
@@ -125,7 +130,9 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const [rainbowUntil, setRainbowUntil] = useState(profile.rainbowUntil);
   const [rainbowPrizeDays, setRainbowPrizeDays] = useState(profile.rainbowPrizeDays);
   const [rainbowBusy, setRainbowBusy] = useState(false);
-  const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(
+    null,
+  );
 
   const resetAvatarDialog = useCallback(() => {
     setAvatarDialogOpen(false);
@@ -335,35 +342,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     }
   }
 
-  async function removeAvatar() {
-    if (avatarBusy) return;
-    setAvatarBusy(true);
-    setAvatarError("");
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatar_url: null }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        errors?: Record<string, string>;
-      };
-      if (!res.ok || !data.ok) {
-        setAvatarError(data.errors?.avatar_url ?? data.message ?? "移除失败");
-        return;
-      }
-      setSavedAvatar("");
-      setBrokenAvatar("");
-      router.refresh();
-    } catch {
-      setAvatarError("网络错误，请稍后重试");
-    } finally {
-      setAvatarBusy(false);
-    }
-  }
-
   async function toggleRainbow() {
     if (!hasRainbowAccess || rainbowBusy) return;
     setRainbowBusy(true);
@@ -442,7 +420,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
               onError={() => setBrokenAvatar(avatarPreview)}
             />
           ) : (
-            <span className="grid size-20 shrink-0 place-items-center rounded-full bg-[#2563eb] text-xl font-semibold text-white">
+            <span className="grid size-20 shrink-0 place-items-center rounded-full bg-brand-600 text-xl font-semibold text-white">
               {avatarInitial}
             </span>
           )}
@@ -459,7 +437,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                 <Upload className="size-3.5" strokeWidth={1.8} />
                 {avatarBusy ? "处理中…" : savedAvatar ? "更换头像" : "上传头像"}
               </button>
-             
             </div>
             {avatarError && (
               <p aria-live="polite" className="mt-2 text-xs text-red-600">
@@ -494,7 +471,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                 className={`h-[46px] w-full rounded-xl border bg-slate-50/70 px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
                   nameError
                     ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                    : "border-slate-200 focus:border-blue-500 focus:ring-blue-500/10"
+                    : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/10"
                 }`}
               />
               {(nameMsg || nameError) && (
@@ -524,7 +501,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                <Sparkles className="size-4 text-violet-500" />
+                <Sparkles className="size-4 text-brand-500" />
                 彩虹昵称
               </h2>
               <p className="mt-1 text-xs text-slate-500">{rainbowStatus}</p>
@@ -614,7 +591,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                   <label htmlFor="avatar-url" className="text-sm font-medium text-slate-700">
                     图片链接
                   </label>
-                
                 </div>
                 <input
                   id="avatar-url"
@@ -630,10 +606,10 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                     }
                   }}
                   disabled={avatarBusy}
-               
+
                   autoComplete="off"
                   spellCheck={false}
-                  className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                  className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                 />
 
                 <p className="mt-5 text-sm font-medium text-slate-700">或上传本地图片</p>
@@ -650,9 +626,9 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                     }
                   }}
                   onDrop={handleAvatarDrop}
-                  className={`mt-2 flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-8 text-center transition focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/10 ${
+                  className={`mt-2 flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-8 text-center transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-400/10 ${
                     avatarDragging
-                      ? "border-amber-400 bg-amber-50/60"
+                      ? "border-brand-400 bg-brand-50/60"
                       : "border-slate-300 bg-slate-50/40 hover:border-slate-400 hover:bg-slate-50"
                   } ${avatarBusy ? "pointer-events-none opacity-60" : "cursor-pointer"}`}
                 >
@@ -665,11 +641,10 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                     disabled={avatarBusy}
                     className="sr-only"
                   />
-                  <ImageIcon className="size-9 text-amber-400" strokeWidth={1.5} />
+                  <ImageIcon className="size-9 text-brand-500" strokeWidth={1.5} />
                   <span className="text-sm font-medium text-slate-700">
                     点击或拖动图片到此处上传
                   </span>
-               
                 </label>
 
                 {avatarFile && (
@@ -706,11 +681,11 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                   <button
                     type="submit"
                     disabled={avatarBusy || (!avatarFile && !avatarUrlInput.trim())}
-                    className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {avatarBusy ? (
                       <>
-                        <span className="size-3.5 animate-spin rounded-full border-2 border-slate-900/20 border-t-slate-900" />
+                        <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                         处理中…
                       </>
                     ) : (
@@ -724,6 +699,75 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
         </div>
       )}
     </div>
+  );
+}
+
+function AppearancePanel() {
+  const { theme: activeTheme, setTheme, themes } = useTheme();
+
+  return (
+    <section className={CARD}>
+      <div className="border-b border-slate-100 p-5 sm:p-6">
+        <h2 className="text-base font-semibold text-slate-900">颜色风格</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          选择一个强调色，全站按钮、链接和选中态会立即切换。
+        </p>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {themes.map((theme) => {
+            const active = theme.id === activeTheme;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setTheme(theme.id)}
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                  active
+                    ? "border-brand-300 bg-brand-50/70 ring-2 ring-brand-500/15"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <span
+                  className={`size-10 shrink-0 rounded-lg bg-gradient-to-br ${theme.swatch} shadow-sm`}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-slate-900">{theme.label}</span>
+                  <span className="mt-0.5 block text-xs text-slate-500">{theme.description}</span>
+                </span>
+                {active && <Check className="size-4 shrink-0 text-brand-700" strokeWidth={2.4} />}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+          <p className="text-xs font-medium text-slate-500">预览</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <span className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20">
+              主按钮
+            </span>
+            <span className="text-sm font-semibold text-brand-700">链接文字</span>
+            <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200">
+              标签
+            </span>
+            <span className="size-6 rounded-full bg-brand-500 ring-4 ring-brand-500/15" />
+          </div>
+        </div>
+
+        {activeTheme !== DEFAULT_THEME && (
+          <button
+            type="button"
+            onClick={() => setTheme(DEFAULT_THEME)}
+            className={`${SECONDARY_BUTTON} mt-4`}
+          >
+            恢复默认
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -769,9 +813,7 @@ function DangerPanel() {
     <section className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm shadow-slate-900/[0.03]">
       <div className="p-5 sm:p-6">
         <h2 className="text-base font-semibold text-red-900">注销账号</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          此操作不可逆，账号和所有数据将被永久删除。
-        </p>
+        <p className="mt-1 text-sm text-slate-500">此操作不可逆，账号和所有数据将被永久删除。</p>
         <Link
           href="/settings/delete"
           className="mt-4 inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-[0.98]"

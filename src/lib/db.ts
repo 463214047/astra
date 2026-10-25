@@ -14,7 +14,7 @@ const config: PoolConfig = {
 // 单例 Pool
 let pool: Pool | null = null;
 
-export function getPool(): Pool {
+function getPool(): Pool {
   if (!pool) {
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL 环境变量未设置");
@@ -39,12 +39,17 @@ export async function query<T = Record<string, unknown>>(
 
 /** 带事务的执行，传入回调函数内的所有查询会在同一事务中 */
 export async function withTransaction<T>(
-  fn: (q: <R = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<R[]>) => Promise<T>,
+  fn: (
+    q: <R = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<R[]>,
+  ) => Promise<T>,
 ): Promise<T> {
   const client = await getPool().connect();
   try {
     await client.query("BEGIN");
-    const runQuery = async <R = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<R[]> => {
+    const runQuery = async <R = Record<string, unknown>>(
+      sql: string,
+      params?: unknown[],
+    ): Promise<R[]> => {
       const r = await client.query<R>(sql, params);
       return r.rows;
     };
@@ -374,12 +379,4 @@ export async function ensureSchema(): Promise<void> {
       PRIMARY KEY (media_type, tmdb_id)
     );
   `);
-}
-
-/** 关闭连接池（用于测试/脚本退出） */
-export async function closePool(): Promise<void> {
-  if (pool) {
-    await pool.end();
-    pool = null;
-  }
 }

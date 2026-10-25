@@ -53,8 +53,18 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-16 text-center">
         <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
           <svg viewBox="0 0 24 24" fill="none" className="size-8">
-            <path d="M4 5h16v12H7l-3 3V5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-            <path d="M8 10h8M8 13h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <path
+              d="M4 5h16v12H7l-3 3V5Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M8 10h8M8 13h5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
         <p className="text-base font-medium text-slate-700">还没有任何帖子</p>
@@ -65,7 +75,7 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
   return (
     <ul className="space-y-2">
       {topics.map((t) => {
-        const initial = (t.anonymous ? "匿" : ((t.author_name ?? t.author_email).slice(0, 1)));
+        const initial = t.anonymous ? "匿" : (t.author_name ?? t.author_email).slice(0, 1);
         const showAvatar = !t.anonymous && t.avatar_url;
         const displayName = t.anonymous ? "匿名用户" : (t.author_name ?? t.author_email);
         return (
@@ -117,7 +127,7 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
                           e.stopPropagation();
                           router.push(`/users/${t.author_uid}`);
                         }}
-                        className="inline-flex items-center gap-1 font-medium text-slate-600 transition hover:text-violet-600"
+                        className="inline-flex items-center gap-1 font-medium text-slate-600 transition hover:text-brand-700"
                       >
                         <User size={14} className="shrink-0 opacity-70" />
                         <UserName name={displayName} rainbow={t.rainbow} />
@@ -140,9 +150,16 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
 
                     <span className="ml-auto flex items-center gap-1.5 text-slate-500">
                       <svg viewBox="0 0 20 20" fill="none" className="size-5 text-slate-400">
-                        <path d="M3 5h14v8H5.5L3 15.5V5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                        <path
+                          d="M3 5h14v8H5.5L3 15.5V5Z"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinejoin="round"
+                        />
                       </svg>
-                      <span className="tabular-nums text-sm font-medium text-slate-600">{t.comment_count}</span>
+                      <span className="tabular-nums text-sm font-medium text-slate-600">
+                        {t.comment_count}
+                      </span>
                     </span>
                   </div>
                 </div>

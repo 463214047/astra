@@ -17,8 +17,12 @@ interface Props {
 function formatSize(bytes: number | null): { value: string; unit: string } {
   if (bytes == null || bytes <= 0) return { value: "—", unit: "" };
   const units = ["B", "KB", "MB", "GB", "TB"];
-  let i = 0; let n = bytes;
-  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  let i = 0;
+  let n = bytes;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
   const value = `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)}`;
   return { value, unit: units[i] };
 }
@@ -100,21 +104,36 @@ function PostsTable({ posts, categoryMeta }: Props) {
           <tr className="hidden bg-slate-50/70 text-xs font-medium text-slate-500 sm:table-row">
             <th className="px-4 py-2.5 text-left">标题</th>
             <th className="px-2 py-2.5 text-center">
-              <button type="button" title="做种数" onClick={() => toggleSort("seed_count")}
-                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "seed_count" ? "text-slate-900 font-semibold" : ""}`}>
-                <ArrowUp size={14} strokeWidth={1.5} />{caret(sortKey === "seed_count")}
+              <button
+                type="button"
+                title="做种数"
+                onClick={() => toggleSort("seed_count")}
+                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "seed_count" ? "text-slate-900 font-semibold" : ""}`}
+              >
+                <ArrowUp size={14} strokeWidth={1.5} />
+                {caret(sortKey === "seed_count")}
               </button>
             </th>
             <th className="px-2 py-2.5 text-center">
-              <button type="button" title="种子大小" onClick={() => toggleSort("torrent_size")}
-                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "torrent_size" ? "text-slate-900 font-semibold" : ""}`}>
-                <Database size={14} strokeWidth={1.5} />{caret(sortKey === "torrent_size")}
+              <button
+                type="button"
+                title="种子大小"
+                onClick={() => toggleSort("torrent_size")}
+                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "torrent_size" ? "text-slate-900 font-semibold" : ""}`}
+              >
+                <Database size={14} strokeWidth={1.5} />
+                {caret(sortKey === "torrent_size")}
               </button>
             </th>
             <th className="px-2 py-2.5 text-center">
-              <button type="button" title="发布时间" onClick={() => toggleSort("created_at")}
-                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "created_at" ? "text-slate-900 font-semibold" : ""}`}>
-                <Clock size={14} strokeWidth={1.5} />{caret(sortKey === "created_at")}
+              <button
+                type="button"
+                title="发布时间"
+                onClick={() => toggleSort("created_at")}
+                className={`flex w-full items-center justify-center transition hover:text-slate-700 ${sortKey === "created_at" ? "text-slate-900 font-semibold" : ""}`}
+              >
+                <Clock size={14} strokeWidth={1.5} />
+                {caret(sortKey === "created_at")}
               </button>
             </th>
           </tr>
@@ -133,19 +152,21 @@ function PostsTable({ posts, categoryMeta }: Props) {
                         {post.title}
                       </span>
                       {post.hot && (
-                        <span className="shrink-0 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">🔥 HOT</span>
+                        <span className="shrink-0 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">
+                          🔥 HOT
+                        </span>
                       )}
                     </div>
                     {(meta || post.subtitle || tags.length > 0) && (
                       <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-slate-500">
                         {meta && (
-                          <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}>
+                          <span
+                            className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}
+                          >
                             {meta.label}
                           </span>
                         )}
-                        {post.subtitle && (
-                          <span className="truncate">{post.subtitle}</span>
-                        )}
+                        {post.subtitle && <span className="truncate">{post.subtitle}</span>}
                         {tags.length > 0 && (
                           <span className="flex shrink-0 items-center gap-1">
                             {tags.map((t: string, i: number) => (
@@ -157,14 +178,24 @@ function PostsTable({ posts, categoryMeta }: Props) {
                     )}
                     {/* 移动端 — 做种 / 大小 / 时间 */}
                     <div className="mt-1 flex items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 sm:hidden">
-                      <span className="inline-flex items-center gap-1 tabular-nums"><span className="text-emerald-600">↑</span><span className="font-medium">{post.seed_count ?? 0}</span></span>
-                      <span>{(() => { const s = formatSize(post.torrent_size); return `${s.value}${s.unit ? " " + s.unit : ""}`; })()}</span>
+                      <span className="inline-flex items-center gap-1 tabular-nums">
+                        <span className="text-emerald-600">↑</span>
+                        <span className="font-medium">{post.seed_count ?? 0}</span>
+                      </span>
+                      <span>
+                        {(() => {
+                          const s = formatSize(post.torrent_size);
+                          return `${s.value}${s.unit ? " " + s.unit : ""}`;
+                        })()}
+                      </span>
                       <span>{timeAgo(post.created_at)}</span>
                     </div>
                   </Link>
                 </td>
                 <td className="hidden px-2 py-3 text-center sm:table-cell">
-                  <span className="text-[13px] text-emerald-600 tabular-nums font-medium">{post.seed_count ?? 0}</span>
+                  <span className="text-[13px] text-emerald-600 tabular-nums font-medium">
+                    {post.seed_count ?? 0}
+                  </span>
                 </td>
                 <td className="hidden px-2 py-3 text-center sm:table-cell">
                   {(() => {
@@ -195,7 +226,8 @@ function postsShallowEqual(a: HomePost[], b: HomePost[]) {
   return true;
 }
 
-export default memo(PostsTable, (prev, next) =>
-  postsShallowEqual(prev.posts, next.posts)
-  && prev.categoryMeta === next.categoryMeta
+export default memo(
+  PostsTable,
+  (prev, next) =>
+    postsShallowEqual(prev.posts, next.posts) && prev.categoryMeta === next.categoryMeta,
 );

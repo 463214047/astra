@@ -19,10 +19,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   if (!items.length) return null;
 
   return (
-    <nav
-      aria-label="面包屑"
-      className="mb-5 flex flex-wrap items-center gap-1.5 text-[13px]"
-    >
+    <nav aria-label="面包屑" className="mb-5 flex flex-wrap items-center gap-1.5 text-[13px]">
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
 

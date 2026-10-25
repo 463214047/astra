@@ -195,10 +195,10 @@ export default function LoginForm() {
   }
 
   return (
-    <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(37,99,235,0.10),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
+    <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
       <CardContent className="flex flex-col items-center px-8 pb-7 pt-10">
         {/* Logo */}
-        <div className="mb-7 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] p-[3px] shadow-[0_12px_28px_rgba(37,99,235,0.28)]">
+        <div className="mb-7 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-400 p-[3px] shadow-lg shadow-brand-600/25">
           <Image
             src="/icon.png"
             alt="Astra PT Logo"
@@ -210,15 +210,13 @@ export default function LoginForm() {
           />
         </div>
 
-        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">
-          Astra PT
-        </h1>
+        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">Astra PT</h1>
 
         {/* ✅ 修复：补全了缺失的文案内容和闭合标签 */}
         <p
           className={`mb-8 min-h-[20px] text-sm transition-colors duration-300 ${
             isStatusLoading
-              ? "font-medium text-[#2563eb]"
+              ? "font-medium text-brand-700"
               : isStatusError
                 ? "font-medium text-red-500"
                 : isStatusSuccess
@@ -276,7 +274,7 @@ export default function LoginForm() {
                   autoComplete="email"
                   autoFocus={!showTotp}
                   aria-invalid={!!error && !showTotp}
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                 />
               </div>
 
@@ -296,7 +294,7 @@ export default function LoginForm() {
                   placeholder="密码"
                   autoComplete="current-password"
                   aria-invalid={!!error && !showTotp}
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                 />
               </div>
 
@@ -307,13 +305,13 @@ export default function LoginForm() {
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                    className="size-3.5 cursor-pointer rounded border-slate-300 accent-[#2563eb]"
+                    className="size-3.5 cursor-pointer rounded border-slate-300 accent-brand-600"
                   />
                   记住我
                 </label>
                 <a
                   href="/forgot-password"
-                  className="font-medium text-[#2563eb] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]/40 focus-visible:rounded"
+                  className="font-medium text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
                 >
                   忘记密码？
                 </a>
@@ -324,23 +322,29 @@ export default function LoginForm() {
           {/* ====== TOTP 输入框 ====== */}
           <div
             className={`grid transition-all duration-300 ease-out ${
-              showTotp
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0"
+              showTotp ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
             }`}
           >
             <div className="overflow-hidden">
               <div className="space-y-3">
                 {/* TOTP 标题 */}
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <div className="grid size-7 place-items-center rounded-full bg-[#2563eb]/10">
+                  <div className="grid size-7 place-items-center rounded-full bg-brand-600/10">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
-                      className="size-4 text-[#2563eb]"
+                      className="size-4 text-brand-700"
                       aria-hidden="true"
                     >
-                      <rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                      <rect
+                        x="4"
+                        y="10"
+                        width="16"
+                        height="10"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                       <path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
                   </div>
@@ -363,7 +367,7 @@ export default function LoginForm() {
                     onChange={(e) => handleTotpChange(e.target.value)}
                     tabIndex={showTotp ? 0 : -1}
                     aria-invalid={!!error && showTotp}
-                    className="h-14 w-full rounded-xl border border-slate-200 bg-white text-center text-2xl font-bold tracking-[0.5em] text-slate-900 outline-none transition placeholder:tracking-normal placeholder:text-slate-300 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+                    className="h-14 w-full rounded-xl border border-slate-200 bg-white text-center text-2xl font-bold tracking-[0.5em] text-slate-900 outline-none transition placeholder:tracking-normal placeholder:text-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                   />
                 </div>
 
@@ -375,7 +379,7 @@ export default function LoginForm() {
                     setTotp("");
                     setError(null);
                   }}
-                  className="text-xs text-slate-500 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]/40 focus-visible:rounded"
+                  className="text-xs text-slate-500 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
                 >
                   ← 修改账号密码
                 </button>
@@ -387,15 +391,17 @@ export default function LoginForm() {
           <Button
             type="submit"
             disabled={isAnyLoading || (showTotp && totp.length !== 6)}
-            className="disabled-primary h-[48px] w-full rounded-[14px] bg-[#0b1220] text-[15px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-[#111827] hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)] disabled:translate-y-0"
+            className="disabled-primary h-[48px] w-full rounded-[14px] bg-brand-600 text-[15px] font-bold text-white shadow-lg shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 disabled:translate-y-0"
           >
             {credentialLoading ? (
               <span className="inline-flex items-center gap-2">
                 <Spinner />
                 {showTotp ? "验证中…" : "登录中…"}
               </span>
+            ) : showTotp ? (
+              "验证并登录"
             ) : (
-              showTotp ? "验证并登录" : "登录"
+              "登录"
             )}
           </Button>
         </form>
@@ -436,7 +442,7 @@ export default function LoginForm() {
               还没有账号？{" "}
               <Link
                 href="/register"
-                className="font-semibold text-[#2563eb] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]/40 focus-visible:rounded"
+                className="font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
               >
                 立即注册
               </Link>
@@ -477,7 +483,13 @@ function Spinner() {
       style={{ transform: `rotate(${rot}deg)` }}
     >
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity={0.25} />
-      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity={0.75} />
+      <path
+        d="M4 12a8 8 0 018-8"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        opacity={0.75}
+      />
     </svg>
   );
 }

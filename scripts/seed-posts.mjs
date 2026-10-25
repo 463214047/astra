@@ -116,7 +116,7 @@ async function main() {
         p.views,
         p.likes,
         p.comments,
-      ]
+      ],
     );
   }
 

@@ -29,7 +29,13 @@ type ForumTopic = {
 };
 
 export default async function GuestProfile({ user, stats }: { user: UserRow; stats: UserStats }) {
-  const counts = await query<{ post_count: number; seed_count: number; fav_count: number; torrent_count: number; forum_count: number }>(
+  const counts = await query<{
+    post_count: number;
+    seed_count: number;
+    fav_count: number;
+    torrent_count: number;
+    forum_count: number;
+  }>(
     `SELECT
        COUNT(*) FILTER (WHERE status = 'published') AS post_count,
        COALESCE(SUM(seed_count) FILTER (WHERE status = 'published'), 0) AS seed_count,
@@ -68,9 +74,27 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
 
   const metrics: StatMetric[] = [
     { icon: Scale, label: "分享率", value: shareRatioText, unit: "", iconClass: "text-slate-400" },
-    { icon: ArrowUpRight, label: "累计上传", value: uploaded.value, unit: uploaded.unit, iconClass: "text-emerald-500" },
-    { icon: ArrowDownRight, label: "累计下载", value: downloaded.value, unit: downloaded.unit, iconClass: "text-sky-500" },
-    { icon: Star, label: "做种积分", value: fmtInt(stats.seedPoints), unit: "", iconClass: "text-yellow-500" },
+    {
+      icon: ArrowUpRight,
+      label: "累计上传",
+      value: uploaded.value,
+      unit: uploaded.unit,
+      iconClass: "text-emerald-500",
+    },
+    {
+      icon: ArrowDownRight,
+      label: "累计下载",
+      value: downloaded.value,
+      unit: downloaded.unit,
+      iconClass: "text-sky-500",
+    },
+    {
+      icon: Star,
+      label: "做种积分",
+      value: fmtInt(stats.seedPoints),
+      unit: "",
+      iconClass: "text-yellow-500",
+    },
   ];
 
   return (
@@ -105,31 +129,44 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
             {posts.map((p) => (
               <li key={p.id} className="group flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                 {(p.cover_url ?? p.screenshot_urls?.[0]) ? (
-                  <Link href={`/posts/${p.id}`}
-                    className="shrink-0 overflow-hidden rounded-lg ring-1 ring-slate-200">
+                  <Link
+                    href={`/posts/${p.id}`}
+                    className="shrink-0 overflow-hidden rounded-lg ring-1 ring-slate-200"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.cover_url ?? p.screenshot_urls![0]} alt=""
-                      className="h-14 w-20 object-cover transition group-hover:scale-[1.03]" />
+                    <img
+                      src={p.cover_url ?? p.screenshot_urls![0]}
+                      alt=""
+                      className="h-14 w-20 object-cover transition group-hover:scale-[1.03]"
+                    />
                   </Link>
                 ) : (
-                  <div className="shrink-0 grid h-14 w-20 place-items-center rounded-lg bg-slate-100 text-lg ring-1 ring-slate-200">📦</div>
+                  <div className="shrink-0 grid h-14 w-20 place-items-center rounded-lg bg-slate-100 text-lg ring-1 ring-slate-200">
+                    📦
+                  </div>
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <Link href={`/posts/${p.id}`}
-                    className="block truncate text-[14px] font-medium text-slate-900 hover:text-slate-700">
+                  <Link
+                    href={`/posts/${p.id}`}
+                    className="block truncate text-[14px] font-medium text-slate-900 hover:text-slate-700"
+                  >
                     {p.title}
                   </Link>
                   {p.subtitle && (
                     <p className="mt-0.5 truncate text-[12px] text-slate-500">{p.subtitle}</p>
                   )}
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">{p.category}</span>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
+                      {p.category}
+                    </span>
                     {p.seed_count > 0 && <span className="text-emerald-600">▲ {p.seed_count}</span>}
                     {p.leech_count > 0 && <span className="text-sky-600">▼ {p.leech_count}</span>}
                     {p.favorite_count > 0 && <span>⭐ {p.favorite_count}</span>}
                     {p.like_count > 0 && <span>♥ {p.like_count}</span>}
-                    <span className="text-slate-400">{new Date(p.created_at).toLocaleDateString("zh-CN")}</span>
+                    <span className="text-slate-400">
+                      {new Date(p.created_at).toLocaleDateString("zh-CN")}
+                    </span>
                   </div>
                 </div>
               </li>
@@ -148,13 +185,24 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
           <ul className="divide-y divide-slate-100">
             {forums.map((f) => (
               <li key={f.id} className="py-3 first:pt-0 last:pb-0">
-                <Link href={`/forum/${f.id}`} className="group flex items-center justify-between gap-3">
+                <Link
+                  href={`/forum/${f.id}`}
+                  className="group flex items-center justify-between gap-3"
+                >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-medium text-slate-900 group-hover:text-violet-600">{f.title}</p>
+                    <p className="truncate text-[14px] font-medium text-slate-900 group-hover:text-brand-700">
+                      {f.title}
+                    </p>
                     <div className="mt-1 flex items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">{f.category}</span>
-                      {f.comment_count > 0 && <span className="text-slate-500">💬 {f.comment_count}</span>}
-                      <span className="text-slate-400">{new Date(f.created_at).toLocaleDateString("zh-CN")}</span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
+                        {f.category}
+                      </span>
+                      {f.comment_count > 0 && (
+                        <span className="text-slate-500">💬 {f.comment_count}</span>
+                      )}
+                      <span className="text-slate-400">
+                        {new Date(f.created_at).toLocaleDateString("zh-CN")}
+                      </span>
                     </div>
                   </div>
                 </Link>

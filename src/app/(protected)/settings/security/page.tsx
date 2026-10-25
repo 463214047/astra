@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
 type StatusResp = { ok: true; enabled: boolean; hasPassword: boolean };
@@ -36,7 +36,7 @@ export default function SecurityPage() {
       const data = await res.json();
       if (res.ok && data.ok) setStatus(data);
       else setError(data.message ?? "获取状态失败");
-    } catch (e) {
+    } catch {
       setError("网络错误");
     } finally {
       setLoading(false);
@@ -148,7 +148,7 @@ export default function SecurityPage() {
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : msgType === "error"
                 ? "border-red-200 bg-red-50 text-red-700"
-                : "border-blue-200 bg-blue-50 text-blue-700"
+                : "border-brand-200 bg-brand-50 text-brand-700"
           }`}
         >
           {msg}
@@ -196,9 +196,7 @@ export default function SecurityPage() {
         {status?.enabled && step === "idle" && (
           <div>
             <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-4">
-              <p className="text-sm text-emerald-900">
-                ✓ 两步验证已启用。
-              </p>
+              <p className="text-sm text-emerald-900">✓ 两步验证已启用。</p>
             </div>
 
             <button
@@ -214,9 +212,7 @@ export default function SecurityPage() {
         {/* ===== 状态：未启用 → OAuth-only 账号引导设置密码 ===== */}
         {!status?.enabled && !loading && step === "idle" && !status?.hasPassword && (
           <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-4">
-            <p className="text-sm font-medium text-amber-900">
-              请先设置登录密码
-            </p>
+            <p className="text-sm font-medium text-amber-900">请先设置登录密码</p>
             <p className="mt-1 text-xs text-amber-800">
               启用两步验证需要先通过密码确认你的身份。前往账号设置中为当前 GitHub 登录设置密码。
             </p>
@@ -233,15 +229,13 @@ export default function SecurityPage() {
         {!status?.enabled && !loading && step === "idle" && status?.hasPassword && (
           <form onSubmit={startSetup} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                当前密码
-              </label>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">当前密码</label>
               <input
                 type="password"
                 value={setupPwd}
                 onChange={(e) => setSetupPwd(e.target.value)}
                 autoComplete="current-password"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                 placeholder="输入密码以确认身份"
                 required
               />
@@ -249,7 +243,7 @@ export default function SecurityPage() {
             <button
               type="submit"
               disabled={setupLoading || !setupPwd}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
             >
               {setupLoading && <Spinner />}
               {setupLoading ? "生成中…" : "开始设置两步验证"}
@@ -261,9 +255,7 @@ export default function SecurityPage() {
         {step === "setup" && authUrl && (
           <div className="space-y-5">
             <div>
-              <h3 className="mb-1 text-sm font-semibold text-slate-900">
-                第 1 步：扫描二维码
-              </h3>
+              <h3 className="mb-1 text-sm font-semibold text-slate-900">第 1 步：扫描二维码</h3>
               <p className="mb-3 text-xs text-slate-500">
                 使用 Google Authenticator、1Password、Authy 或类似 App 扫描下方二维码。
               </p>
@@ -281,16 +273,17 @@ export default function SecurityPage() {
                     <Spinner /> 生成中…
                   </div>
                 )}
-                <p className="w-full truncate text-center font-mono text-xs text-slate-500" title={authUrl}>
+                <p
+                  className="w-full truncate text-center font-mono text-xs text-slate-500"
+                  title={authUrl}
+                >
                   {authUrl}
                 </p>
               </div>
             </div>
 
             <div>
-              <h3 className="mb-1 text-sm font-semibold text-slate-900">
-                第 2 步：输入验证码启用
-              </h3>
+              <h3 className="mb-1 text-sm font-semibold text-slate-900">第 2 步：输入验证码启用</h3>
               <form onSubmit={confirmVerify} className="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="text"
@@ -299,15 +292,15 @@ export default function SecurityPage() {
                   maxLength={6}
                   value={verifyCode}
                   onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ""))}
-             
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-center font-mono text-base tracking-[0.5em] outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+
+                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-center font-mono text-base tracking-[0.5em] outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                   autoComplete="one-time-code"
                   required
                 />
                 <button
                   type="submit"
                   disabled={verifyCode.length !== 6}
-                  className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-60"
+                  className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
                 >
                   启用
                 </button>
@@ -320,7 +313,15 @@ export default function SecurityPage() {
         {step === "done" && (
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-5 text-center">
             <div className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-emerald-100">
-              <svg viewBox="0 0 24 24" className="size-7 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                className="size-7 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
@@ -409,7 +410,7 @@ function ShieldIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="size-5 text-[#2563eb]"
+      className="size-5 text-brand-700"
       aria-hidden="true"
     >
       <path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3v8Z" />
@@ -431,12 +432,26 @@ function Spinner() {
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="size-4" style={{ transform: `rotate(${rot}deg)` }}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="size-4"
+      style={{ transform: `rotate(${rot}deg)` }}
+    >
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity={0.25} />
-      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity={0.75} />
+      <path
+        d="M4 12a8 8 0 018-8"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        opacity={0.75}
+      />
     </svg>
   );
 }

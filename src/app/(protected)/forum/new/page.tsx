@@ -60,9 +60,7 @@ export default function ForumNewPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="mb-6 sm:mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          发新帖
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">发新帖</h1>
         <p className="mt-1 text-sm text-slate-500">写下你的想法，让同好们看到</p>
       </header>
 
@@ -73,16 +71,23 @@ export default function ForumNewPage() {
             <label className="text-sm font-medium text-slate-700">
               标题 <span className="text-rose-500">*</span>
             </label>
-            <span className={`text-xs tabular-nums ${
-              title.length > MAX_TITLE ? "text-rose-500" :
-              title.length >= MAX_TITLE * 0.8 ? "text-amber-500" : "text-slate-400"
-            }`}>{title.length}/{MAX_TITLE}</span>
+            <span
+              className={`text-xs tabular-nums ${
+                title.length > MAX_TITLE
+                  ? "text-rose-500"
+                  : title.length >= MAX_TITLE * 0.8
+                    ? "text-amber-500"
+                    : "text-slate-400"
+              }`}
+            >
+              {title.length}/{MAX_TITLE}
+            </span>
           </div>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE))}
-  
+
             className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-900/5"
           />
         </div>
@@ -119,9 +124,13 @@ export default function ForumNewPage() {
             <label className="text-sm font-medium text-slate-700">
               正文 <span className="text-rose-500">*</span>
             </label>
-            <span className={`text-xs tabular-nums ${
-              content.length > MAX_CONTENT ? "text-rose-500" : "text-slate-400"
-            }`}>{content.length}/{MAX_CONTENT}</span>
+            <span
+              className={`text-xs tabular-nums ${
+                content.length > MAX_CONTENT ? "text-rose-500" : "text-slate-400"
+              }`}
+            >
+              {content.length}/{MAX_CONTENT}
+            </span>
           </div>
           <div className="rounded-xl border border-slate-200 overflow-hidden focus-within:border-slate-400 focus-within:ring-4 focus:ring-slate-900/5 transition">
             <Editor content={content} onChange={setContent} />
@@ -144,7 +153,7 @@ export default function ForumNewPage() {
             onClick={handleSubmit}
             className={`rounded-full px-7 py-2.5 text-sm font-semibold transition active:scale-[0.98] ${
               canSubmit
-                ? "bg-slate-900 text-white hover:bg-slate-700 shadow-sm shadow-slate-900/20"
+                ? "bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20"
                 : "cursor-not-allowed bg-slate-200 text-slate-400"
             }`}
           >

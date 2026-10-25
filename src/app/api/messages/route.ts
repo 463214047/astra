@@ -36,17 +36,22 @@ export async function POST(req: Request) {
       conversation_id?: string;
     };
 
-    if (!body.content?.trim()) return NextResponse.json({ ok: false, message: "内容不能为空" }, { status: 400 });
-    if (body.content.length > 2000) return NextResponse.json({ ok: false, message: "消息过长（最多 2000 字）" }, { status: 400 });
+    if (!body.content?.trim())
+      return NextResponse.json({ ok: false, message: "内容不能为空" }, { status: 400 });
+    if (body.content.length > 2000)
+      return NextResponse.json({ ok: false, message: "消息过长（最多 2000 字）" }, { status: 400 });
 
     let conversationId = body.conversation_id;
 
     if (!conversationId) {
-      if (!body.to?.trim()) return NextResponse.json({ ok: false, message: "缺少收件人" }, { status: 400 });
-      if (body.to.trim() === sender) return NextResponse.json({ ok: false, message: "不能给自己发消息" }, { status: 400 });
+      if (!body.to?.trim())
+        return NextResponse.json({ ok: false, message: "缺少收件人" }, { status: 400 });
+      if (body.to.trim() === sender)
+        return NextResponse.json({ ok: false, message: "不能给自己发消息" }, { status: 400 });
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(body.to.trim())) return NextResponse.json({ ok: false, message: "收件人邮箱格式错误" }, { status: 400 });
+      if (!emailRegex.test(body.to.trim()))
+        return NextResponse.json({ ok: false, message: "收件人邮箱格式错误" }, { status: 400 });
 
       const [a, b] = sorted(sender, body.to.trim());
       conversationId = await withTransaction(async (q) => {
@@ -69,10 +74,9 @@ export async function POST(req: Request) {
        VALUES ($1, $2, $3)`,
       [conversationId, sender, body.content.trim()],
     );
-    await query(
-      `UPDATE public.conversations SET last_message_at = NOW() WHERE id = $1`,
-      [conversationId],
-    );
+    await query(`UPDATE public.conversations SET last_message_at = NOW() WHERE id = $1`, [
+      conversationId,
+    ]);
 
     return NextResponse.json({ ok: true, conversation_id: conversationId });
   } catch (e) {

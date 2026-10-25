@@ -13,7 +13,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { query } from "@/lib/db";
 import { getUserByPasskey } from "@/lib/passkey";
-import { decodeBencode, encodeBencode, parseTorrentInfoHash, type BencodeValue } from "@/lib/bencode";
+import {
+  decodeBencode,
+  encodeBencode,
+  parseTorrentInfoHash,
+  type BencodeValue,
+} from "@/lib/bencode";
 
 // torrent 的 announce URL 应该指向 /api/announce
 // 但 Next.js dev server 端口可能是 3000 — 我们用相对 URL + 让 tracker route 里自己识别 origin
@@ -52,10 +57,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const passkey = await ensureUserPasskey(email);
 
   // 查 torrent 二进制 + info_hash
-  const rows = await query<{ torrent_data: string | null; torrent_name: string | null; torrent_info_hash: string | null }>(
-    "SELECT torrent_data, torrent_name, torrent_info_hash FROM public.posts WHERE id = $1",
-    [id],
-  );
+  const rows = await query<{
+    torrent_data: string | null;
+    torrent_name: string | null;
+    torrent_info_hash: string | null;
+  }>("SELECT torrent_data, torrent_name, torrent_info_hash FROM public.posts WHERE id = $1", [id]);
   if (!rows.length) {
     return new NextResponse("Post not found", { status: 404 });
   }
@@ -81,14 +87,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const fullAnnounce = buildAnnounceUrl(passkey, infoHashHex, req);
     root.announce = new TextEncoder().encode(fullAnnounce);
     // announce-list: list of list of byte strings —— 必须是完整 URL，BT 客户端不认相对路径
-    root["announce-list"] = [
-      [new TextEncoder().encode(fullAnnounce)],
-    ];
+    root["announce-list"] = [[new TextEncoder().encode(fullAnnounce)]];
 
     // 重编码（用新的安全 encodeBencode）
     const outBuf = encodeBencode(root as unknown as BencodeValue);
 
-    const rawName = (rows[0].torrent_name || "download.torrent").replace(/\.torrent$/i, "") + ".torrent";
+    const rawName =
+      (rows[0].torrent_name || "download.torrent").replace(/\.torrent$/i, "") + ".torrent";
     // Content-Disposition header 不能包含 > 255 的字符（Node.js 会 throw）
     // RFC 5987 编码: filename="ascii" + filename*=UTF-8''%E9...
     const isAscii = /^[\x00-\x7f]+$/.test(rawName);

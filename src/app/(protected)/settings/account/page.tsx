@@ -50,7 +50,8 @@ export default function AccountPage() {
     try {
       const res = await fetch("/api/oauth/status");
       const data = await res.json();
-      if (res.ok && data.ok) setStatus({ accounts: data.accounts, has_password: data.has_password });
+      if (res.ok && data.ok)
+        setStatus({ accounts: data.accounts, has_password: data.has_password });
     } catch {
       // 忽略
     }
@@ -85,9 +86,18 @@ export default function AccountPage() {
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault();
     setPwdError(null);
-    if (!newPwd.trim()) { setPwdError("请输入密码"); return; }
-    if (!confirmPwd.trim()) { setPwdError("请再次输入密码"); return; }
-    if (newPwd !== confirmPwd) { setPwdError("两次输入的密码不一致"); return; }
+    if (!newPwd.trim()) {
+      setPwdError("请输入密码");
+      return;
+    }
+    if (!confirmPwd.trim()) {
+      setPwdError("请再次输入密码");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdError("两次输入的密码不一致");
+      return;
+    }
     setPwdLoading(true);
     try {
       const res = await fetch("/api/account/set-password", {
@@ -102,7 +112,8 @@ export default function AccountPage() {
         return;
       }
       setMsg({ type: "success", text: "密码设置成功！现在你可以用邮箱+密码登录了" });
-      setNewPwd(""); setConfirmPwd("");
+      setNewPwd("");
+      setConfirmPwd("");
       await fetchStatus();
     } catch {
       setPwdError("网络错误");
@@ -113,16 +124,18 @@ export default function AccountPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/profile" className="hover:text-slate-700">个人主页</Link>
+        <Link href="/profile" className="hover:text-slate-700">
+          个人主页
+        </Link>
         <span>/</span>
-        <Link href="/settings" className="hover:text-slate-700">设置</Link>
+        <Link href="/settings" className="hover:text-slate-700">
+          设置
+        </Link>
         <span>/</span>
         <span className="text-slate-700">账号与绑定</span>
       </div>
 
-      {mounted && !status && (
-        <div className="text-xs text-slate-400">加载中…</div>
-      )}
+      {mounted && !status && <div className="text-xs text-slate-400">加载中…</div>}
 
       {mounted && !!status && isOAuthOnly && isBound && (
         <>
@@ -133,13 +146,17 @@ export default function AccountPage() {
 
             <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
               <div className="flex items-center gap-3 min-w-0">
-                <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${PROVIDER_META.github.color}`}>
+                <span
+                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${PROVIDER_META.github.color}`}
+                >
                   {PROVIDER_META.github.icon}
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900">GitHub</p>
                   <p className="mt-0.5 text-xs text-slate-500 truncate">
-                    已绑定 · {status?.accounts.find((a) => a.provider === "github")?.provider_name ?? "Unknown"}
+                    已绑定 ·{" "}
+                    {status?.accounts.find((a) => a.provider === "github")?.provider_name ??
+                      "Unknown"}
                   </p>
                 </div>
                 <button
@@ -168,10 +185,13 @@ export default function AccountPage() {
                 <input
                   type="password"
                   value={newPwd}
-                  onChange={(e) => { setNewPwd(e.target.value); setPwdError(null); }}
+                  onChange={(e) => {
+                    setNewPwd(e.target.value);
+                    setPwdError(null);
+                  }}
                   placeholder="任意长度，支持任意字符"
                   disabled={pwdLoading}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20 disabled:opacity-60"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:opacity-60"
                 />
               </div>
               <div>
@@ -179,22 +199,29 @@ export default function AccountPage() {
                 <input
                   type="password"
                   value={confirmPwd}
-                  onChange={(e) => { setConfirmPwd(e.target.value); setPwdError(null); }}
+                  onChange={(e) => {
+                    setConfirmPwd(e.target.value);
+                    setPwdError(null);
+                  }}
                   placeholder="再次输入新密码"
                   disabled={pwdLoading}
                   className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 disabled:opacity-60 ${
                     confirmPwd && newPwd !== confirmPwd
                       ? "border-red-400 focus:border-red-400 focus:ring-red-200"
-                      : "border-slate-200 focus:border-[#2563eb] focus:ring-[#2563eb]/20"
+                      : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/20"
                   }`}
                 />
                 {confirmPwd && newPwd !== confirmPwd && (
-                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">两次输入的密码不一致</p>
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">
+                    两次输入的密码不一致
+                  </p>
                 )}
               </div>
 
               {pwdError && (
-                <p className="text-xs font-medium text-red-600" role="alert">{pwdError}</p>
+                <p className="text-xs font-medium text-red-600" role="alert">
+                  {pwdError}
+                </p>
               )}
 
               <div className="flex items-center justify-between pt-1">
@@ -202,7 +229,7 @@ export default function AccountPage() {
                 <button
                   type="submit"
                   disabled={!newPwd || !confirmPwd || newPwd !== confirmPwd || pwdLoading}
-                  className="rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1d4ed8] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
                 >
                   {pwdLoading ? "设置中…" : "设置密码"}
                 </button>
@@ -227,14 +254,18 @@ export default function AccountPage() {
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${PROVIDER_META.github.color}`}>
+                <span
+                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${PROVIDER_META.github.color}`}
+                >
                   {PROVIDER_META.github.icon}
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900">GitHub</p>
                   {isBound && (
                     <p className="mt-0.5 text-xs text-slate-500 truncate">
-                      已绑定 · {status?.accounts.find((a) => a.provider === "github")?.provider_name ?? "Unknown"}
+                      已绑定 ·{" "}
+                      {status?.accounts.find((a) => a.provider === "github")?.provider_name ??
+                        "Unknown"}
                     </p>
                   )}
                   {!isBound && <p className="mt-0.5 text-xs text-slate-400">未绑定</p>}
@@ -271,7 +302,7 @@ export default function AccountPage() {
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : msg.type === "error"
                 ? "border-red-200 bg-red-50 text-red-700"
-                : "border-blue-200 bg-blue-50 text-blue-700"
+                : "border-brand-200 bg-brand-50 text-brand-700"
           }`}
         >
           {msg.text}

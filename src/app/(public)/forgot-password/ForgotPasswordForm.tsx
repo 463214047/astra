@@ -123,10 +123,10 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(37,99,235,0.10),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
+    <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
       <CardContent className="flex flex-col items-center px-8 pb-7 pt-10">
         {/* Logo */}
-        <div className="mb-7 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-[#2563eb] to-[#38bdf8] p-[3px] shadow-[0_12px_28px_rgba(37,99,235,0.28)]">
+        <div className="mb-7 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-400 p-[3px] shadow-lg shadow-brand-600/25">
           <Image
             src="/icon.png"
             alt="Astra PT Logo"
@@ -138,15 +138,13 @@ export default function ForgotPasswordForm() {
           />
         </div>
 
-        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">
-          重置密码
-        </h1>
+        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">重置密码</h1>
 
         {/* 副标题状态文案 */}
         <p
           className={`mb-8 min-h-[20px] text-sm transition-colors duration-300 ${
             isStatusLoading
-              ? "font-medium text-[#2563eb]"
+              ? "font-medium text-brand-700"
               : isStatusError
                 ? "font-medium text-red-500"
                 : isStatusSuccess
@@ -170,22 +168,29 @@ export default function ForgotPasswordForm() {
         <form className="w-full space-y-3" onSubmit={handleSubmit} noValidate>
           {/* 邮箱 */}
           <div className="space-y-1">
-            <label htmlFor="fp-email" className="sr-only">邮箱地址</label>
+            <label htmlFor="fp-email" className="sr-only">
+              邮箱地址
+            </label>
             <input
               id="fp-email"
               type="email"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); if (error) setError(null); }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError(null);
+              }}
               placeholder="邮箱地址"
               autoComplete="email"
               aria-invalid={!!error}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
 
           {/* 邮箱验证码 */}
           <div className="space-y-1">
-            <label htmlFor="fp-code" className="sr-only">邮箱验证码</label>
+            <label htmlFor="fp-code" className="sr-only">
+              邮箱验证码
+            </label>
             <div className="flex gap-2">
               <input
                 id="fp-code"
@@ -193,17 +198,21 @@ export default function ForgotPasswordForm() {
                 inputMode="numeric"
                 maxLength={6}
                 value={code}
-                onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setCode(v); if (error) setError(null); }}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, "");
+                  setCode(v);
+                  if (error) setError(null);
+                }}
                 placeholder="6 位验证码"
                 autoComplete="one-time-code"
                 aria-invalid={!!error}
-                className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm tracking-[0.3em] text-slate-900 outline-none transition placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+                className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm tracking-[0.3em] text-slate-900 outline-none transition placeholder:tracking-normal placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               />
               <button
                 type="button"
                 onClick={handleSendCode}
                 disabled={!emailValid || cooldown > 0 || sendingCode}
-                className="h-11 shrink-0 rounded-xl border border-[#2563eb]/30 bg-[#2563eb]/5 px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#2563eb]/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400"
+                className="h-11 shrink-0 rounded-xl border border-brand-600/30 bg-brand-600/5 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-600/10 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400"
               >
                 {sendingCode ? "发送中…" : cooldown > 0 ? `${cooldown}s 后重发` : "获取验证码"}
               </button>
@@ -212,38 +221,50 @@ export default function ForgotPasswordForm() {
 
           {/* 新密码 */}
           <div className="space-y-1">
-            <label htmlFor="fp-password" className="sr-only">新密码</label>
+            <label htmlFor="fp-password" className="sr-only">
+              新密码
+            </label>
             <input
               id="fp-password"
               type="password"
               value={password}
-              onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError(null);
+              }}
               placeholder="新密码（至少 6 位）"
               autoComplete="new-password"
               aria-invalid={!!error}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/20"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
 
           {/* 确认密码 */}
           <div className="space-y-1">
-            <label htmlFor="fp-confirm" className="sr-only">确认新密码</label>
+            <label htmlFor="fp-confirm" className="sr-only">
+              确认新密码
+            </label>
             <input
               id="fp-confirm"
               type="password"
               value={confirmPassword}
-              onChange={(e) => { setConfirmPassword(e.target.value); if (error) setError(null); }}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (error) setError(null);
+              }}
               placeholder="再次输入新密码"
               autoComplete="new-password"
               aria-invalid={passwordMismatch}
               className={`h-11 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                 passwordMismatch
                   ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-                  : "border-slate-200 focus:border-[#2563eb] focus:ring-[#2563eb]/20"
+                  : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/20"
               }`}
             />
             {passwordMismatch && (
-              <p className="pl-1 text-xs text-red-500" role="alert">两次输入的密码不一致</p>
+              <p className="pl-1 text-xs text-red-500" role="alert">
+                两次输入的密码不一致
+              </p>
             )}
           </div>
 
@@ -251,10 +272,13 @@ export default function ForgotPasswordForm() {
           <Button
             type="submit"
             disabled={submitting || !canSubmit}
-            className="mt-2 h-[48px] w-full rounded-[14px] bg-[#0b1220] text-[15px] font-bold text-white shadow-[0_12px_26px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:bg-[#111827] hover:shadow-[0_18px_36px_rgba(37,99,235,0.28)] disabled:translate-y-0 disabled:opacity-60"
+            className="mt-2 h-[48px] w-full rounded-[14px] bg-brand-600 text-[15px] font-bold text-white shadow-lg shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 disabled:translate-y-0 disabled:opacity-60"
           >
             {submitting ? (
-              <span className="inline-flex items-center gap-2"><Spinner />重置中…</span>
+              <span className="inline-flex items-center gap-2">
+                <Spinner />
+                重置中…
+              </span>
             ) : (
               "重置密码"
             )}
@@ -266,7 +290,7 @@ export default function ForgotPasswordForm() {
           想起来了？{" "}
           <Link
             href="/login"
-            className="font-semibold text-[#2563eb] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]/40 focus-visible:rounded"
+            className="font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
           >
             返回登录
           </Link>
@@ -288,13 +312,26 @@ function Spinner() {
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="size-4"
-      style={{ transform: `rotate(${rot}deg)` }}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="size-4"
+      style={{ transform: `rotate(${rot}deg)` }}
+    >
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity={0.25} />
-      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity={0.75} />
+      <path
+        d="M4 12a8 8 0 018-8"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        opacity={0.75}
+      />
     </svg>
   );
 }

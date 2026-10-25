@@ -33,7 +33,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!me) return NextResponse.json({ ok: false, message: "未登录" }, { status: 401 });
 
     const id = (await params).id;
-    if (!await ensureOwnsConversation(id, me)) {
+    if (!(await ensureOwnsConversation(id, me))) {
       return NextResponse.json({ ok: false, message: "对话不存在" }, { status: 404 });
     }
 
@@ -86,7 +86,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       sender_email: string;
       content: string;
       created_at: string;
-      read_by_me: boolean;          // 对我方来说这条是否已读
+      read_by_me: boolean; // 对我方来说这条是否已读
       recipient_read_at: string | null; // 对方看到这条消息的时间（null=对方还没看到）
     }>(
       `SELECT m.id, m.sender_email, m.content, m.created_at,
@@ -137,7 +137,7 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
     if (!me) return NextResponse.json({ ok: false, message: "未登录" }, { status: 401 });
 
     const id = (await params).id;
-    if (!await ensureOwnsConversation(id, me)) {
+    if (!(await ensureOwnsConversation(id, me))) {
       return NextResponse.json({ ok: false, message: "对话不存在" }, { status: 404 });
     }
 

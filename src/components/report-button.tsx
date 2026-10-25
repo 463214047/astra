@@ -47,20 +47,30 @@ export default function ReportButton({ postId }: Props) {
         title="举报"
       >
         <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-          <path d="M4 3h9l3 3v11H4V3ZM7 9h6M7 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <path
+            d="M4 3h9l3 3v11H4V3ZM7 9h6M7 12h4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
         </svg>
         举报
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => !submitting && setOpen(false)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+          onClick={() => !submitting && setOpen(false)}
+        >
           <div
             className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {done ? (
               <div className="py-6 text-center">
-                <div className="mx-auto mb-3 grid size-10 place-items-center rounded-full bg-emerald-100 text-emerald-600">✓</div>
+                <div className="mx-auto mb-3 grid size-10 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                  ✓
+                </div>
                 <p className="text-sm font-medium text-slate-800">举报已提交</p>
                 <p className="mt-1 text-xs text-slate-500">感谢你的反馈</p>
               </div>

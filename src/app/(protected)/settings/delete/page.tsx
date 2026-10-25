@@ -39,9 +39,13 @@ export default function DeletePage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/profile" className="hover:text-slate-700">个人主页</Link>
+        <Link href="/profile" className="hover:text-slate-700">
+          个人主页
+        </Link>
         <span>/</span>
-        <Link href="/settings" className="hover:text-slate-700">设置</Link>
+        <Link href="/settings" className="hover:text-slate-700">
+          设置
+        </Link>
         <span>/</span>
         <span className="text-slate-700">注销账号</span>
       </div>
@@ -50,8 +54,13 @@ export default function DeletePage() {
         <div className="flex items-start gap-4">
           <div className="grid size-11 shrink-0 place-items-center rounded-full bg-red-100">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="size-6 text-red-600">
-              <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
-                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           <div className="min-w-0 flex-1">
@@ -90,8 +99,13 @@ export default function DeletePage() {
             <input
               type="password"
               value={pwd}
-              onChange={(e) => { setPwd(e.target.value); setDelError(null); }}
-              onKeyDown={(e) => { if (e.key === "Enter" && pwd.trim() && !delLoading) handleDelete(); }}
+              onChange={(e) => {
+                setPwd(e.target.value);
+                setDelError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && pwd.trim() && !delLoading) handleDelete();
+              }}
               placeholder="当前密码"
               autoFocus
               disabled={delLoading}
@@ -102,7 +116,9 @@ export default function DeletePage() {
               }`}
             />
             {delError && (
-              <p className="mt-1.5 text-xs font-medium text-red-600" role="alert">{delError}</p>
+              <p className="mt-1.5 text-xs font-medium text-red-600" role="alert">
+                {delError}
+              </p>
             )}
 
             <div className="mt-5 flex justify-end gap-2">

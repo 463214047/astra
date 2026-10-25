@@ -23,7 +23,8 @@ export async function DELETE(req: Request) {
 
     const url = new URL(req.url);
     const provider = url.searchParams.get("provider")?.trim().toLowerCase();
-    if (!provider) return NextResponse.json({ ok: false, message: "缺少 provider 参数" }, { status: 400 });
+    if (!provider)
+      return NextResponse.json({ ok: false, message: "缺少 provider 参数" }, { status: 400 });
 
     const ALLOWED = ["github", "google", "discord", "twitter"];
     if (!ALLOWED.includes(provider)) {
@@ -56,10 +57,10 @@ export async function DELETE(req: Request) {
     );
     const beforeCount = parseInt(before[0]?.count ?? "0", 10);
 
-    await query(
-      `DELETE FROM public.oauth_accounts WHERE user_email = $1 AND provider = $2`,
-      [email, provider],
-    );
+    await query(`DELETE FROM public.oauth_accounts WHERE user_email = $1 AND provider = $2`, [
+      email,
+      provider,
+    ]);
 
     if (beforeCount === 0) {
       return NextResponse.json({ ok: false, message: "未找到绑定记录" }, { status: 404 });

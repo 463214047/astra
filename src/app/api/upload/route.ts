@@ -70,10 +70,7 @@ export async function POST(req: Request) {
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { ok: false, message: "文件超过 5 MB 限制" },
-        { status: 413 },
-      );
+      return NextResponse.json({ ok: false, message: "文件超过 5 MB 限制" }, { status: 413 });
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());

@@ -28,14 +28,6 @@ type Topic = {
 };
 
 // ---------- 配置 ----------
-const TAG_STYLES: Record<TopicTag, string> = {
-  求助: "bg-blue-50 text-blue-600 ring-blue-200",
-  邀请: "bg-violet-50 text-violet-600 ring-violet-200",
-  分享: "bg-emerald-50 text-emerald-600 ring-emerald-200",
-  讨论: "bg-amber-50 text-amber-600 ring-amber-200",
-  公告: "bg-rose-50 text-rose-600 ring-rose-200",
-};
-
 const TAG_TABS: { key: TopicTag | "all"; label: string }[] = [
   { key: "all", label: "全部" },
   { key: "求助", label: "求助" },
@@ -50,7 +42,10 @@ const VALID_FORUM_TAGS: TopicTag[] = ["求助", "邀请", "分享", "讨论", "�
 // ---------- 数据获取 ----------
 let schemaEnsured = false;
 async function fetchForumTopics(tag?: string): Promise<ForumTopic[]> {
-  if (!schemaEnsured) { await ensureSchema(); schemaEnsured = true; }
+  if (!schemaEnsured) {
+    await ensureSchema();
+    schemaEnsured = true;
+  }
   try {
     const validTag = VALID_FORUM_TAGS.includes(tag as TopicTag) ? tag : undefined;
     const rows = await query<Topic>(
@@ -73,28 +68,17 @@ async function fetchForumTopics(tag?: string): Promise<ForumTopic[]> {
     );
     return rows.map((r) => ({
       ...r,
-      rainbow: !r.anonymous && isRainbowName({
-        role: r.author_role,
-        rainbow_enabled: r.author_rainbow_enabled,
-        rainbow_until: r.author_rainbow_until,
-      }),
+      rainbow:
+        !r.anonymous &&
+        isRainbowName({
+          role: r.author_role,
+          rainbow_enabled: r.author_rainbow_enabled,
+          rainbow_until: r.author_rainbow_until,
+        }),
     }));
   } catch {
     return [];
   }
-}
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "刚刚";
-  if (mins < 60) return `${mins} 分钟前`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} 小时前`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} 天前`;
-  return d.toLocaleDateString("zh-CN");
 }
 
 // ---------- 页面 ----------
@@ -117,7 +101,7 @@ export default async function ForumPage({
         </div>
         <Link
           href="/forum/new"
-          className="shrink-0 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 active:scale-95"
+          className="shrink-0 rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 active:scale-95"
         >
           发新帖
         </Link>
@@ -134,7 +118,7 @@ export default async function ForumPage({
               href={href}
               className={`rounded-full px-3.5 py-1 text-sm font-medium transition ${
                 isActive
-                  ? "bg-slate-900 text-white shadow-sm"
+                  ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >

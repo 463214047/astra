@@ -50,7 +50,10 @@ export async function POST(req: Request) {
     }
 
     const hash = await hashPassword(newPwd);
-    await query(`UPDATE public.account_users SET password_hash = $1 WHERE email = $2`, [hash, email]);
+    await query(`UPDATE public.account_users SET password_hash = $1 WHERE email = $2`, [
+      hash,
+      email,
+    ]);
 
     return NextResponse.json({ ok: true });
   } catch (e) {

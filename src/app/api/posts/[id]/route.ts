@@ -19,10 +19,7 @@ async function ensureOnce() {
   schemaEnsured = true;
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const { id } = await params;
@@ -51,10 +48,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const { id } = await params;
@@ -147,7 +141,9 @@ export async function PUT(
         if (total !== null) torrentSize = Number(total);
         torrentInfoHash = parseTorrentInfoHash(u8);
         torrentDataUpdate = torrentData;
-      } catch { /* 兜底 */ }
+      } catch {
+        /* 兜底 */
+      }
     }
 
     // 种子验重 — 编辑帖子换种子时也不能跟别人撞 hash
@@ -201,10 +197,7 @@ export async function PUT(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(`[PUT /api/posts/:id] 失败:`, err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误" }, { status: 500 });
   }
 }
 

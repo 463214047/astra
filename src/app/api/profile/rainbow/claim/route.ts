@@ -98,10 +98,7 @@ export async function POST() {
       });
     }
     if (result.kind === "empty") {
-      return NextResponse.json(
-        { ok: false, message: "没有可用的彩虹ID奖品" },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, message: "没有可用的彩虹ID奖品" }, { status: 400 });
     }
 
     return NextResponse.json({

@@ -18,10 +18,10 @@ const SLIDES: Slide[] = [
     badge: "Astra PT",
     title: "发现同好，分享热爱",
     subtitle: "游戏、动漫、漫画、影视等等 一切你感兴趣的内容，都能在这里找到同好。",
-    gradient: "bg-gradient-to-br from-slate-900 via-indigo-900 to-violet-900",
+    gradient: "bg-gradient-to-br from-slate-900 via-brand-900 to-brand-950",
     blobs: [
-      { className: "-right-20 -top-20 size-60", color: "bg-violet-500/20" },
-      { className: "-bottom-16 -left-10 size-48", color: "bg-sky-500/20" },
+      { className: "-right-20 -top-20 size-60", color: "bg-brand-500/20" },
+      { className: "-bottom-16 -left-10 size-48", color: "bg-brand-400/20" },
     ],
     duoButtons: true,
   },
@@ -64,10 +64,7 @@ export default function HeroCarousel() {
         }}
       >
         {SLIDES.map((s, i) => (
-          <div
-            key={i}
-            className={`relative w-full shrink-0 ${s.gradient}`}
-          >
+          <div key={i} className={`relative w-full shrink-0 ${s.gradient}`}>
             {/* 背景光斑 */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               {s.blobs.map((b, bi) => (
@@ -81,16 +78,14 @@ export default function HeroCarousel() {
             {/* 内容 */}
             <div className="relative p-6 sm:p-10">
               {s.badge && (
-                <p className="text-xs font-medium uppercase tracking-widest text-violet-300/80">
+                <p className="text-xs font-medium uppercase tracking-widest text-brand-300/80">
                   {s.badge}
                 </p>
               )}
               <h1 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-4xl">
                 {s.title}
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-300 sm:text-base">
-                {s.subtitle}
-              </p>
+              <p className="mt-2 max-w-xl text-sm text-slate-300 sm:text-base">{s.subtitle}</p>
 
               {s.duoButtons ? (
                 <div className="mt-5 flex items-center gap-3">
@@ -129,7 +124,13 @@ export default function HeroCarousel() {
             onClick={() => go(-1)}
             className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white/80 backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-black/50 hover:text-white sm:p-2"
           >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="size-4 sm:size-5">
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="size-4 sm:size-5"
+            >
               <path d="m12 4-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
@@ -139,7 +140,13 @@ export default function HeroCarousel() {
             onClick={() => go(1)}
             className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-1.5 text-white/80 backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-black/50 hover:text-white sm:p-2"
           >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="size-4 sm:size-5">
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="size-4 sm:size-5"
+            >
               <path d="m8 4 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
@@ -171,8 +178,12 @@ export default function HeroCarousel() {
 
       <style jsx>{`
         @keyframes shrink {
-          from { transform: scaleX(1); }
-          to   { transform: scaleX(0); }
+          from {
+            transform: scaleX(1);
+          }
+          to {
+            transform: scaleX(0);
+          }
         }
       `}</style>
     </section>

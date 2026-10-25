@@ -22,8 +22,8 @@ import { query } from "@/lib/db";
 interface PeerEntry {
   ip: string;
   port: number;
-  left: number;          // 剩余字节，0 = seed
-  lastSeen: number;      // ts
+  left: number; // 剩余字节，0 = seed
+  lastSeen: number; // ts
   peerId: string;
   email: string;
 }
@@ -37,7 +37,9 @@ export const peerStore = new Map<string, Map<string, PeerEntry>>();
 // 已计入 download_count 的 (user_email, info_hash) 对 — 防止同一用户同一种子重复 +1
 // （seeder 每次心跳 left=0 都要 announce，不能每次都加）
 export const downloadedPairs = new Set<string>();
-function pairKey(email: string, infoHash: string) { return `${email}|${infoHash}`; }
+function pairKey(email: string, infoHash: string) {
+  return `${email}|${infoHash}`;
+}
 
 // 每分钟清理过期 peers（15 分钟没 announce = 掉线）
 const EXPIRY_MS = 15 * 60 * 1000;
@@ -191,7 +193,11 @@ export async function GET(req: NextRequest) {
   } else {
     const now = Date.now();
     peers.set(key, {
-      ip, port, left, peerId, email,
+      ip,
+      port,
+      left,
+      peerId,
+      email,
       lastSeen: now,
     });
 
@@ -199,7 +205,11 @@ export async function GET(req: NextRequest) {
     // 不依赖 BT 客户端发 event=completed — 很多客户端静默变成 seed，不发事件
     if (existing && existing.left > 0 && left === 0) {
       peers.set(key, {
-        ip, port, left, peerId, email,
+        ip,
+        port,
+        left,
+        peerId,
+        email,
         lastSeen: now + 1, // 标记需要 +1 download_count（用 +1 时间戳）
       });
     }
@@ -249,7 +259,10 @@ export async function GET(req: NextRequest) {
 
       // 下载完成 +1 — 同一用户同一种子只计一次
       // 触发条件：BT 客户端发 event=completed，或 peer 从 leech(left>0) 变成 seed(left=0)
-      if ((event === "completed" || justCompleted) && !downloadedPairs.has(pairKey(email, infoHashHex))) {
+      if (
+        (event === "completed" || justCompleted) &&
+        !downloadedPairs.has(pairKey(email, infoHashHex))
+      ) {
         downloadedPairs.add(pairKey(email, infoHashHex));
         await query(
           `UPDATE public.posts SET download_count = download_count + 1
@@ -268,9 +281,9 @@ export async function GET(req: NextRequest) {
   const interval = 300; // 5 分钟
 
   const response: Record<string, Buffer> = {
-    "interval": bencodeInt(interval),
-    "complete": bencodeInt(stats.complete),
-    "incomplete": bencodeInt(stats.incomplete),
+    interval: bencodeInt(interval),
+    complete: bencodeInt(stats.complete),
+    incomplete: bencodeInt(stats.incomplete),
     "tracker id": bencodeString("astra-pt"),
   };
 

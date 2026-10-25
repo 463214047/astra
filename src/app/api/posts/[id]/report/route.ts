@@ -15,10 +15,7 @@ async function ensureOnce() {
   schemaEnsured = true;
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await ensureOnce();
     const { id } = await params;
@@ -32,16 +29,10 @@ export async function POST(
     const reason = String(body.reason ?? "").trim();
 
     if (!reason) {
-      return NextResponse.json(
-        { ok: false, message: "请填写举报原因" },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, message: "请填写举报原因" }, { status: 400 });
     }
     if (reason.length > 500) {
-      return NextResponse.json(
-        { ok: false, message: "举报原因不超过 500 字" },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, message: "举报原因不超过 500 字" }, { status: 400 });
     }
 
     // 确认帖子存在
@@ -63,9 +54,6 @@ export async function POST(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(`[POST /api/posts/:id/report] 失败:`, err);
-    return NextResponse.json(
-      { ok: false, message: "服务器错误" },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, message: "服务器错误" }, { status: 500 });
   }
 }

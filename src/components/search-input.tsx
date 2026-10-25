@@ -44,8 +44,13 @@ export default function SearchInput() {
     if (advSeeded) params.set("seeded", "1");
     if (advAdult) params.set("adult", "1");
     const anyFilter =
-      !!term || !!advScope || !!advCategory || !!advTag ||
-      (advContent !== "torrent") || advSeeded || advAdult;
+      !!term ||
+      !!advScope ||
+      !!advCategory ||
+      !!advTag ||
+      advContent !== "torrent" ||
+      advSeeded ||
+      advAdult;
     if (!anyFilter) return;
     setAdvOpen(false);
     router.push(`/search?${params.toString()}`);
@@ -62,29 +67,29 @@ export default function SearchInput() {
 
   // ---------- 固定的筛选项集合 ----------
   const TORRENT_CATEGORIES = [
-    { label: "游戏",   emoji: "🎮" },
-    { label: "漫画",   emoji: "📚" },
-    { label: "动漫",   emoji: "🎬" },
-    { label: "电影",   emoji: "🎥" },
+    { label: "游戏", emoji: "🎮" },
+    { label: "漫画", emoji: "📚" },
+    { label: "动漫", emoji: "🎬" },
+    { label: "电影", emoji: "🎥" },
     { label: "剧集", emoji: "📺" },
-    { label: "音乐",   emoji: "🎵" },
-    { label: "体育",   emoji: "⚽" },
-    { label: "综艺",   emoji: "🎤" },
+    { label: "音乐", emoji: "🎵" },
+    { label: "体育", emoji: "⚽" },
+    { label: "综艺", emoji: "🎤" },
   ] as const;
 
   const TORRENT_TAGS = [
-    { label: "禁转",     emoji: "🚫" },
-    { label: "LGBTQ+",   emoji: "🏳️‍🌈" },
+    { label: "禁转", emoji: "🚫" },
+    { label: "LGBTQ+", emoji: "🏳️‍🌈" },
     { label: "特效字幕", emoji: "✨" },
-    { label: "中字",     emoji: "🀄" },
-    { label: "合集",     emoji: "📦" },
+    { label: "中字", emoji: "🀄" },
+    { label: "合集", emoji: "📦" },
   ] as const;
 
   const NSFW_TAG_SET = new Set(["无码", "NTR"]);
 
   const TORRENT_NSFW_TAGS = [
     { label: "无码", emoji: "🔞" },
-    { label: "NTR",  emoji: "⚠️" },
+    { label: "NTR", emoji: "⚠️" },
   ] as const;
 
   function switchAdult(v: boolean) {
@@ -119,10 +124,17 @@ export default function SearchInput() {
       {/* 搜索框 */}
       <div className="relative">
         {/* 左侧可点击放大镜 */}
-        <button type="button" onClick={submit} aria-label="搜索"
-          className="absolute left-2.5 top-1/2 grid size-5 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-slate-400 transition hover:text-slate-700">
+        <button
+          type="button"
+          onClick={submit}
+          aria-label="搜索"
+          className="absolute left-2.5 top-1/2 grid size-5 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-slate-400 transition hover:text-slate-700"
+        >
           <svg viewBox="0 0 20 20" fill="none" className="size-4">
-            <path d="M9 3a6 6 0 1 0 3.7 10.7l3.3 3.3a1 1 0 0 0 1.4-1.4l-3.3-3.3A6 6 0 0 0 9 3Zm-4 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" fill="currentColor" />
+            <path
+              d="M9 3a6 6 0 1 0 3.7 10.7l3.3 3.3a1 1 0 0 0 1.4-1.4l-3.3-3.3A6 6 0 0 0 9 3Zm-4 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+              fill="currentColor"
+            />
           </svg>
         </button>
 
@@ -139,19 +151,34 @@ export default function SearchInput() {
 
         {/* 清空按钮（有值时才显） */}
         {query && (
-          <button type="button" onClick={() => { setQuery(""); inputRef.current?.focus(); }}
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              inputRef.current?.focus();
+            }}
             aria-label="清空"
-            className="absolute right-9 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded-full text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-600">
+            className="absolute right-9 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded-full text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-600"
+          >
             <svg viewBox="0 0 16 16" fill="none" className="size-3.5">
-              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              <path
+                d="M4 4l8 8M12 4l-8 8"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         )}
 
         {/* 右侧高级搜索按钮（打开时加深背景提示激活态） */}
-        <button type="button" onClick={() => setAdvOpen((v) => !v)} aria-label="高级搜索"
+        <button
+          type="button"
+          onClick={() => setAdvOpen((v) => !v)}
+          aria-label="高级搜索"
           aria-expanded={advOpen}
-          className={`absolute right-2 top-1/2 grid size-6 -translate-y-1/2 cursor-pointer place-items-center rounded-full transition ${advOpen ? "bg-slate-200 text-slate-700" : "text-slate-400 hover:bg-slate-200/60 hover:text-slate-700"}`}>
+          className={`absolute right-2 top-1/2 grid size-6 -translate-y-1/2 cursor-pointer place-items-center rounded-full transition ${advOpen ? "bg-slate-200 text-slate-700" : "text-slate-400 hover:bg-slate-200/60 hover:text-slate-700"}`}
+        >
           <SlidersHorizontal size={16} strokeWidth={1.8} />
         </button>
       </div>
@@ -190,7 +217,9 @@ export default function SearchInput() {
               >
                 <option value="">不限</option>
                 {SCOPE.map((it) => (
-                  <option key={it.value} value={it.value}>{it.label}</option>
+                  <option key={it.value} value={it.value}>
+                    {it.label}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -205,7 +234,9 @@ export default function SearchInput() {
                 >
                   <option value="">不限</option>
                   {TORRENT_CATEGORIES.map((c) => (
-                    <option key={c.label} value={c.label}>{c.label}</option>
+                    <option key={c.label} value={c.label}>
+                      {c.label}
+                    </option>
                   ))}
                 </select>
               </Field>
@@ -220,12 +251,16 @@ export default function SearchInput() {
               >
                 <option value="">不限</option>
                 {(advContent === "torrent" ? TORRENT_TAGS : FORUM_TAGS).map((t) => (
-                  <option key={t.label} value={t.label}>{t.label}</option>
+                  <option key={t.label} value={t.label}>
+                    {t.label}
+                  </option>
                 ))}
                 {advContent === "torrent" && advAdult && (
                   <optgroup label="NSFW">
                     {TORRENT_NSFW_TAGS.map((t) => (
-                      <option key={t.label} value={t.label}>{t.label}</option>
+                      <option key={t.label} value={t.label}>
+                        {t.label}
+                      </option>
                     ))}
                   </optgroup>
                 )}
@@ -245,7 +280,11 @@ export default function SearchInput() {
                       : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100"
                   }`}
                 >
-                  {advAdult ? <ShieldAlert size={14} strokeWidth={2.25} /> : <ShieldCheck size={14} strokeWidth={2.25} />}
+                  {advAdult ? (
+                    <ShieldAlert size={14} strokeWidth={2.25} />
+                  ) : (
+                    <ShieldCheck size={14} strokeWidth={2.25} />
+                  )}
                   {advAdult ? "NSFW" : "SFW"}
                 </button>
               </div>
@@ -254,8 +293,11 @@ export default function SearchInput() {
 
           {/* 底部按钮 */}
           <div className="border-t border-slate-100 px-4 py-2">
-            <button type="button" onClick={submit}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700">
+            <button
+              type="button"
+              onClick={submit}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-brand-700"
+            >
               搜索{query ? ` "${query.trim()}"` : ""}
             </button>
           </div>
@@ -293,7 +335,7 @@ function Toggle({
       />
       <span
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${
-          checked ? "bg-slate-900" : "bg-slate-200 group-hover:bg-slate-300"
+          checked ? "bg-brand-600" : "bg-slate-200 group-hover:bg-slate-300"
         }`}
       >
         <span

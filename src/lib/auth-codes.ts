@@ -22,8 +22,6 @@ export const AUTH_CODES = {
   SERVER_ERROR: "SERVER_ERROR",
 } as const;
 
-export type AuthCode = (typeof AUTH_CODES)[keyof typeof AUTH_CODES];
-
 /**
  * 错误码 → 用户友好中文消息
  * 前端登录/注册页面复用

@@ -20,9 +20,7 @@ async function ensureSchemaLazy() {
   }
 }
 
-export { AUTH_CODES };
-
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, auth } = NextAuth({
   providers: [
     GitHub({
       // 必须请求 email scope — 否则 GitHub 不返回用户邮箱
@@ -60,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: string | null;
           avatar_url: string | null;
           signature: string | null;
-          password_hash: string | null;  // OAuth-only 账号为 NULL
+          password_hash: string | null; // OAuth-only 账号为 NULL
           totp_secret_enc: string | null;
           totp_enabled: boolean;
           recovery_codes_enc: string | null;
@@ -153,7 +151,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const ghId = account.providerAccountId;
         const ghLogin = (profile as { login?: string } | undefined)?.login;
         const ghAvatar = (profile as { avatar_url?: string } | undefined)?.avatar_url;
-        const ghName = (profile as { name?: string } | undefined)?.name ?? ghLogin ?? ghEmail.split("@")[0];
+        const ghName =
+          (profile as { name?: string } | undefined)?.name ?? ghLogin ?? ghEmail.split("@")[0];
 
         console.log("[auth] GitHub signIn callback", { ghEmail, ghId, ghLogin });
 
@@ -217,11 +216,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         // 自动确保 passkey 存在（首次登录生成）
         if (user.email) {
-          ensureUserPasskey(user.email).catch(() => { /* 后台异步，不阻塞登录 */ });
+          ensureUserPasskey(user.email).catch(() => {
+            /* 后台异步，不阻塞登录 */
+          });
         }
 
         // remember me 控制 session 过期
-        if (account?.provider === "credentials" && (account as unknown as { remember?: string }).remember === "true") {
+        if (
+          account?.provider === "credentials" &&
+          (account as unknown as { remember?: string }).remember === "true"
+        ) {
           token.maxAge = 60 * 60 * 24 * 7; // 7 天
         } else {
           token.maxAge = 60 * 60 * 24;

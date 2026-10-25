@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import './games-page.css';
+import { useEffect, useRef } from "react";
+import "./games-page.css";
 
 export default function GameClient(props: {
   initialMagic: number;
@@ -18,7 +18,7 @@ export default function GameClient(props: {
     if (!root) return;
 
     const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
-      root.querySelector('#' + id) as T;
+      root.querySelector("#" + id) as T;
 
     /* ============ 图标 ============ */
     const ICON_MAGIC =
@@ -27,7 +27,7 @@ export default function GameClient(props: {
 
     let rainbowGradId = 0;
     function rainbowIconSvg() {
-      const id = 'rg' + ++rainbowGradId;
+      const id = "rg" + ++rainbowGradId;
       return `<svg viewBox="0 0 24 24">
         <defs>
           <linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
@@ -46,19 +46,19 @@ export default function GameClient(props: {
 
     /* ============ 奖励池 ============ */
     type PoolItem =
-      | { name: string; type: 'magic'; min: number; max: number; w: number }
-      | { name: string; type: 'rainbow'; dayMin: number; dayMax: number; w: number };
+      | { name: string; type: "magic"; min: number; max: number; w: number }
+      | { name: string; type: "rainbow"; dayMin: number; dayMax: number; w: number };
 
     const POOL: Record<number, PoolItem[]> = {
       5: [
-        { name: '彩虹ID', type: 'rainbow', dayMin: 30, dayMax: 365, w: 1.0 },
-        { name: '魔力',   type: 'magic',   min: 800,  max: 2000,  w: 1.8 },
+        { name: "彩虹ID", type: "rainbow", dayMin: 30, dayMax: 365, w: 1.0 },
+        { name: "魔力", type: "magic", min: 800, max: 2000, w: 1.8 },
       ],
       4: [
-        { name: '彩虹ID', type: 'rainbow', dayMin: 7, dayMax: 90, w: 1.0 },
-        { name: '魔力',   type: 'magic',   min: 200, max: 600,   w: 1.8 },
+        { name: "彩虹ID", type: "rainbow", dayMin: 7, dayMax: 90, w: 1.0 },
+        { name: "魔力", type: "magic", min: 200, max: 600, w: 1.8 },
       ],
-      3: [{ name: '魔力', type: 'magic', min: 20, max: 100, w: 1.0 }],
+      3: [{ name: "魔力", type: "magic", min: 20, max: 100, w: 1.0 }],
     };
 
     function randInt(min: number, max: number) {
@@ -116,8 +116,8 @@ export default function GameClient(props: {
 
         const base = this.pick(rarity);
         const item: any = { type: base.type, name: base.name, rarity, index: this.total };
-        if (base.type === 'magic') item.value = randInt(base.min, base.max);
-        else if (base.type === 'rainbow') item.days = randInt(base.dayMin, base.dayMax);
+        if (base.type === "magic") item.value = randInt(base.min, base.max);
+        else if (base.type === "rainbow") item.days = randInt(base.dayMin, base.dayMax);
 
         this.history.unshift(item);
         if (this.history.length > 400) this.history.length = 400;
@@ -126,10 +126,15 @@ export default function GameClient(props: {
     };
 
     /* ============ 货币 & 背包 ============ */
-    const magicCountEl = $('magicCount');
+    const magicCountEl = $("magicCount");
     const WISH_COST = 160;
     let magic = props.initialMagic;
-    const inventory = { rainbowIds: (Array.isArray(props.initialRainbowIds) ? props.initialRainbowIds : []) as { days: number; ts: number }[] };
+    const inventory = {
+      rainbowIds: (Array.isArray(props.initialRainbowIds) ? props.initialRainbowIds : []) as {
+        days: number;
+        ts: number;
+      }[],
+    };
 
     function refreshUI() {
       if (magicCountEl) magicCountEl.textContent = String(magic);
@@ -137,11 +142,11 @@ export default function GameClient(props: {
 
     /* ============ 星空生成 ============ */
     (function buildStarfield() {
-      const sf = $('starfield');
+      const sf = $("starfield");
       if (!sf) return;
       const n = 140;
-      const colors = ['#ffffff', '#cfe8ff', '#a8d4ff', '#e0f4ff'];
-      let html = '';
+      const colors = ["#ffffff", "#cfe8ff", "#a8d4ff", "#e0f4ff"];
+      let html = "";
       for (let i = 0; i < n; i++) {
         const size = (Math.random() * 1.9 + 0.6).toFixed(2);
         const x = (Math.random() * 100).toFixed(2);
@@ -149,7 +154,7 @@ export default function GameClient(props: {
         const d = (Math.random() * 4).toFixed(2);
         const o = (Math.random() * 0.55 + 0.15).toFixed(2);
         const c = colors[(Math.random() * colors.length) | 0];
-        const glow = Number(size) > 1.8 ? `box-shadow:0 0 8px ${c};` : '';
+        const glow = Number(size) > 1.8 ? `box-shadow:0 0 8px ${c};` : "";
         html += `<div class="star" style="width:${size}px;height:${size}px;left:${x}%;top:${y}%;background:${c};${glow}animation-delay:-${d}s;opacity:${o}"></div>`;
       }
       sf.innerHTML = html;
@@ -165,7 +170,7 @@ export default function GameClient(props: {
           AC = null;
         }
       }
-      if (AC && AC.state === 'suspended') AC.resume();
+      if (AC && AC.state === "suspended") AC.resume();
       return AC;
     }
 
@@ -175,19 +180,20 @@ export default function GameClient(props: {
       const t = ctx.currentTime;
       const freq = rarity === 5 ? 1046 : rarity === 4 ? 784 : 587;
       const o = ctx.createOscillator();
-      o.type = 'triangle';
+      o.type = "triangle";
       o.frequency.value = freq;
       const g = ctx.createGain();
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(rarity === 5 ? 0.13 : 0.07, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.75);
       o.connect(g).connect(ctx.destination);
-      o.start(t); o.stop(t + 0.8);
+      o.start(t);
+      o.stop(t + 0.8);
 
       if (rarity === 5) {
         [1568, 2093].forEach((f, i) => {
           const o2 = ctx.createOscillator();
-          o2.type = 'triangle';
+          o2.type = "triangle";
           o2.frequency.value = f;
           const g2 = ctx.createGain();
           const st = t + 0.05 + i * 0.06;
@@ -195,15 +201,17 @@ export default function GameClient(props: {
           g2.gain.exponentialRampToValueAtTime(0.05, st + 0.02);
           g2.gain.exponentialRampToValueAtTime(0.0001, st + 0.9);
           o2.connect(g2).connect(ctx.destination);
-          o2.start(st); o2.stop(st + 1.0);
+          o2.start(st);
+          o2.stop(st + 1.0);
         });
       }
     }
 
     /* ============ 特效画布（用容器尺寸） ============ */
-    const canvas = $('fx') as HTMLCanvasElement;
-    const ctx2d = canvas.getContext('2d')!;
-    let W = 0, H = 0;
+    const canvas = $("fx") as HTMLCanvasElement;
+    const ctx2d = canvas.getContext("2d")!;
+    let W = 0,
+      H = 0;
 
     function resizeCanvas() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -212,15 +220,15 @@ export default function GameClient(props: {
       H = rect.height;
       canvas.width = W * dpr;
       canvas.height = H * dpr;
-      canvas.style.width = W + 'px';
-      canvas.style.height = H + 'px';
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
       ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resizeCanvas();
 
     const ro = new ResizeObserver(() => resizeCanvas());
     ro.observe(root);
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     let rafId = 0;
     (function emptyLoop() {
@@ -231,11 +239,11 @@ export default function GameClient(props: {
     })();
 
     /* ============ 动画时序 ============ */
-    const blackout = $('blackout');
-    const skipHint = $('skipHint');
-    const cardsEl = $('cards');
-    const resultView = $('resultView');
-    const closeBtn = $('closeBtn') as HTMLButtonElement;
+    const blackout = $("blackout");
+    const skipHint = $("skipHint");
+    const cardsEl = $("cards");
+    const resultView = $("resultView");
+    const closeBtn = $("closeBtn") as HTMLButtonElement;
 
     let skipResolve: (() => void) | null = null;
     let animating = false;
@@ -254,7 +262,9 @@ export default function GameClient(props: {
         setTimeout(finish, ms);
       });
     }
-    function requestSkip() { if (skipResolve) skipResolve(); }
+    function requestSkip() {
+      if (skipResolve) skipResolve();
+    }
 
     const onPointerDown = (e: PointerEvent) => {
       if (animating) {
@@ -262,26 +272,26 @@ export default function GameClient(props: {
         requestSkip();
       }
     };
-    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener("pointerdown", onPointerDown, true);
 
     async function playAnimation() {
       // 确保黑幕先盖牢主界面
-      blackout.style.transition = 'none';
-      blackout.style.opacity = '1';
+      blackout.style.transition = "none";
+      blackout.style.opacity = "1";
       // 强制 reflow 让 transition 生效
       void blackout.offsetWidth;
-      blackout.style.transition = '';
+      blackout.style.transition = "";
 
-      skipHint.classList.add('show');
+      skipHint.classList.add("show");
       await wait(280);
 
       // resultView 在黑幕之下先激活（z-index 100 > 40），但里面卡片都是 opacity:0
-      resultView.classList.add('active');
-      skipHint.classList.remove('show');
+      resultView.classList.add("active");
+      skipHint.classList.remove("show");
 
       // 黑幕淡出（在 resultView 下方，用户看不到淡出过程）
-      blackout.style.transition = 'opacity .2s ease';
-      blackout.style.opacity = '0';
+      blackout.style.transition = "opacity .2s ease";
+      blackout.style.opacity = "0";
 
       // 等一帧让 resultView 的 opacity:0 卡片被浏览器渲染，这样后续加 .show 时 transition 能触发
       await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
@@ -289,25 +299,25 @@ export default function GameClient(props: {
 
     /* ============ 结果展示 ============ */
     function createCard(item: any) {
-      const el = document.createElement('div');
-      el.className = 'card r' + item.rarity;
+      const el = document.createElement("div");
+      el.className = "card r" + item.rarity;
 
       let iconHtml: string, iconColor: string, nameText: string, subText: string;
-      if (item.type === 'magic') {
+      if (item.type === "magic") {
         iconHtml = `<svg viewBox="0 0 24 24">${ICON_MAGIC}</svg>`;
-        iconColor = '#a8e0ff';
-        nameText = '魔力';
-        subText = '+' + item.value;
-      } else if (item.type === 'rainbow') {
+        iconColor = "#a8e0ff";
+        nameText = "魔力";
+        subText = "+" + item.value;
+      } else if (item.type === "rainbow") {
         iconHtml = rainbowIconSvg();
-        iconColor = '#fff';
-        nameText = '彩虹ID';
-        subText = item.days + ' 天';
+        iconColor = "#fff";
+        nameText = "彩虹ID";
+        subText = item.days + " 天";
       } else {
         iconHtml = `<svg viewBox="0 0 24 24">${ICON_MAGIC}</svg>`;
-        iconColor = '#a8e0ff';
-        nameText = item.name || '奖励';
-        subText = '';
+        iconColor = "#a8e0ff";
+        nameText = item.name || "奖励";
+        subText = "";
       }
 
       el.innerHTML = `
@@ -317,7 +327,7 @@ export default function GameClient(props: {
             <div class="cardIcon" style="color:${iconColor}">${iconHtml}</div>
             <div class="cardBottom">
               <div class="cardName">${nameText}</div>
-              <div class="cardStars">${'★'.repeat(item.rarity)}</div>
+              <div class="cardStars">${"★".repeat(item.rarity)}</div>
               <div class="cardSub">${subText}</div>
             </div>
           </div>
@@ -327,53 +337,53 @@ export default function GameClient(props: {
 
     // 提前准备好 DOM（在黑幕覆盖期间），避免 resultView 激活后才清空 + 填充导致闪烁
     function prepareCards(results: any[]) {
-      cardsEl.innerHTML = '';
-      cardsEl.className = 'cards ' + (results.length > 1 ? 'grid' : 'single');
-      closeBtn.classList.remove('show');
+      cardsEl.innerHTML = "";
+      cardsEl.className = "cards " + (results.length > 1 ? "grid" : "single");
+      closeBtn.classList.remove("show");
       results.forEach((item) => cardsEl.appendChild(createCard(item)));
     }
 
     async function showResults(results: any[]) {
       // playAnimation 已经让 resultView 可见 + 卡片已准备好（opacity:0，等待 .show）
-      const els = cardsEl.querySelectorAll('.card');
+      const els = cardsEl.querySelectorAll(".card");
       const interval = results.length > 1 ? 145 : 320;
 
       for (let i = 0; i < els.length; i++) {
-        els[i].classList.add('show');
+        els[i].classList.add("show");
         sfxChime(results[i].rarity);
         await wait(interval);
       }
 
       await wait(420);
-      closeBtn.classList.add('show');
+      closeBtn.classList.add("show");
 
       return new Promise<void>((resolve) => {
         const done = () => {
-          closeBtn.removeEventListener('click', done);
-          resultView.classList.remove('active');
+          closeBtn.removeEventListener("click", done);
+          resultView.classList.remove("active");
           setTimeout(resolve, 180);
         };
-        closeBtn.addEventListener('click', done);
+        closeBtn.addEventListener("click", done);
       });
     }
 
     /* ============ 弹窗 ============ */
-    const modal = $('modal');
-    const modalBox = $('modalBox');
+    const modal = $("modal");
+    const modalBox = $("modalBox");
 
     function showModal(html: string) {
       modalBox.innerHTML = html + '<button class="modalClose">关 闭</button>';
-      modal.classList.add('active');
-      modalBox.querySelector('.modalClose')!.addEventListener('click', () => {
-        modal.classList.remove('active');
+      modal.classList.add("active");
+      modalBox.querySelector(".modalClose")!.addEventListener("click", () => {
+        modal.classList.remove("active");
       });
       return modalBox;
     }
 
     const onModalClick = (e: MouseEvent) => {
-      if (e.target === modal) modal.classList.remove('active');
+      if (e.target === modal) modal.classList.remove("active");
     };
-    modal.addEventListener('click', onModalClick);
+    modal.addEventListener("click", onModalClick);
 
     /* ============ 主流程 ============ */
     let busy = false;
@@ -400,12 +410,12 @@ export default function GameClient(props: {
       for (let i = 0; i < count; i++) {
         const r = gacha.pull();
         results.push(r);
-        if (r.type === 'magic') magic += r.value;
-        else if (r.type === 'rainbow') inventory.rainbowIds.push({ days: r.days, ts: Date.now() });
+        if (r.type === "magic") magic += r.value;
+        else if (r.type === "rainbow") inventory.rainbowIds.push({ days: r.days, ts: Date.now() });
       }
 
       refreshUI();
-      prepareCards(results);  // 黑幕覆盖期间提前把卡片 DOM 准备好（opacity:0）
+      prepareCards(results); // 黑幕覆盖期间提前把卡片 DOM 准备好（opacity:0）
       await playAnimation();
       await showResults(results);
 
@@ -415,15 +425,15 @@ export default function GameClient(props: {
       saveSave();
     }
 
-    const wishBtns = root.querySelectorAll<HTMLButtonElement>('.wishBtn');
+    const wishBtns = root.querySelectorAll<HTMLButtonElement>(".wishBtn");
     const onWishClick = (e: Event) => {
       const btn = e.currentTarget as HTMLButtonElement;
       doWish(parseInt(btn.dataset.count!, 10));
     };
-    wishBtns.forEach((btn) => btn.addEventListener('click', onWishClick));
+    wishBtns.forEach((btn) => btn.addEventListener("click", onWishClick));
 
     /* ============ 详情 / 历史 ============ */
-    $('btnDetail').addEventListener('click', () => {
+    $("btnDetail").addEventListener("click", () => {
       showModal(`
         <h3>祈 愿 详 情</h3>
         <p><span class="hl">★★★★★</span> 基础概率 <b>0.600%</b>，综合概率（含保底）<b>1.600%</b>。最多 <b>90</b> 次祈愿必定获得五星奖励。</p>
@@ -440,7 +450,7 @@ export default function GameClient(props: {
         </p>`);
     });
 
-    $('btnHistory').addEventListener('click', () => {
+    $("btnHistory").addEventListener("click", () => {
       const p5Left = Math.max(0, 90 - gacha.pity5);
       const p4Left = Math.max(0, 10 - gacha.pity4);
       showModal(`<h3>祈 愿 记 录</h3>
@@ -461,11 +471,11 @@ export default function GameClient(props: {
     });
 
     /* ============ 存档 ============ */
-    const API_BASE = '';
+    const API_BASE = "";
 
     async function loadSave() {
       try {
-        const res = await fetch(API_BASE + '/api/game/wish', { credentials: 'same-origin' });
+        const res = await fetch(API_BASE + "/api/game/wish", { credentials: "same-origin" });
         if (!res.ok) return false;
         const data = await res.json();
         if (!data.ok || !data.save) return false;
@@ -478,7 +488,7 @@ export default function GameClient(props: {
         inventory.rainbowIds = Array.isArray(s.rainbowIds) ? s.rainbowIds : [];
         return true;
       } catch (e) {
-        console.warn('[wish] load save failed:', e);
+        console.warn("[wish] load save failed:", e);
         return false;
       }
     }
@@ -488,10 +498,10 @@ export default function GameClient(props: {
       if (saveTimer) clearTimeout(saveTimer);
       saveTimer = setTimeout(async () => {
         try {
-          await fetch(API_BASE + '/api/game/wish', {
-            method: 'PUT',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch(API_BASE + "/api/game/wish", {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               magic,
               pity5: gacha.pity5,
@@ -502,7 +512,7 @@ export default function GameClient(props: {
             }),
           });
         } catch (e) {
-          console.warn('[wish] save failed:', e);
+          console.warn("[wish] save failed:", e);
         }
       }, 1000);
     }
@@ -524,20 +534,24 @@ export default function GameClient(props: {
       if (now - lastTouch < 300) e.preventDefault();
       lastTouch = now;
     };
-    document.addEventListener('touchend', onTouchEnd, { passive: false });
+    document.addEventListener("touchend", onTouchEnd, { passive: false });
 
     /* ============ 清理 ============ */
     return () => {
       disposed = true;
       cancelAnimationFrame(rafId);
       ro.disconnect();
-      window.removeEventListener('resize', resizeCanvas);
-      document.removeEventListener('pointerdown', onPointerDown, true);
-      document.removeEventListener('touchend', onTouchEnd);
-      modal.removeEventListener('click', onModalClick);
-      wishBtns.forEach((btn) => btn.removeEventListener('click', onWishClick));
+      window.removeEventListener("resize", resizeCanvas);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("touchend", onTouchEnd);
+      modal.removeEventListener("click", onModalClick);
+      wishBtns.forEach((btn) => btn.removeEventListener("click", onWishClick));
       if (saveTimer) clearTimeout(saveTimer);
-      if (AC) { try { AC.close(); } catch {} }
+      if (AC) {
+        try {
+          AC.close();
+        } catch {}
+      }
     };
   }, []);
 
@@ -546,7 +560,7 @@ export default function GameClient(props: {
       <div
         ref={rootRef}
         className="games-page-root overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]"
-        style={{ height: 'min(calc(100vh - 7rem), 720px)' }}
+        style={{ height: "min(calc(100vh - 7rem), 720px)" }}
       >
         {/* ============ 主界面 ============ */}
         <div id="wishView">
@@ -584,8 +598,12 @@ export default function GameClient(props: {
 
           <div className="bottomBar">
             <div className="sideLinks">
-              <button className="sideLink" id="btnDetail">详情</button>
-              <button className="sideLink" id="btnHistory">历史</button>
+              <button className="sideLink" id="btnDetail">
+                详情
+              </button>
+              <button className="sideLink" id="btnHistory">
+                历史
+              </button>
             </div>
             <div className="wishButtons">
               <button className="wishBtn" data-count="1">

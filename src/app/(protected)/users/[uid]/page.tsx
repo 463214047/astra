@@ -26,10 +26,10 @@ type Row = {
 
 export type UserStats = {
   magic: number;
-  seedPoints: number;      // 做种积分（公式待定，先读字段）
-  uploaded: number;        // 累计上传字节
-  downloaded: number;      // 累计下载字节
-  shareRatio: number;      // 分享率（uploaded / downloaded，至少 0）
+  seedPoints: number; // 做种积分（公式待定，先读字段）
+  uploaded: number; // 累计上传字节
+  downloaded: number; // 累计下载字节
+  shareRatio: number; // 分享率（uploaded / downloaded，至少 0）
 };
 
 function profileNickname(user: Pick<Row, "name" | "email" | "uid">) {
@@ -66,11 +66,7 @@ export async function generateMetadata({
   return { title: `${profileNickname(user)}的主页` };
 }
 
-export default async function UserProfilePage({
-  params,
-}: {
-  params: Promise<{ uid: string }>;
-}) {
+export default async function UserProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const { uid } = await params;
 
   if (!/^\d+$/.test(uid)) notFound();
@@ -91,9 +87,9 @@ export default async function UserProfilePage({
     [user.email],
   );
 
-  const uploaded   = Number(agg[0]?.total_uploaded ?? 0);
+  const uploaded = Number(agg[0]?.total_uploaded ?? 0);
   const downloaded = Number(agg[0]?.total_downloaded ?? 0);
-  const shareRatio = downloaded > 0 ? uploaded / downloaded : (uploaded > 0 ? 999.99 : 0);
+  const shareRatio = downloaded > 0 ? uploaded / downloaded : uploaded > 0 ? 999.99 : 0;
 
   const stats: UserStats = {
     magic: Number(user.wish_magic) || 0,
@@ -106,10 +102,10 @@ export default async function UserProfilePage({
   const session = await auth();
   const isOwner = session.user.email === user.email;
 
-  return (
-    isOwner
-      ? <OwnerProfile user={user} stats={stats} />
-      : <GuestProfile user={user} stats={stats} />
+  return isOwner ? (
+    <OwnerProfile user={user} stats={stats} />
+  ) : (
+    <GuestProfile user={user} stats={stats} />
   );
 }
 
@@ -136,19 +132,29 @@ export function ProfileBanner({
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <div className="h-28 bg-gradient-to-r from-blue-100 via-violet-100 to-pink-100" />
+      <div className="h-28 bg-gradient-to-r from-brand-100 via-brand-50 to-brand-100" />
 
-      {topRight && (
-        <div className="absolute right-6 top-4">{topRight}</div>
-      )}
+      {topRight && <div className="absolute right-6 top-4">{topRight}</div>}
 
       <div className="px-6 pb-6">
-        <div className={aside ? "min-[900px]:grid min-[900px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[900px]:gap-x-6" : ""}>
+        <div
+          className={
+            aside
+              ? "min-[900px]:grid min-[900px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[900px]:gap-x-6"
+              : ""
+          }
+        >
           <div className="-mt-12 mb-4 min-[900px]:col-span-2">
-            <span className="inline-flex rounded-full bg-gradient-to-tr from-blue-400 via-violet-400 to-pink-400 p-[3px] shadow-lg shadow-violet-200">
+            <span className="inline-flex rounded-full bg-gradient-to-tr from-brand-400 via-brand-500 to-brand-600 p-[3px] shadow-lg shadow-brand-200">
               {hasAvatar ? (
-                <Image src={user.avatar_url!} alt={nickname} width={96} height={96} unoptimized
-                  className="size-24 rounded-full border-4 border-white object-cover" />
+                <Image
+                  src={user.avatar_url!}
+                  alt={nickname}
+                  width={96}
+                  height={96}
+                  unoptimized
+                  className="size-24 rounded-full border-4 border-white object-cover"
+                />
               ) : (
                 <span className="grid size-24 place-items-center rounded-full border-4 border-white bg-slate-100 text-3xl font-bold text-slate-500">
                   {nickname[0]?.toUpperCase() ?? "U"}
@@ -181,7 +187,15 @@ export function ProfileBanner({
   );
 }
 
-export function Stat({ label, value, tone }: { label: string; value: number | string; tone?: string }) {
+export function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  tone?: string;
+}) {
   const toneClass = tone ?? "text-slate-900";
   return (
     <div>
@@ -197,7 +211,10 @@ export function formatBytes(bytes: number): string {
   const units = ["B", "KB", "MB", "GB", "TB"];
   let i = 0;
   let n = bytes;
-  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
   const val = n >= 100 ? n.toFixed(1) : n.toFixed(2);
   return `${Number(val).toLocaleString("en-US")} ${units[i]}`;
 }

@@ -134,9 +134,13 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const [rainbowUntil, setRainbowUntil] = useState(profile.rainbowUntil);
   const [rainbowPrizeDays, setRainbowPrizeDays] = useState(profile.rainbowPrizeDays);
   const [rainbowBusy, setRainbowBusy] = useState(false);
+  const [rainbowClaiming, setRainbowClaiming] = useState(false);
   const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(
     null,
   );
+  const rainbowDesiredRef = useRef(profile.rainbowEnabled);
+  const rainbowSavedRef = useRef(profile.rainbowEnabled);
+  const rainbowSavingRef = useRef(false);
 
   const resetAvatarDialog = useCallback(() => {
     setAvatarDialogOpen(false);
@@ -346,44 +350,63 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     }
   }
 
-  async function toggleRainbow() {
-    if (!hasRainbowAccess || rainbowBusy) return;
-    const next = !rainbowEnabled;
-    setRainbowEnabled(next);
+  async function flushRainbow() {
+    if (rainbowSavingRef.current) return;
+    rainbowSavingRef.current = true;
     setRainbowBusy(true);
-    setRainbowMsg(null);
     try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rainbow_enabled: next }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        errors?: Record<string, string>;
-        rainbow_until?: string;
-      };
-      if (!res.ok || !data.ok) {
-        setRainbowEnabled(!next);
-        setRainbowMsg({
-          type: "error",
-          text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
+      while (rainbowDesiredRef.current !== rainbowSavedRef.current) {
+        const target = rainbowDesiredRef.current;
+        const res = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rainbow_enabled: target }),
         });
-        return;
+        const data = (await res.json()) as {
+          ok?: boolean;
+          message?: string;
+          errors?: Record<string, string>;
+          rainbow_until?: string;
+        };
+        if (!res.ok || !data.ok) {
+          const fallback = rainbowSavedRef.current;
+          rainbowDesiredRef.current = fallback;
+          setRainbowEnabled(fallback);
+          setRainbowMsg({
+            type: "error",
+            text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
+          });
+          return;
+        }
+        rainbowSavedRef.current = target;
+        if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
       }
-      if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
-      router.refresh();
     } catch {
-      setRainbowEnabled(!next);
+      const fallback = rainbowSavedRef.current;
+      rainbowDesiredRef.current = fallback;
+      setRainbowEnabled(fallback);
       setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
     } finally {
+      rainbowSavingRef.current = false;
       setRainbowBusy(false);
+      if (rainbowDesiredRef.current !== rainbowSavedRef.current) {
+        void flushRainbow();
+      }
     }
+  }
+
+  function toggleRainbow() {
+    if (!hasRainbowAccess || rainbowClaiming) return;
+    const next = !rainbowDesiredRef.current;
+    rainbowDesiredRef.current = next;
+    setRainbowEnabled(next);
+    setRainbowMsg(null);
+    void flushRainbow();
   }
 
   async function claimRainbowPrizes() {
     if (rainbowBusy) return;
+    setRainbowClaiming(true);
     setRainbowBusy(true);
     setRainbowMsg(null);
     try {
@@ -400,16 +423,18 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
       }
       if (data.rainbowUntil) setRainbowUntil(data.rainbowUntil);
       setRainbowPrizeDays(0);
+      rainbowDesiredRef.current = true;
+      rainbowSavedRef.current = true;
       setRainbowEnabled(true);
       setRainbowMsg({
         type: "success",
         text: `已获得 ${data.claimedDays ?? 0} 天彩虹昵称`,
       });
-      router.refresh();
     } catch {
       setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
     } finally {
       setRainbowBusy(false);
+      setRainbowClaiming(false);
     }
   }
 
@@ -518,7 +543,8 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
               role="switch"
               aria-checked={rainbowEnabled}
               aria-label="彩虹昵称"
-              disabled={!hasRainbowAccess || rainbowBusy}
+              aria-busy={rainbowBusy}
+              disabled={!hasRainbowAccess || rainbowClaiming}
               onClick={toggleRainbow}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-80 ${
                 rainbowEnabled ? "bg-brand-600 shadow-sm shadow-brand-600/20" : "bg-slate-200"

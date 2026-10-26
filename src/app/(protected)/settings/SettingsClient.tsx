@@ -13,17 +13,20 @@ import {
   Pencil,
   ShieldCheck,
   Trash2,
+  Upload,
   User,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { useLocale } from "@/components/language-provider";
+import { UserName } from "@/components/rainbow-name";
 import { useTheme } from "@/components/theme-provider";
 import { backgroundPreviewStyle } from "@/lib/backgrounds";
 
 export type SettingsProfile = {
   nickname: string;
   avatarUrl: string;
+  rainbow: boolean;
 };
 
 type TabKey = "profile" | "appearance" | "language" | "security" | "danger";
@@ -99,6 +102,13 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
 function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const router = useRouter();
 
+  const [savedName, setSavedName] = useState(profile.nickname);
+  const [name, setName] = useState(profile.nickname);
+  const [editingName, setEditingName] = useState(false);
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameMsg, setNameMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
   const [savedAvatar, setSavedAvatar] = useState(profile.avatarUrl);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState("");
@@ -147,9 +157,74 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [avatarDialogOpen, closeAvatarDialog]);
 
+  useEffect(() => {
+    if (!editingName) return;
+    nameInputRef.current?.focus();
+    nameInputRef.current?.select();
+  }, [editingName]);
+
+  const trimmedName = name.trim();
+  const nameError =
+    trimmedName.length === 0
+      ? "请输入用户名"
+      : trimmedName.length > 20
+        ? "用户名最多 20 个字符"
+        : /[\x00-\x1f]/.test(trimmedName)
+          ? "用户名含非法字符"
+          : "";
+  const canSaveName = trimmedName !== savedName && !nameError && !nameSaving;
+
   const avatarPreview = savedAvatar;
   const showAvatarImage = !!avatarPreview && brokenAvatar !== avatarPreview;
-  const avatarInitial = profile.nickname.trim().slice(0, 1).toUpperCase() || "?";
+  const avatarInitial = savedName.trim().slice(0, 1).toUpperCase() || "?";
+
+  function startNameEdit() {
+    setName(savedName);
+    setNameMsg(null);
+    setEditingName(true);
+  }
+
+  function cancelNameEdit() {
+    if (nameSaving) return;
+    setName(savedName);
+    setNameMsg(null);
+    setEditingName(false);
+  }
+
+  async function saveName(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canSaveName) return;
+    setNameSaving(true);
+    setNameMsg(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname: trimmedName }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        errors?: Record<string, string>;
+      };
+      if (!res.ok || !data.ok) {
+        setNameMsg({
+          type: "error",
+          text: data.errors?.nickname ?? data.message ?? "保存失败",
+        });
+        return;
+      }
+      setSavedName(trimmedName);
+      setName(trimmedName);
+      setNameMsg(null);
+      setEditingName(false);
+      router.refresh();
+    } catch {
+      setNameMsg({ type: "error", text: "网络错误，请稍后重试" });
+    } finally {
+      setNameSaving(false);
+    }
+  }
 
   function openAvatarDialog() {
     if (avatarBusy) return;
@@ -268,7 +343,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   return (
     <div className="space-y-4">
       <section className={CARD}>
-        <div className="flex items-center gap-4 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-4 p-5 sm:p-6">
           {showAvatarImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -283,20 +358,97 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
             </span>
           )}
 
-          <div className="min-w-0">
-            <h2 className="flex min-w-0 items-center gap-1 text-base font-semibold text-slate-900">
-              <span className="min-w-0 truncate">{profile.nickname.trim() || "未设置用户名"}</span>
+          <div className="min-w-60 flex-1">
+            {editingName ? (
+              <form onSubmit={saveName} className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={name}
+                    maxLength={20}
+                    autoComplete="nickname"
+                    aria-label="用户名"
+                    aria-invalid={!!nameError}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setNameMsg(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") cancelNameEdit();
+                    }}
+                    className={`h-8 w-44 min-w-0 rounded-lg border bg-slate-50/70 px-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                      nameError
+                        ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                        : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/10"
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!canSaveName}
+                    aria-label="保存用户名"
+                    title="保存用户名"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-emerald-600 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Check className="size-4" strokeWidth={2.2} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelNameEdit}
+                    disabled={nameSaving}
+                    aria-label="取消修改用户名"
+                    title="取消"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <X className="size-4" strokeWidth={2.2} />
+                  </button>
+                </div>
+                {(nameMsg || nameError) && (
+                  <p
+                    aria-live="polite"
+                    className={`mt-1.5 text-xs ${
+                      nameMsg?.type === "success" ? "text-emerald-600" : "text-red-600"
+                    }`}
+                  >
+                    {nameMsg?.text ?? nameError}
+                  </p>
+                )}
+              </form>
+            ) : (
+              <h2 className="flex min-w-0 items-center gap-1 text-base font-semibold text-slate-900">
+                {savedName ? (
+                  <UserName
+                    name={savedName}
+                    rainbow={profile.rainbow}
+                    className="min-w-0 truncate"
+                  />
+                ) : (
+                  <span className="min-w-0 truncate text-slate-400">未设置用户名</span>
+                )}
+                <button
+                  type="button"
+                  onClick={startNameEdit}
+                  aria-label="修改用户名"
+                  title="修改用户名"
+                  className="grid size-7 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <Pencil className="size-3.5" strokeWidth={2} />
+                </button>
+              </h2>
+            )}
+
+            <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
                 onClick={openAvatarDialog}
                 disabled={avatarBusy}
-                aria-label="更换头像"
-                title="更换头像"
-                className="grid size-7 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Pencil className="size-3.5" strokeWidth={2} />
+                <Upload className="size-3.5" strokeWidth={1.8} />
+                {avatarBusy ? "处理中…" : savedAvatar ? "更换头像" : "上传头像"}
               </button>
-            </h2>
+            </div>
+
             {avatarError && (
               <p aria-live="polite" className="mt-2 text-xs text-red-600">
                 {avatarError}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ensureSchema, query } from "@/lib/db";
+import { isRainbowName } from "@/lib/rainbow";
 import SettingsClient from "./SettingsClient";
 
 export const metadata = { title: "账户设置" };
@@ -8,6 +9,9 @@ export const metadata = { title: "账户设置" };
 type SettingsRow = {
   name: string | null;
   avatar_url: string | null;
+  role: string | null;
+  rainbow_enabled: boolean | null;
+  rainbow_until: Date | string | null;
 };
 
 export default async function SettingsPage() {
@@ -18,7 +22,7 @@ export default async function SettingsPage() {
   await ensureSchema();
 
   const rows = await query<SettingsRow>(
-    `SELECT name, avatar_url
+    `SELECT name, avatar_url, role, rainbow_enabled, rainbow_until
        FROM public.account_users
       WHERE email = $1
       LIMIT 1`,
@@ -33,6 +37,11 @@ export default async function SettingsPage() {
       initialProfile={{
         nickname: user.name ?? "",
         avatarUrl: user.avatar_url ?? "",
+        rainbow: isRainbowName({
+          role: user.role,
+          rainbow_enabled: user.rainbow_enabled,
+          rainbow_until: user.rainbow_until,
+        }),
       }}
     />
   );

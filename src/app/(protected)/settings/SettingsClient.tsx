@@ -11,7 +11,6 @@ import {
   Palette,
   Paperclip,
   ShieldCheck,
-  Sparkles,
   Trash2,
   Upload,
   User,
@@ -25,10 +24,6 @@ import { backgroundPreviewStyle } from "@/lib/backgrounds";
 export type SettingsProfile = {
   nickname: string;
   avatarUrl: string;
-  rainbowEnabled: boolean;
-  rainbowPrivileged: boolean;
-  rainbowUntil: string | null;
-  rainbowPrizeDays: number;
 };
 
 type TabKey = "profile" | "appearance" | "language" | "security" | "danger";
@@ -43,20 +38,11 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 
 const CARD =
   "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]";
-const PRIMARY_BUTTON =
-  "inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 const SECONDARY_BUTTON =
   "inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50";
 
 const AVATAR_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
-
-function remainingRainbowDays(until: string | null): number {
-  if (!until) return 0;
-  const t = new Date(until).getTime();
-  if (!Number.isFinite(t)) return 0;
-  return Math.max(0, Math.ceil((t - Date.now()) / 86400000));
-}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -113,11 +99,6 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
 function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const router = useRouter();
 
-  const [savedName, setSavedName] = useState(profile.nickname);
-  const [name, setName] = useState(profile.nickname);
-  const [nameSaving, setNameSaving] = useState(false);
-  const [nameMsg, setNameMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
   const [savedAvatar, setSavedAvatar] = useState(profile.avatarUrl);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState("");
@@ -129,18 +110,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const [avatarDialogError, setAvatarDialogError] = useState("");
   const avatarFileRef = useRef<HTMLInputElement>(null);
   const avatarDialogRef = useRef<HTMLDivElement>(null);
-
-  const [rainbowEnabled, setRainbowEnabled] = useState(profile.rainbowEnabled);
-  const [rainbowUntil, setRainbowUntil] = useState(profile.rainbowUntil);
-  const [rainbowPrizeDays, setRainbowPrizeDays] = useState(profile.rainbowPrizeDays);
-  const [rainbowBusy, setRainbowBusy] = useState(false);
-  const [rainbowClaiming, setRainbowClaiming] = useState(false);
-  const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(
-    null,
-  );
-  const rainbowDesiredRef = useRef(profile.rainbowEnabled);
-  const rainbowSavedRef = useRef(profile.rainbowEnabled);
-  const rainbowSavingRef = useRef(false);
 
   const resetAvatarDialog = useCallback(() => {
     setAvatarDialogOpen(false);
@@ -178,63 +147,9 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [avatarDialogOpen, closeAvatarDialog]);
 
-  const trimmedName = name.trim();
-  const nameError =
-    trimmedName.length === 0
-      ? "请输入用户名"
-      : trimmedName.length > 20
-        ? "用户名最多 20 个字符"
-        : /[\x00-\x1f]/.test(trimmedName)
-          ? "用户名含非法字符"
-          : "";
-  const canSaveName = trimmedName !== savedName && !nameError && !nameSaving;
-
   const avatarPreview = savedAvatar;
   const showAvatarImage = !!avatarPreview && brokenAvatar !== avatarPreview;
-  const avatarInitial = (trimmedName || savedName).slice(0, 1).toUpperCase() || "?";
-
-  const remainingDays = remainingRainbowDays(rainbowUntil);
-  const hasRainbowAccess = profile.rainbowPrivileged || remainingDays > 0;
-  const rainbowStatus = profile.rainbowPrivileged
-    ? "永久可用"
-    : remainingDays > 0
-      ? `剩余 ${remainingDays} 天`
-      : rainbowPrizeDays > 0
-        ? `${rainbowPrizeDays} 天奖品待使用`
-        : "暂不可用";
-
-  async function saveName(e: React.FormEvent) {
-    e.preventDefault();
-    if (!canSaveName) return;
-    setNameSaving(true);
-    setNameMsg(null);
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: trimmedName }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        errors?: Record<string, string>;
-      };
-      if (!res.ok || !data.ok) {
-        setNameMsg({
-          type: "error",
-          text: data.errors?.nickname ?? data.message ?? "保存失败",
-        });
-        return;
-      }
-      setSavedName(trimmedName);
-      setNameMsg({ type: "success", text: "已保存" });
-      router.refresh();
-    } catch {
-      setNameMsg({ type: "error", text: "网络错误，请稍后重试" });
-    } finally {
-      setNameSaving(false);
-    }
-  }
+  const avatarInitial = profile.nickname.trim().slice(0, 1).toUpperCase() || "?";
 
   function openAvatarDialog() {
     if (avatarBusy) return;
@@ -350,94 +265,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     }
   }
 
-  async function flushRainbow() {
-    if (rainbowSavingRef.current) return;
-    rainbowSavingRef.current = true;
-    setRainbowBusy(true);
-    try {
-      while (rainbowDesiredRef.current !== rainbowSavedRef.current) {
-        const target = rainbowDesiredRef.current;
-        const res = await fetch("/api/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rainbow_enabled: target }),
-        });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          message?: string;
-          errors?: Record<string, string>;
-          rainbow_until?: string;
-        };
-        if (!res.ok || !data.ok) {
-          const fallback = rainbowSavedRef.current;
-          rainbowDesiredRef.current = fallback;
-          setRainbowEnabled(fallback);
-          setRainbowMsg({
-            type: "error",
-            text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
-          });
-          return;
-        }
-        rainbowSavedRef.current = target;
-        if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
-      }
-    } catch {
-      const fallback = rainbowSavedRef.current;
-      rainbowDesiredRef.current = fallback;
-      setRainbowEnabled(fallback);
-      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
-    } finally {
-      rainbowSavingRef.current = false;
-      setRainbowBusy(false);
-      if (rainbowDesiredRef.current !== rainbowSavedRef.current) {
-        void flushRainbow();
-      }
-    }
-  }
-
-  function toggleRainbow() {
-    if (!hasRainbowAccess || rainbowClaiming) return;
-    const next = !rainbowDesiredRef.current;
-    rainbowDesiredRef.current = next;
-    setRainbowEnabled(next);
-    setRainbowMsg(null);
-    void flushRainbow();
-  }
-
-  async function claimRainbowPrizes() {
-    if (rainbowBusy) return;
-    setRainbowClaiming(true);
-    setRainbowBusy(true);
-    setRainbowMsg(null);
-    try {
-      const res = await fetch("/api/profile/rainbow/claim", { method: "POST" });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        claimedDays?: number;
-        rainbowUntil?: string;
-      };
-      if (!res.ok || !data.ok) {
-        setRainbowMsg({ type: "error", text: data.message ?? "领取失败" });
-        return;
-      }
-      if (data.rainbowUntil) setRainbowUntil(data.rainbowUntil);
-      setRainbowPrizeDays(0);
-      rainbowDesiredRef.current = true;
-      rainbowSavedRef.current = true;
-      setRainbowEnabled(true);
-      setRainbowMsg({
-        type: "success",
-        text: `已获得 ${data.claimedDays ?? 0} 天彩虹昵称`,
-      });
-    } catch {
-      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
-    } finally {
-      setRainbowBusy(false);
-      setRainbowClaiming(false);
-    }
-  }
-
   return (
     <div className="space-y-4">
       <section className={CARD}>
@@ -475,112 +302,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
               </p>
             )}
           </div>
-        </div>
-      </section>
-
-      <section className={CARD}>
-        <div className="p-5 sm:p-6">
-          <h2 className="text-base font-semibold text-slate-900">用户名</h2>
-
-          <form onSubmit={saveName} className="mt-3 flex items-start gap-2">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="nickname" className="sr-only">
-                用户名
-              </label>
-              <input
-                id="nickname"
-                type="text"
-                value={name}
-                maxLength={20}
-                autoComplete="nickname"
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setNameMsg(null);
-                }}
-                placeholder="用户名"
-                aria-invalid={!!nameError}
-                className={`h-[46px] w-full rounded-xl border bg-slate-50/70 px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
-                  nameError
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                    : "border-slate-200 focus:border-brand-500 focus:ring-brand-500/10"
-                }`}
-              />
-              {(nameMsg || nameError) && (
-                <p
-                  aria-live="polite"
-                  className={`mt-2 text-xs ${
-                    nameMsg?.type === "success" ? "text-emerald-600" : "text-red-600"
-                  }`}
-                >
-                  {nameMsg?.text ?? nameError}
-                </p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={!canSaveName}
-              className={`${PRIMARY_BUTTON} h-[46px] shrink-0`}
-            >
-              {nameSaving ? "保存中…" : "保存"}
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <section className={CARD}>
-        <div className="p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                <Sparkles className="size-4 text-brand-500" />
-                彩虹昵称
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">{rainbowStatus}</p>
-            </div>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={rainbowEnabled}
-              aria-label="彩虹昵称"
-              aria-busy={rainbowBusy}
-              disabled={!hasRainbowAccess || rainbowClaiming}
-              onClick={toggleRainbow}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-80 ${
-                rainbowEnabled ? "bg-brand-600 shadow-sm shadow-brand-600/20" : "bg-slate-200"
-              }`}
-            >
-              <span
-                className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  rainbowEnabled ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-
-          {(rainbowPrizeDays > 0 || rainbowMsg) && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-              {rainbowPrizeDays > 0 && (
-                <button
-                  type="button"
-                  onClick={claimRainbowPrizes}
-                  disabled={rainbowBusy}
-                  className="rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-violet-500 px-3 py-1 text-[11px] font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {rainbowBusy ? "处理中…" : `使用 ${rainbowPrizeDays} 天奖品`}
-                </button>
-              )}
-              {rainbowMsg && (
-                <span
-                  className={`text-[11px] ${
-                    rainbowMsg.type === "error" ? "text-red-600" : "text-emerald-600"
-                  }`}
-                >
-                  {rainbowMsg.text}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       </section>
 

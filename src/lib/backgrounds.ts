@@ -10,16 +10,6 @@ export const BACKGROUND_COOKIE = "astra-background";
 
 export const BACKGROUNDS = [
   {
-    id: "white",
-    label: "纯白",
-    style: {
-      backgroundColor: "#ffffff",
-      backgroundImage: "none",
-      backgroundAttachment: "scroll",
-      backgroundSize: "auto",
-    },
-  },
-  {
     id: "mist",
     label: "雾灰",
     style: {
@@ -55,7 +45,7 @@ export const BACKGROUNDS = [
 
 export type BackgroundId = (typeof BACKGROUNDS)[number]["id"];
 
-export const DEFAULT_BACKGROUND: BackgroundId = "white";
+export const DEFAULT_BACKGROUND: BackgroundId = "mist";
 
 export function getBackground(id?: string | null): (typeof BACKGROUNDS)[number] {
   return BACKGROUNDS.find((background) => background.id === id) ?? BACKGROUNDS[0];

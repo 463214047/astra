@@ -348,10 +348,11 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
 
   async function toggleRainbow() {
     if (!hasRainbowAccess || rainbowBusy) return;
+    const next = !rainbowEnabled;
+    setRainbowEnabled(next);
     setRainbowBusy(true);
     setRainbowMsg(null);
     try {
-      const next = !rainbowEnabled;
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -364,16 +365,17 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
         rainbow_until?: string;
       };
       if (!res.ok || !data.ok) {
+        setRainbowEnabled(!next);
         setRainbowMsg({
           type: "error",
           text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
         });
         return;
       }
-      setRainbowEnabled(next);
       if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
       router.refresh();
     } catch {
+      setRainbowEnabled(!next);
       setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
     } finally {
       setRainbowBusy(false);
@@ -518,7 +520,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
               aria-label="彩虹昵称"
               disabled={!hasRainbowAccess || rainbowBusy}
               onClick={toggleRainbow}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-80 ${
                 rainbowEnabled ? "bg-brand-600 shadow-sm shadow-brand-600/20" : "bg-slate-200"
               }`}
             >

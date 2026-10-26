@@ -73,8 +73,9 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
   const hasRainbowAccess = initial.rainbow_privileged || rainbowRemainingDays > 0;
 
   async function toggleRainbow() {
-    if (rainbowBusy) return;
+    if (rainbowBusy || !hasRainbowAccess) return;
     const next = !rainbowEnabled;
+    setRainbowEnabled(next);
     setRainbowBusy(true);
     setRainbowMsg(null);
     try {
@@ -85,13 +86,14 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
       });
       const data = await res.json();
       if (res.ok && data.ok) {
-        setRainbowEnabled(next);
         if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
         router.refresh();
       } else {
+        setRainbowEnabled(!next);
         setRainbowMsg(data.errors?.rainbow_enabled ?? data.message ?? "操作失败");
       }
     } catch {
+      setRainbowEnabled(!next);
       setRainbowMsg("网络错误");
     } finally {
       setRainbowBusy(false);
@@ -281,7 +283,7 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
                     aria-label="彩虹昵称"
                     disabled={!hasRainbowAccess || rainbowBusy}
                     onClick={toggleRainbow}
-                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-80 ${
                       rainbowEnabled ? "bg-brand-600 shadow-sm shadow-brand-600/20" : "bg-slate-200"
                     }`}
                   >

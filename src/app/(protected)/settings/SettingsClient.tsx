@@ -100,7 +100,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
 
         <div className="min-w-0">
           {tab === "profile" && <ProfilePanel profile={initialProfile} />}
-          {tab === "appearance" && <AppearancePanel />}
+          {tab === "appearance" && <AppearancePanel profile={initialProfile} />}
           {tab === "language" && <LanguagePanel />}
           {tab === "security" && <SecurityPanel />}
           {tab === "danger" && <DangerPanel />}
@@ -129,14 +129,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const [avatarDialogError, setAvatarDialogError] = useState("");
   const avatarFileRef = useRef<HTMLInputElement>(null);
   const avatarDialogRef = useRef<HTMLDivElement>(null);
-
-  const [rainbowEnabled, setRainbowEnabled] = useState(profile.rainbowEnabled);
-  const [rainbowUntil, setRainbowUntil] = useState(profile.rainbowUntil);
-  const [rainbowPrizeDays, setRainbowPrizeDays] = useState(profile.rainbowPrizeDays);
-  const [rainbowBusy, setRainbowBusy] = useState(false);
-  const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(
-    null,
-  );
 
   const resetAvatarDialog = useCallback(() => {
     setAvatarDialogOpen(false);
@@ -188,16 +180,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   const avatarPreview = savedAvatar;
   const showAvatarImage = !!avatarPreview && brokenAvatar !== avatarPreview;
   const avatarInitial = (trimmedName || savedName).slice(0, 1).toUpperCase() || "?";
-
-  const remainingDays = remainingRainbowDays(rainbowUntil);
-  const hasRainbowAccess = profile.rainbowPrivileged || remainingDays > 0;
-  const rainbowStatus = profile.rainbowPrivileged
-    ? "永久可用"
-    : remainingDays > 0
-      ? `剩余 ${remainingDays} 天`
-      : rainbowPrizeDays > 0
-        ? `${rainbowPrizeDays} 天奖品待使用`
-        : "暂不可用";
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
@@ -346,71 +328,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
     }
   }
 
-  async function toggleRainbow() {
-    if (!hasRainbowAccess || rainbowBusy) return;
-    setRainbowBusy(true);
-    setRainbowMsg(null);
-    try {
-      const next = !rainbowEnabled;
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rainbow_enabled: next }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        errors?: Record<string, string>;
-        rainbow_until?: string;
-      };
-      if (!res.ok || !data.ok) {
-        setRainbowMsg({
-          type: "error",
-          text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
-        });
-        return;
-      }
-      setRainbowEnabled(next);
-      if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
-      router.refresh();
-    } catch {
-      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
-    } finally {
-      setRainbowBusy(false);
-    }
-  }
-
-  async function claimRainbowPrizes() {
-    if (rainbowBusy) return;
-    setRainbowBusy(true);
-    setRainbowMsg(null);
-    try {
-      const res = await fetch("/api/profile/rainbow/claim", { method: "POST" });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        claimedDays?: number;
-        rainbowUntil?: string;
-      };
-      if (!res.ok || !data.ok) {
-        setRainbowMsg({ type: "error", text: data.message ?? "领取失败" });
-        return;
-      }
-      if (data.rainbowUntil) setRainbowUntil(data.rainbowUntil);
-      setRainbowPrizeDays(0);
-      setRainbowEnabled(true);
-      setRainbowMsg({
-        type: "success",
-        text: `已获得 ${data.claimedDays ?? 0} 天彩虹昵称`,
-      });
-      router.refresh();
-    } catch {
-      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
-    } finally {
-      setRainbowBusy(false);
-    }
-  }
-
   return (
     <div className="space-y-4">
       <section className={CARD}>
@@ -497,64 +414,6 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
               {nameSaving ? "保存中…" : "保存"}
             </button>
           </form>
-        </div>
-      </section>
-
-      <section className={CARD}>
-        <div className="p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                <Sparkles className="size-4 text-brand-500" />
-                彩虹昵称
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">{rainbowStatus}</p>
-            </div>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={rainbowEnabled}
-              aria-label="彩虹昵称"
-              disabled={!hasRainbowAccess || rainbowBusy}
-              onClick={toggleRainbow}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
-                rainbowEnabled
-                  ? "bg-gradient-to-r from-rose-400 via-amber-400 to-violet-500"
-                  : "bg-slate-200"
-              }`}
-            >
-              <span
-                className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  rainbowEnabled ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-
-          {(rainbowPrizeDays > 0 || rainbowMsg) && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-              {rainbowPrizeDays > 0 && (
-                <button
-                  type="button"
-                  onClick={claimRainbowPrizes}
-                  disabled={rainbowBusy}
-                  className="rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-violet-500 px-3 py-1 text-[11px] font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {rainbowBusy ? "处理中…" : `使用 ${rainbowPrizeDays} 天奖品`}
-                </button>
-              )}
-              {rainbowMsg && (
-                <span
-                  className={`text-[11px] ${
-                    rainbowMsg.type === "error" ? "text-red-600" : "text-emerald-600"
-                  }`}
-                >
-                  {rainbowMsg.text}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       </section>
 
@@ -706,7 +565,8 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
   );
 }
 
-function AppearancePanel() {
+function AppearancePanel({ profile }: { profile: SettingsProfile }) {
+  const router = useRouter();
   const {
     theme: activeTheme,
     setTheme,
@@ -715,6 +575,89 @@ function AppearancePanel() {
     setBackground,
     backgrounds,
   } = useTheme();
+
+  const [rainbowEnabled, setRainbowEnabled] = useState(profile.rainbowEnabled);
+  const [rainbowUntil, setRainbowUntil] = useState(profile.rainbowUntil);
+  const [rainbowPrizeDays, setRainbowPrizeDays] = useState(profile.rainbowPrizeDays);
+  const [rainbowBusy, setRainbowBusy] = useState(false);
+  const [rainbowMsg, setRainbowMsg] = useState<{ type: "success" | "error"; text: string } | null>(
+    null,
+  );
+
+  const remainingDays = remainingRainbowDays(rainbowUntil);
+  const hasRainbowAccess = profile.rainbowPrivileged || remainingDays > 0;
+  const rainbowStatus = profile.rainbowPrivileged
+    ? "永久可用"
+    : remainingDays > 0
+      ? `剩余 ${remainingDays} 天`
+      : rainbowPrizeDays > 0
+        ? `${rainbowPrizeDays} 天奖品待使用`
+        : "暂不可用";
+
+  async function toggleRainbow() {
+    if (!hasRainbowAccess || rainbowBusy) return;
+    setRainbowBusy(true);
+    setRainbowMsg(null);
+    try {
+      const next = !rainbowEnabled;
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rainbow_enabled: next }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        errors?: Record<string, string>;
+        rainbow_until?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setRainbowMsg({
+          type: "error",
+          text: data.errors?.rainbow_enabled ?? data.message ?? "操作失败",
+        });
+        return;
+      }
+      setRainbowEnabled(next);
+      if (data.rainbow_until) setRainbowUntil(data.rainbow_until);
+      router.refresh();
+    } catch {
+      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
+    } finally {
+      setRainbowBusy(false);
+    }
+  }
+
+  async function claimRainbowPrizes() {
+    if (rainbowBusy) return;
+    setRainbowBusy(true);
+    setRainbowMsg(null);
+    try {
+      const res = await fetch("/api/profile/rainbow/claim", { method: "POST" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        claimedDays?: number;
+        rainbowUntil?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setRainbowMsg({ type: "error", text: data.message ?? "领取失败" });
+        return;
+      }
+      if (data.rainbowUntil) setRainbowUntil(data.rainbowUntil);
+      setRainbowPrizeDays(0);
+      setRainbowEnabled(true);
+      setRainbowMsg({
+        type: "success",
+        text: `已获得 ${data.claimedDays ?? 0} 天彩虹昵称`,
+      });
+      router.refresh();
+    } catch {
+      setRainbowMsg({ type: "error", text: "网络错误，请稍后重试" });
+    } finally {
+      setRainbowBusy(false);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -788,6 +731,62 @@ function AppearancePanel() {
             })}
           </div>
         </div>
+      </section>
+
+      <section className={CARD}>
+        <div className="flex items-center justify-between gap-4 border-b border-slate-100 p-5 sm:p-6">
+          <div>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+              <Sparkles className="size-4 text-brand-500" />
+              彩虹昵称
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">{rainbowStatus}</p>
+          </div>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={rainbowEnabled}
+            aria-label="彩虹昵称"
+            disabled={!hasRainbowAccess || rainbowBusy}
+            onClick={toggleRainbow}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+              rainbowEnabled
+                ? "bg-gradient-to-r from-rose-400 via-amber-400 to-violet-500"
+                : "bg-slate-200"
+            }`}
+          >
+            <span
+              className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                rainbowEnabled ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        {(rainbowPrizeDays > 0 || rainbowMsg) && (
+          <div className="flex flex-wrap items-center gap-2 px-5 py-3 sm:px-6">
+            {rainbowPrizeDays > 0 && (
+              <button
+                type="button"
+                onClick={claimRainbowPrizes}
+                disabled={rainbowBusy}
+                className="rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-violet-500 px-3 py-1 text-[11px] font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+              >
+                {rainbowBusy ? "处理中…" : `使用 ${rainbowPrizeDays} 天奖品`}
+              </button>
+            )}
+            {rainbowMsg && (
+              <span
+                className={`text-[11px] ${
+                  rainbowMsg.type === "error" ? "text-red-600" : "text-emerald-600"
+                }`}
+              >
+                {rainbowMsg.text}
+              </span>
+            )}
+          </div>
+        )}
       </section>
     </div>
   );

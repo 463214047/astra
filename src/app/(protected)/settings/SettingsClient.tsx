@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
-import { DEFAULT_THEME } from "@/lib/themes";
 
 export type SettingsProfile = {
   nickname: string;
@@ -713,9 +712,6 @@ function AppearancePanel() {
     <section className={CARD}>
       <div className="border-b border-slate-100 p-5 sm:p-6">
         <h2 className="text-base font-semibold text-slate-900">颜色风格</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          选择一个强调色，全站按钮、链接和选中态会立即切换。
-        </p>
       </div>
 
       <div className="p-5 sm:p-6">
@@ -737,39 +733,14 @@ function AppearancePanel() {
                 <span
                   className={`size-10 shrink-0 rounded-lg bg-gradient-to-br ${theme.swatch} shadow-sm`}
                 />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-slate-900">{theme.label}</span>
-                  <span className="mt-0.5 block text-xs text-slate-500">{theme.description}</span>
+                <span className="min-w-0 flex-1 text-sm font-semibold text-slate-900">
+                  {theme.label}
                 </span>
                 {active && <Check className="size-4 shrink-0 text-brand-700" strokeWidth={2.4} />}
               </button>
             );
           })}
         </div>
-
-        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-          <p className="text-xs font-medium text-slate-500">预览</p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <span className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20">
-              主按钮
-            </span>
-            <span className="text-sm font-semibold text-brand-700">链接文字</span>
-            <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200">
-              标签
-            </span>
-            <span className="size-6 rounded-full bg-brand-500 ring-4 ring-brand-500/15" />
-          </div>
-        </div>
-
-        {activeTheme !== DEFAULT_THEME && (
-          <button
-            type="button"
-            onClick={() => setTheme(DEFAULT_THEME)}
-            className={`${SECONDARY_BUTTON} mt-4`}
-          >
-            恢复默认
-          </button>
-        )}
       </div>
     </section>
   );

@@ -746,6 +746,13 @@ function SecurityPanel() {
     <section className={CARD}>
       <div className="divide-y divide-slate-100">
         <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900">登录密码</h2>
+          <Link href="/settings/security#password" className={SECONDARY_BUTTON}>
+            重设密码
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
           <h2 className="text-base font-semibold text-slate-900">两步验证（2FA）</h2>
           <Link href="/settings/security" className={SECONDARY_BUTTON}>
             管理

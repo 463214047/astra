@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { KeyRound } from "lucide-react";
 import QRCode from "qrcode";
 
 type StatusResp = { ok: true; enabled: boolean; hasPassword: boolean };
@@ -21,6 +22,14 @@ export default function SecurityPage() {
   const [disablePwd, setDisablePwd] = useState("");
   const [disableCode, setDisableCode] = useState("");
   const [disableLoading, setDisableLoading] = useState(false);
+
+  // ---- 重设密码 ----
+  const [pwdOpen, setPwdOpen] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState<string | null>(null);
 
   // ---- 表单 ----
   const [setupPwd, setSetupPwd] = useState("");
@@ -134,6 +143,73 @@ export default function SecurityPage() {
     }
   }
 
+  /* ==================== 重设密码 ==================== */
+  function openPwdForm() {
+    setCurrentPwd("");
+    setNewPwd("");
+    setConfirmPwd("");
+    setPwdError(null);
+    setMsg(null);
+    setPwdOpen(true);
+  }
+
+  function closePwdForm() {
+    if (pwdLoading) return;
+    setPwdOpen(false);
+    setCurrentPwd("");
+    setNewPwd("");
+    setConfirmPwd("");
+    setPwdError(null);
+  }
+
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwdError(null);
+    setMsg(null);
+
+    if (!currentPwd) {
+      setPwdError("请输入当前密码");
+      return;
+    }
+    if (newPwd.length < 6) {
+      setPwdError("新密码至少 6 位");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdError("两次输入的新密码不一致");
+      return;
+    }
+
+    setPwdLoading(true);
+    try {
+      const res = await fetch("/api/account/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_password: currentPwd,
+          new_password: newPwd,
+          confirm_password: confirmPwd,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        setPwdError(data.message ?? "重设失败");
+        return;
+      }
+
+      setPwdOpen(false);
+      setCurrentPwd("");
+      setNewPwd("");
+      setConfirmPwd("");
+      setMsg("✓ 密码已重设");
+      setMsgType("success");
+    } catch {
+      setPwdError("网络错误，请稍后重试");
+    } finally {
+      setPwdLoading(false);
+    }
+  }
+
   /* ==================== 渲染 ==================== */
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
@@ -160,6 +236,140 @@ export default function SecurityPage() {
           {error}
         </div>
       )}
+
+      {/* 登录密码卡片 */}
+      <section
+        id="password"
+        className="mb-6 scroll-mt-20 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+              <KeyRound className="size-5 text-brand-700" aria-hidden="true" />
+              登录密码
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">定期更换密码可以降低账号被盗风险。</p>
+          </div>
+          {status?.hasPassword && !pwdOpen && (
+            <button
+              type="button"
+              onClick={openPwdForm}
+              className="shrink-0 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-100"
+            >
+              重设密码
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+            <Spinner /> 加载中…
+          </div>
+        ) : !status ? (
+          <p className="mt-4 text-sm text-slate-500">无法获取密码状态，请刷新页面重试。</p>
+        ) : status.hasPassword ? (
+          pwdOpen ? (
+            <form onSubmit={changePassword} noValidate className="mt-5 space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">当前密码</label>
+                <input
+                  type="password"
+                  value={currentPwd}
+                  onChange={(e) => {
+                    setCurrentPwd(e.target.value);
+                    setPwdError(null);
+                  }}
+                  autoComplete="current-password"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                  placeholder="输入当前密码"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">新密码</label>
+                <input
+                  type="password"
+                  value={newPwd}
+                  onChange={(e) => {
+                    setNewPwd(e.target.value);
+                    setPwdError(null);
+                  }}
+                  autoComplete="new-password"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                  placeholder="至少 6 位"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">确认新密码</label>
+                <input
+                  type="password"
+                  value={confirmPwd}
+                  onChange={(e) => {
+                    setConfirmPwd(e.target.value);
+                    setPwdError(null);
+                  }}
+                  autoComplete="new-password"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                  placeholder="再次输入新密码"
+                />
+              </div>
+
+              {confirmPwd && newPwd !== confirmPwd && (
+                <p className="text-xs font-medium text-red-600">两次输入的新密码不一致</p>
+              )}
+              {pwdError && (
+                <p
+                  aria-live="polite"
+                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
+                >
+                  {pwdError}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <a
+                  href="/forgot-password"
+                  className="text-xs text-slate-500 transition hover:text-brand-700 hover:underline"
+                >
+                  忘记当前密码？通过邮箱重置
+                </a>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={closePwdForm}
+                    disabled={pwdLoading}
+                    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      pwdLoading || !currentPwd || newPwd.length < 6 || newPwd !== confirmPwd
+                    }
+                    className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
+                  >
+                    {pwdLoading && <Spinner />}
+                    {pwdLoading ? "重设中…" : "确认重设"}
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : null
+        ) : (
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50/60 p-4">
+            <p className="text-sm font-medium text-amber-900">当前账号未设置登录密码</p>
+            <p className="mt-1 text-xs text-amber-800">
+              你目前通过 GitHub 登录。设置密码后即可使用邮箱 + 密码登录。
+            </p>
+            <a
+              href="/settings/account"
+              className="mt-3 inline-flex items-center gap-1 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-700"
+            >
+              前往账号设置 →
+            </a>
+          </div>
+        )}
+      </section>
 
       {/* 2FA 卡片 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

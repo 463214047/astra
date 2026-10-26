@@ -679,4 +679,26 @@ export const EN_MESSAGES: Record<string, string> = {
   "★★★★★　彩虹ID（30~365 天） · 魔力 800~2000": "★★★★★ Rainbow ID (30–365 days) · Magic 800–2000",
   "★★★★　彩虹ID（7~90 天） · 魔力 200~600": "★★★★ Rainbow ID (7–90 days) · Magic 200–600",
   "★★★　魔力 20~100": "★★★ Magic 20–100",
+  登录密码: "Sign-in password",
+  重设密码: "Reset password",
+  "定期更换密码可以降低账号被盗风险。":
+    "Changing your password regularly reduces the risk of account theft.",
+  "无法获取密码状态，请刷新页面重试。":
+    "Unable to load password status. Refresh the page and try again.",
+  当前账号未设置登录密码: "This account has no sign-in password",
+  "你目前通过 GitHub 登录。设置密码后即可使用邮箱 + 密码登录。":
+    "You currently sign in with GitHub. Set a password to also sign in with email and password.",
+  输入当前密码: "Enter your current password",
+  "至少 6 位": "At least 6 characters",
+  两次输入的新密码不一致: "The new passwords do not match",
+  "忘记当前密码？通过邮箱重置": "Forgot your current password? Reset it by email",
+  确认重设: "Reset password",
+  "重设中…": "Resetting…",
+  重设失败: "Failed to reset password",
+  密码已重设: "Password reset",
+  "✓ 密码已重设": "✓ Password reset",
+  "新密码至少 6 位": "New password must be at least 6 characters",
+  当前密码错误: "Current password is incorrect",
+  "当前账号未设置密码，请先在账号与绑定中设置密码":
+    "This account has no password. Set one in Account & linked sign-ins first.",
 };

@@ -461,6 +461,11 @@ export const EN_MESSAGES: Record<string, string> = {
   "选择一个强调色，全站按钮、链接和选中态会立即切换。":
     "Choose an accent color. Buttons, links, and selected states update instantly.",
   颜色风格: "Color theme",
+  页面背景: "Page background",
+  纯白: "White",
+  雾灰: "Mist",
+  柔光: "Glow",
+  网格: "Grid",
   验证并登录: "Verify and sign in",
   验证链接已过期或无效: "The verification link is invalid or expired.",
   验证码错误: "Invalid code",

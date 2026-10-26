@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
+import { backgroundPreviewStyle } from "@/lib/backgrounds";
 
 export type SettingsProfile = {
   nickname: string;
@@ -706,43 +707,89 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
 }
 
 function AppearancePanel() {
-  const { theme: activeTheme, setTheme, themes } = useTheme();
+  const {
+    theme: activeTheme,
+    setTheme,
+    themes,
+    background: activeBackground,
+    setBackground,
+    backgrounds,
+  } = useTheme();
 
   return (
-    <section className={CARD}>
-      <div className="border-b border-slate-100 p-5 sm:p-6">
-        <h2 className="text-base font-semibold text-slate-900">颜色风格</h2>
-      </div>
-
-      <div className="p-5 sm:p-6">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {themes.map((theme) => {
-            const active = theme.id === activeTheme;
-            return (
-              <button
-                key={theme.id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setTheme(theme.id)}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
-                  active
-                    ? "border-brand-300 bg-brand-50/70 ring-2 ring-brand-500/15"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <span
-                  className={`size-10 shrink-0 rounded-lg bg-gradient-to-br ${theme.swatch} shadow-sm`}
-                />
-                <span className="min-w-0 flex-1 text-sm font-semibold text-slate-900">
-                  {theme.label}
-                </span>
-                {active && <Check className="size-4 shrink-0 text-brand-700" strokeWidth={2.4} />}
-              </button>
-            );
-          })}
+    <div className="space-y-4">
+      <section className={CARD}>
+        <div className="border-b border-slate-100 p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900">颜色风格</h2>
         </div>
-      </div>
-    </section>
+
+        <div className="p-5 sm:p-6">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {themes.map((theme) => {
+              const active = theme.id === activeTheme;
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setTheme(theme.id)}
+                  className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                    active
+                      ? "border-brand-300 bg-brand-50/70 ring-2 ring-brand-500/15"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <span
+                    className={`size-10 shrink-0 rounded-lg bg-gradient-to-br ${theme.swatch} shadow-sm`}
+                  />
+                  <span className="min-w-0 flex-1 text-sm font-semibold text-slate-900">
+                    {theme.label}
+                  </span>
+                  {active && <Check className="size-4 shrink-0 text-brand-700" strokeWidth={2.4} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className={CARD}>
+        <div className="border-b border-slate-100 p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900">页面背景</h2>
+        </div>
+
+        <div className="p-5 sm:p-6">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {backgrounds.map((background) => {
+              const active = background.id === activeBackground;
+              return (
+                <button
+                  key={background.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setBackground(background.id)}
+                  className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                    active
+                      ? "border-brand-300 bg-brand-50/70 ring-2 ring-brand-500/15"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className="size-10 shrink-0 rounded-lg border border-slate-200/80 shadow-sm"
+                    style={backgroundPreviewStyle(background)}
+                  />
+                  <span className="min-w-0 flex-1 text-sm font-semibold text-slate-900">
+                    {background.label}
+                  </span>
+                  {active && <Check className="size-4 shrink-0 text-brand-700" strokeWidth={2.4} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

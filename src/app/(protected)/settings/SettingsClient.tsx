@@ -442,7 +442,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                 type="button"
                 onClick={openAvatarDialog}
                 disabled={avatarBusy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Upload className="size-3.5" strokeWidth={1.8} />
                 {avatarBusy ? "处理中…" : savedAvatar ? "更换头像" : "上传头像"}

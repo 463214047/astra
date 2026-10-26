@@ -41,10 +41,8 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 
 const CARD =
   "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]";
-const SECONDARY_BUTTON =
-  "inline-flex items-center justify-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 transition hover:border-brand-300 hover:bg-brand-100 disabled:opacity-50";
-const LOGOUT_BUTTON =
-  "inline-flex items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:opacity-50";
+const ACTION_BUTTON =
+  "inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-600/90 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 
 const AVATAR_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
@@ -444,7 +442,7 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
                 type="button"
                 onClick={openAvatarDialog}
                 disabled={avatarBusy}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-600/90 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className={ACTION_BUTTON}
               >
                 <Upload className="size-3.5" strokeWidth={1.8} />
                 {avatarBusy ? "处理中…" : savedAvatar ? "更换头像" : "上传头像"}
@@ -749,14 +747,14 @@ function SecurityPanel() {
       <div className="divide-y divide-slate-100">
         <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
           <h2 className="text-base font-semibold text-slate-900">登录密码</h2>
-          <Link href="/settings/security#password" className={SECONDARY_BUTTON}>
+          <Link href="/settings/security#password" className={ACTION_BUTTON}>
             重设密码
           </Link>
         </div>
 
         <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
           <h2 className="text-base font-semibold text-slate-900">两步验证（2FA）</h2>
-          <Link href="/settings/security" className={SECONDARY_BUTTON}>
+          <Link href="/settings/security" className={ACTION_BUTTON}>
             管理
           </Link>
         </div>
@@ -767,7 +765,7 @@ function SecurityPanel() {
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className={LOGOUT_BUTTON}
+            className={ACTION_BUTTON}
           >
             {loggingOut ? "退出中…" : "退出登录"}
           </button>

@@ -10,9 +10,9 @@ import {
   Languages,
   Palette,
   Paperclip,
+  Pencil,
   ShieldCheck,
   Trash2,
-  Upload,
   User,
   X,
   type LucideIcon,
@@ -284,18 +284,19 @@ function ProfilePanel({ profile }: { profile: SettingsProfile }) {
           )}
 
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-slate-900">头像</h2>
-            <div className="mt-3 flex items-center gap-3">
+            <h2 className="flex min-w-0 items-center gap-1 text-base font-semibold text-slate-900">
+              <span className="min-w-0 truncate">{profile.nickname.trim() || "未设置用户名"}</span>
               <button
                 type="button"
                 onClick={openAvatarDialog}
                 disabled={avatarBusy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="更换头像"
+                title="更换头像"
+                className="grid size-7 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Upload className="size-3.5" strokeWidth={1.8} />
-                {avatarBusy ? "处理中…" : savedAvatar ? "更换头像" : "上传头像"}
+                <Pencil className="size-3.5" strokeWidth={2} />
               </button>
-            </div>
+            </h2>
             {avatarError && (
               <p aria-live="polite" className="mt-2 text-xs text-red-600">
                 {avatarError}

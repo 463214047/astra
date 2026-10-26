@@ -282,9 +282,7 @@ export default function ProfileEditor({ initial }: { initial: ProfileData }) {
                     disabled={!hasRainbowAccess || rainbowBusy}
                     onClick={toggleRainbow}
                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                      rainbowEnabled
-                        ? "bg-gradient-to-r from-rose-400 via-amber-400 to-violet-500"
-                        : "bg-slate-200"
+                      rainbowEnabled ? "bg-brand-600 shadow-sm shadow-brand-600/20" : "bg-slate-200"
                     }`}
                   >
                     <span

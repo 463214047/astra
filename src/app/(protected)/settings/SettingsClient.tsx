@@ -42,7 +42,9 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 const CARD =
   "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]";
 const SECONDARY_BUTTON =
-  "inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50";
+  "inline-flex items-center justify-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 transition hover:border-brand-300 hover:bg-brand-100 disabled:opacity-50";
+const LOGOUT_BUTTON =
+  "inline-flex items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:opacity-50";
 
 const AVATAR_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
@@ -765,7 +767,7 @@ function SecurityPanel() {
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className={SECONDARY_BUTTON}
+            className={LOGOUT_BUTTON}
           >
             {loggingOut ? "退出中…" : "退出登录"}
           </button>

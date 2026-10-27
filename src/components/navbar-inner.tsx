@@ -15,8 +15,13 @@ type Props = {
 
 export default function NavbarInner({ loggedIn, userImage, userName, myUid, unreadTotal }: Props) {
   const pathname = usePathname();
-  // 登录/注册页不渲染顶部导航栏
-  if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+  // 未登录时不显示顶部导航栏；登录、注册、重置密码页也不显示
+  if (
+    !loggedIn ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/forgot-password")
+  ) {
     return null;
   }
 

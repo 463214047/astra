@@ -754,7 +754,7 @@ function SecurityPanel() {
 
         <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
           <h2 className="text-base font-semibold text-slate-900">两步验证（2FA）</h2>
-          <Link href="/settings/security" className={ACTION_BUTTON}>
+          <Link href="/settings/security#two-factor" className={ACTION_BUTTON}>
             管理
           </Link>
         </div>

@@ -56,6 +56,13 @@ export default function SecurityPage() {
     fetchStatus();
   }, [fetchStatus]);
 
+  // 从设置页“重设密码”跳转过来时，自动展开密码表单
+  useEffect(() => {
+    if (window.location.hash !== "#password") return;
+    const frame = requestAnimationFrame(() => setPwdOpen(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   /* ==================== 启动 Setup ==================== */
   async function startSetup(e: React.FormEvent) {
     e.preventDefault();
@@ -372,7 +379,10 @@ export default function SecurityPage() {
       </section>
 
       {/* 2FA 卡片 */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section
+        id="two-factor"
+        className="scroll-mt-20 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AuthBackdrop } from "@/components/auth-backdrop";
+import { AuthShell } from "@/components/auth-shell";
 import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
@@ -8,9 +8,8 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="relative grid min-h-dvh place-items-center overflow-hidden p-4">
-      <AuthBackdrop />
+    <AuthShell>
       <LoginForm />
-    </main>
+    </AuthShell>
   );
 }

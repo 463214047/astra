@@ -680,6 +680,8 @@ export const EN_MESSAGES: Record<string, string> = {
   "★★★　魔力 20~100": "★★★ Magic 20–100",
   登录密码: "Sign-in password",
   重设密码: "Reset password",
+  两步验证: "Two-factor authentication",
+  "验证当前密码后设置新密码。": "Verify your current password, then set a new one.",
   "定期更换密码可以降低账号被盗风险。":
     "Changing your password regularly reduces the risk of account theft.",
   "无法获取密码状态，请刷新页面重试。":

@@ -254,7 +254,8 @@ button:disabled,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
+  /* 加载指示器仍需旋转，避免用户误以为操作卡死 */
+  *:not(.animate-spin),
   *::before,
   *::after {
     animation: none !important;

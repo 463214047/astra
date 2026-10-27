@@ -186,17 +186,6 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-      {/* 面包屑 */}
-      <nav className="mb-5 flex items-center gap-1.5 text-xs text-slate-400">
-        <Link href="/forum" className="hover:text-slate-700">
-          论坛
-        </Link>
-        <span>/</span>
-        <span className="truncate text-slate-500" data-no-translate>
-          {post.title}
-        </span>
-      </nav>
-
       {/* 主卡 */}
       <article className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
         <div className="p-5 sm:p-7">

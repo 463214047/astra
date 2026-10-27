@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
@@ -38,18 +37,6 @@ export default function DeletePage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/profile" className="hover:text-slate-700">
-          个人主页
-        </Link>
-        <span>/</span>
-        <Link href="/settings" className="hover:text-slate-700">
-          设置
-        </Link>
-        <span>/</span>
-        <span className="text-slate-700">注销账号</span>
-      </div>
-
       <section className="rounded-2xl border border-red-200 bg-red-50/40 p-6">
         <div className="flex items-start gap-4">
           <div className="grid size-11 shrink-0 place-items-center rounded-full bg-red-100">

@@ -248,7 +248,6 @@ export const EN_MESSAGES: Record<string, string> = {
     "Password set. You can now sign in with email and password.",
   "密码长度至少 6 位": "Password must be at least 6 characters",
   "密码重置成功，请使用新密码登录": "Password reset. Please sign in with your new password.",
-  面包屑: "Breadcrumbs",
   魔力: "Magic",
   魔力值: "Magic",
   "默认 · 冷静、克制": "Default · Calm and restrained",

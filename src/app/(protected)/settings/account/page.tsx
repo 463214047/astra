@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 type OAuthAccount = {
@@ -123,18 +122,6 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/profile" className="hover:text-slate-700">
-          个人主页
-        </Link>
-        <span>/</span>
-        <Link href="/settings" className="hover:text-slate-700">
-          设置
-        </Link>
-        <span>/</span>
-        <span className="text-slate-700">账号与绑定</span>
-      </div>
-
       {mounted && !status && <div className="text-xs text-slate-400">加载中…</div>}
 
       {mounted && !!status && isOAuthOnly && isBound && (

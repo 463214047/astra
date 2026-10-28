@@ -126,7 +126,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     setIfPresent("tags", tags);
     setIfPresent("cover_url", cover_url);
     setIfPresent("screenshot_urls", screenshots);
-    setIfPresent("torrent_name", torrent?.name);
+
+    const clearTorrent = torrent === null;
+    if (clearTorrent) {
+      updates.push(
+        "torrent_name = NULL",
+        "torrent_size = NULL",
+        "torrent_info_hash = NULL",
+        "torrent_data = NULL",
+      );
+    } else {
+      setIfPresent("torrent_name", torrent?.name);
+    }
 
     // torrent_size：后端权威解析 base64 torrent 数据覆盖前端值
     let torrentSize: number | undefined = torrent?.size;
@@ -167,9 +178,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
-    setIfPresent("torrent_size", torrentSize);
-    if (torrentInfoHash !== undefined) setIfPresent("torrent_info_hash", torrentInfoHash);
-    if (torrentDataUpdate !== undefined) setIfPresent("torrent_data", torrentDataUpdate);
+    if (!clearTorrent) {
+      setIfPresent("torrent_size", torrentSize);
+      if (torrentInfoHash !== undefined) setIfPresent("torrent_info_hash", torrentInfoHash);
+      if (torrentDataUpdate !== undefined) setIfPresent("torrent_data", torrentDataUpdate);
+    }
     setIfPresent("anonymous", anonymous);
     setIfPresent("is_adult", is_adult);
 
@@ -185,7 +198,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await withTransaction(async (q) => {
       await q(sql, values);
       // torrent whitelist（编辑帖子重新上传 torrent 时需要确保白名单）
-      if (torrentInfoHash) {
+      if (clearTorrent) {
+        await q(`DELETE FROM public.torrent_whitelist WHERE post_id = $1`, [id]);
+      } else if (torrentInfoHash) {
         await q(
           `INSERT INTO public.torrent_whitelist (info_hash, post_id, uploaded_by)
            VALUES ($1, $2, $3) ON CONFLICT (info_hash) DO NOTHING`,

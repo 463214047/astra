@@ -27,7 +27,7 @@ export default function ForgotPasswordForm() {
   const passwordMismatch =
     password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
   const canSubmit =
-    !passwordMismatch && password.length >= 6 && confirmPassword.length > 0 && code.length === 6;
+    !passwordMismatch && password.length > 0 && confirmPassword.length > 0 && code.length === 6;
 
   const statusMessage = loadingMsg || error || successMsg;
   const isStatusError = !!error && !loadingMsg;
@@ -232,7 +232,7 @@ export default function ForgotPasswordForm() {
                 setPassword(e.target.value);
                 if (error) setError(null);
               }}
-              placeholder="新密码（至少 6 位）"
+              placeholder="新密码"
               autoComplete="new-password"
               aria-invalid={!!error}
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"

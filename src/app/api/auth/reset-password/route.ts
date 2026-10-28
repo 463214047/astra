@@ -47,11 +47,8 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (password.length < 6) {
-    return NextResponse.json(
-      { ok: false, error: { message: "密码长度至少 6 位" } },
-      { status: 400 },
-    );
+  if (!password) {
+    return NextResponse.json({ ok: false, error: { message: "请输入新密码" } }, { status: 400 });
   }
   if (password !== confirmPassword) {
     return NextResponse.json(

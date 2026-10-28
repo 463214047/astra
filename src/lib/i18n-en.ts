@@ -288,6 +288,7 @@ export const EN_MESSAGES: Record<string, string> = {
     "Enter your current password to confirm deletion. You will be signed out and redirected to the sign-in page.",
   请输入链接: "Enter a link",
   请输入密码: "Enter password",
+  请输入新密码: "Enter a new password",
   请输入用户名: "Enter a username",
   "请输入有效的链接，如 https://example.com": "Enter a valid link, e.g. https://example.com",
   请填写标题: "Enter a title",

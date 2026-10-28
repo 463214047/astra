@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import PostsTable from "./posts-table";
 import PostsWaterfall from "./posts-waterfall";
 import type { HomePost } from "@/app/(protected)/page";
 
-type CategoryMeta = { label: string; tagBg: string; tagText: string; emoji: string };
+type CategoryMeta = { label: string; tagBg: string; tagText: string };
+type ResourceType = "torrent" | "other";
 
 interface Props {
   posts: HomePost[];
   categoryMeta: Record<string, CategoryMeta>;
   fallbackGradient: Record<string, string>;
+  headerLeft?: ReactNode;
+  resourceType?: ResourceType;
+  pollType?: ResourceType;
 }
 
 type View = "table" | "waterfall";
@@ -22,6 +26,9 @@ export default function ListContainer({
   posts: initialPosts,
   categoryMeta,
   fallbackGradient,
+  headerLeft,
+  resourceType = "torrent",
+  pollType,
 }: Props) {
   // 默认列表视图，不持久化
   const [view, setView] = useState<View>("table");
@@ -34,7 +41,8 @@ export default function ListContainer({
     if (now - lastFetchRef.current < POLL_MS * 0.8) return;
     lastFetchRef.current = now;
     try {
-      const res = await fetch(`/api/posts?limit=30&_t=${now}`, { cache: "no-store" });
+      const typeParam = pollType ? `&type=${pollType}` : "";
+      const res = await fetch(`/api/posts?limit=30${typeParam}&_t=${now}`, { cache: "no-store" });
       const data = (await res.json()) as { ok: boolean; items?: HomePost[] };
       if (!data.ok || !Array.isArray(data.items)) return;
 
@@ -81,7 +89,7 @@ export default function ListContainer({
     } catch {
       // 静默失败
     }
-  }, []);
+  }, [pollType]);
 
   useEffect(() => {
     // 挂载后等 3 秒再第一次刷新（让 SSR 首屏先出）
@@ -102,9 +110,10 @@ export default function ListContainer({
   return (
     <section>
       {/* 顶部工具栏 */}
-      <div className="mb-3 flex items-center justify-end">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        {headerLeft ? <div className="min-w-0">{headerLeft}</div> : null}
         {/* 视图切换 */}
-        <div className="inline-flex rounded-full border border-slate-200 bg-white p-0.5 text-xs">
+        <div className="ml-auto inline-flex shrink-0 rounded-full border border-slate-200 bg-white p-0.5 text-xs">
           <button
             type="button"
             onClick={() => setView("waterfall")}
@@ -151,9 +160,10 @@ export default function ListContainer({
           posts={posts}
           categoryMeta={categoryMeta}
           fallbackGradient={fallbackGradient}
+          resourceType={resourceType}
         />
       ) : (
-        <PostsTable posts={posts} categoryMeta={categoryMeta} />
+        <PostsTable posts={posts} categoryMeta={categoryMeta} resourceType={resourceType} />
       )}
     </section>
   );

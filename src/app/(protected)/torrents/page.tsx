@@ -1,13 +1,21 @@
+import Link from "next/link";
 import { query, ensureSchema } from "@/lib/db";
 import ListContainer from "@/components/list-container";
 
 export const metadata = {
-  title: "种子资源",
+  title: "资源",
 };
 
 // 强制动态渲染：做种/下载数来自 tracker announce 实时写入，不能缓存
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
+
+type ResourceType = "torrent" | "other";
+
+const RESOURCE_TABS: { key: ResourceType; label: string; href: string }[] = [
+  { key: "torrent", label: "种子资源", href: "/torrents" },
+  { key: "other", label: "其他资源", href: "/torrents?type=other" },
+];
 
 const CATEGORY_META: Record<string, { label: string; tagBg: string; tagText: string }> = {
   游戏: { label: "游戏", tagBg: "bg-blue-600", tagText: "text-white" },
@@ -53,12 +61,17 @@ export type TorrentPost = {
 };
 
 let schemaEnsured = false;
-async function fetchPosts(): Promise<TorrentPost[]> {
+async function fetchPosts(type: ResourceType): Promise<TorrentPost[]> {
   if (!schemaEnsured) {
     await ensureSchema();
     schemaEnsured = true;
   }
   try {
+    const resourceCondition =
+      type === "torrent"
+        ? "p.torrent_name IS NOT NULL AND p.torrent_name <> ''"
+        : "(p.torrent_name IS NULL OR p.torrent_name = '')";
+
     const rows = await query<TorrentPost>(
       `SELECT p.id, p.category, p.title, p.subtitle,
               p.tags, p.cover_url, p.screenshot_urls,
@@ -70,6 +83,7 @@ async function fetchPosts(): Promise<TorrentPost[]> {
        FROM public.posts p
        WHERE p.status = 'published'
          AND p.post_type = 'torrent'
+         AND ${resourceCondition}
        ORDER BY p.hot DESC, p.created_at DESC
        LIMIT 30`,
     );
@@ -89,15 +103,51 @@ async function fetchPosts(): Promise<TorrentPost[]> {
   }
 }
 
-export default async function TorrentsPage() {
-  const posts = await fetchPosts();
+export default async function ResourcesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type } = await searchParams;
+  const activeType: ResourceType = type === "other" ? "other" : "torrent";
+  const posts = await fetchPosts(activeType);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
       <ListContainer
+        key={activeType}
         posts={posts}
         categoryMeta={CATEGORY_META}
         fallbackGradient={FALLBACK_GRADIENT}
+        resourceType={activeType}
+        pollType={activeType}
+        headerLeft={
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">资源</h1>
+            <nav
+              aria-label="资源类型"
+              className="inline-flex rounded-full border border-slate-200 bg-white p-0.5 text-xs"
+            >
+              {RESOURCE_TABS.map((tab) => {
+                const active = activeType === tab.key;
+                return (
+                  <Link
+                    key={tab.key}
+                    href={tab.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`rounded-full px-3 py-1 font-medium transition ${
+                      active
+                        ? "bg-brand-600 text-white shadow-sm shadow-brand-600/20"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {tab.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        }
       />
     </div>
   );

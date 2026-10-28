@@ -46,12 +46,12 @@ export default function NavbarInner({ loggedIn, userImage, userName, myUid, unre
           </span>
         </Link>
 
-        {/* 中间：种子资源 + 游戏 + 论坛 + 搜索 */}
+        {/* 中间：资源 + 游戏 + 论坛 + 搜索 */}
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-          {/* 种子资源入口 */}
+          {/* 资源入口 */}
           <Link
             href="/torrents"
-            aria-label="种子资源"
+            aria-label="资源"
             className="group/torrents grid size-10 shrink-0 place-items-center rounded-full text-slate-500 outline-none ring-offset-2 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-900 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-400"
           >
             <svg

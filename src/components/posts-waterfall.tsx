@@ -6,6 +6,7 @@ import type { HomePost } from "@/app/(protected)/page";
 import PostTag from "./post-tag";
 
 type CategoryMeta = { label: string; tagBg: string; tagText: string };
+type ResourceType = "torrent" | "other";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -25,9 +26,17 @@ interface Props {
   posts: HomePost[];
   categoryMeta: Record<string, CategoryMeta>;
   fallbackGradient: Record<string, string>;
+  resourceType?: ResourceType;
 }
 
-function PostsWaterfall({ posts, categoryMeta, fallbackGradient }: Props) {
+function PostsWaterfall({
+  posts,
+  categoryMeta,
+  fallbackGradient,
+  resourceType = "torrent",
+}: Props) {
+  const isTorrent = resourceType === "torrent";
+
   if (posts.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
@@ -103,14 +112,19 @@ function PostsWaterfall({ posts, categoryMeta, fallbackGradient }: Props) {
                 </div>
               )}
 
-              {/* 一行：左=做种  右=大小 + 时间 — 风格统一 */}
+              {/* 种子资源显示做种 / 大小，其他资源只显示时间 */}
               <div className="mt-1 flex items-center justify-between gap-x-3 text-[12px]">
-                <span className="inline-flex items-center gap-1 tabular-nums text-slate-600">
-                  <span className="text-emerald-600">↑</span>
-                  <span className="text-slate-700 font-medium">{post.seed_count ?? 0}</span>
-                </span>
+                {isTorrent ? (
+                  <span className="inline-flex items-center gap-1 tabular-nums text-slate-600">
+                    <span className="text-emerald-600">↑</span>
+                    <span className="text-slate-700 font-medium">{post.seed_count ?? 0}</span>
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-slate-400">其他资源</span>
+                )}
                 <div className="flex items-center gap-x-2 text-slate-400">
-                  {post.torrent_size != null &&
+                  {isTorrent &&
+                    post.torrent_size != null &&
                     post.torrent_size > 0 &&
                     (() => {
                       const units = ["B", "KB", "MB", "GB", "TB"];
@@ -150,5 +164,6 @@ export default memo(
   (prev, next) =>
     postsShallowEqual(prev.posts, next.posts) &&
     prev.categoryMeta === next.categoryMeta &&
-    prev.fallbackGradient === next.fallbackGradient,
+    prev.fallbackGradient === next.fallbackGradient &&
+    prev.resourceType === next.resourceType,
 );

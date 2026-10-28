@@ -563,6 +563,8 @@ export const EN_MESSAGES: Record<string, string> = {
   种子详情: "Torrent details",
   种子资源: "Torrent resources",
   其他资源: "Other resources",
+  切换到其他资源: "Switch to other resources",
+  切换到种子资源: "Switch to torrent resources",
   可选: "Optional",
   资源: "Resources",
   资源详情: "Resource details",

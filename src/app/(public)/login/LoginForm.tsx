@@ -423,17 +423,8 @@ export default function LoginForm() {
               className="disabled-outline h-[48px] w-full rounded-[14px] text-[15px] font-semibold shadow-sm transition disabled:translate-y-0 hover:-translate-y-0.5 hover:shadow-md border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             >
               <span className="flex items-center gap-2.5">
-                {githubLoading ? (
-                  <>
-                    <Spinner />
-                    连接中…
-                  </>
-                ) : (
-                  <>
-                    <GitHubIcon className="size-5" />
-                    使用 GitHub 登录
-                  </>
-                )}
+                <GitHubIcon className="size-5" />
+                使用 GitHub 登录
               </span>
             </Button>
 

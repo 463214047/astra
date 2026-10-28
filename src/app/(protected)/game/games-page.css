@@ -635,22 +635,6 @@
   filter: brightness(1.1);
   box-shadow: 0 0 24px rgba(120, 170, 230, 0.45);
 }
-#skipHint {
-  position: absolute;
-  right: 22px;
-  bottom: 18px;
-  z-index: 55;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: rgba(44, 55, 72, 0.45);
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-#skipHint.show {
-  opacity: 1;
-}
-
 /* ============ 弹窗 ============ */
 #modal {
   position: absolute;

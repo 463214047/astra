@@ -240,7 +240,6 @@ export default function GameClient(props: {
 
     /* ============ 动画时序 ============ */
     const blackout = $("blackout");
-    const skipHint = $("skipHint");
     const cardsEl = $("cards");
     const resultView = $("resultView");
     const closeBtn = $("closeBtn") as HTMLButtonElement;
@@ -282,12 +281,10 @@ export default function GameClient(props: {
       void blackout.offsetWidth;
       blackout.style.transition = "";
 
-      skipHint.classList.add("show");
       await wait(280);
 
       // resultView 在黑幕之下先激活（z-index 100 > 40），但里面卡片都是 opacity:0
       resultView.classList.add("active");
-      skipHint.classList.remove("show");
 
       // 黑幕淡出（在 resultView 下方，用户看不到淡出过程）
       blackout.style.transition = "opacity .2s ease";
@@ -637,7 +634,6 @@ export default function GameClient(props: {
         {/* ============ 特效层 ============ */}
         <div id="blackout" />
         <canvas id="fx" />
-        <div id="skipHint">点击任意处跳过</div>
 
         {/* ============ 结果页 ============ */}
         <div id="resultView">

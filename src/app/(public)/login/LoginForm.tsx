@@ -54,12 +54,19 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
+
+    const normalizedEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError(AUTH_ERROR_MESSAGES[AUTH_CODES.EMAIL_FORMAT]);
+      return;
+    }
+
     setLoadingMsg("登录中…");
     setCredentialLoading(true);
 
     try {
       const result = await signIn("credentials", {
-        email,
+        email: normalizedEmail,
         password,
         remember: String(remember),
         redirect: false,

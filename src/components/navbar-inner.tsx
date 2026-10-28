@@ -50,15 +50,15 @@ export default function NavbarInner({ loggedIn, userImage, userName, myUid, unre
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
           {/* 资源入口 */}
           <Link
-            href="/torrents"
+            href="/resources"
             aria-label="资源"
-            className="group/torrents grid size-10 shrink-0 place-items-center rounded-full text-slate-500 outline-none ring-offset-2 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-900 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-400"
+            className="group/resources grid size-10 shrink-0 place-items-center rounded-full text-slate-500 outline-none ring-offset-2 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-900 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-400"
           >
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
               fill="none"
-              className="size-7 transition-transform duration-300 group-hover/torrents:-translate-y-0.5"
+              className="size-7 transition-transform duration-300 group-hover/resources:-translate-y-0.5"
             >
               <rect
                 x="2.5"

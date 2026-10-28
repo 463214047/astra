@@ -13,8 +13,8 @@ export const fetchCache = "force-no-store";
 type ResourceType = "torrent" | "other";
 
 const RESOURCE_TABS: { key: ResourceType; label: string; href: string }[] = [
-  { key: "torrent", label: "种子资源", href: "/torrents" },
-  { key: "other", label: "其他资源", href: "/torrents?type=other" },
+  { key: "torrent", label: "种子资源", href: "/resources" },
+  { key: "other", label: "其他资源", href: "/resources?type=other" },
 ];
 
 const CATEGORY_META: Record<string, { label: string; tagBg: string; tagText: string }> = {

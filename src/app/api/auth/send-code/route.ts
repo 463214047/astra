@@ -76,20 +76,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // 重置密码场景：邮箱必须已注册 + 必须有密码（OAuth-only 账号走 GitHub）
+    // 重置密码场景：邮箱必须已注册；OAuth-only 账号也可通过邮箱验证设置密码
     if (purpose === "reset_password") {
-      const existing = await query<{ email: string; password_hash: string | null }>(
-        "SELECT email, password_hash FROM public.account_users WHERE email = $1 LIMIT 1",
+      const existing = await query<{ email: string }>(
+        "SELECT email FROM public.account_users WHERE email = $1 LIMIT 1",
         [rawEmail],
       );
       if (existing.length === 0) {
         return NextResponse.json({ ok: false, message: "该邮箱未注册" }, { status: 404 });
-      }
-      if (!existing[0].password_hash) {
-        return NextResponse.json(
-          { ok: false, message: "该账号使用第三方登录，请直接使用 GitHub 登录" },
-          { status: 400 },
-        );
       }
     }
 

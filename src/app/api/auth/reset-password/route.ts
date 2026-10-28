@@ -60,21 +60,15 @@ export async function POST(request: Request) {
   try {
     await ensureSchema();
 
-    // 1. 查用户（同时检查不是 OAuth-only 账号）
-    const users = await query<{ email: string; password_hash: string | null }>(
-      "SELECT email, password_hash FROM public.account_users WHERE email = $1 LIMIT 1",
+    // 1. 查用户（OAuth-only 账号也可通过邮箱验证设置密码）
+    const users = await query<{ email: string }>(
+      "SELECT email FROM public.account_users WHERE email = $1 LIMIT 1",
       [email],
     );
     if (users.length === 0) {
       // 故意用通用提示 — 防止枚举已注册邮箱
       return NextResponse.json(
         { ok: false, error: { message: "验证码错误或已过期" } },
-        { status: 400 },
-      );
-    }
-    if (!users[0].password_hash) {
-      return NextResponse.json(
-        { ok: false, error: { message: "该账号使用第三方登录，请直接使用 GitHub 登录" } },
         { status: 400 },
       );
     }

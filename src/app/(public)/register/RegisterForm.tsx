@@ -39,8 +39,6 @@ export default function RegisterForm() {
   // 密码一致性校验（内联）：两字段都非空时才比较，避免输入过程中频繁报红
   const passwordMismatch =
     password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
-  const canSubmit =
-    !passwordMismatch && password.length > 0 && confirmPassword.length > 0 && code.length === 6;
 
   // 副标题消息区域 — 四级优先级：loading > error > success > 默认引导
   const statusMessage = loadingMsg || error || successMsg;
@@ -89,8 +87,37 @@ export default function RegisterForm() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
+
     setError(null);
     setSuccessMsg(null);
+
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setError("请填写邮箱地址");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError("邮箱格式不正确");
+      return;
+    }
+    if (!code) {
+      setError("请填写邮箱验证码");
+      return;
+    }
+    if (!/^\d{6}$/.test(code)) {
+      setError("验证码格式错误（应为 6 位数字）");
+      return;
+    }
+    if (password && !confirmPassword) {
+      setError("请再次输入密码");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("两次输入的密码不一致");
+      return;
+    }
+
     setLoadingMsg("注册中…");
     setLoading(true);
 
@@ -100,7 +127,13 @@ export default function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, confirmPassword, name, code }),
+        body: JSON.stringify({
+          email: normalizedEmail,
+          password,
+          confirmPassword,
+          name: name.trim(),
+          code,
+        }),
       });
 
       const data = (await res.json().catch(() => ({}))) as {
@@ -116,6 +149,15 @@ export default function RegisterForm() {
         return;
       }
 
+      // 未设置密码：无法用 credentials 自动登录，引导用户使用 GitHub 登录
+      if (!password) {
+        redirecting = true;
+        setLoadingMsg(null);
+        setSuccessMsg("注册成功，请使用 GitHub 登录");
+        setTimeout(() => router.push("/login"), 1200);
+        return;
+      }
+
       // 注册成功，自动登录（让 loadingMsg 一直显示到浏览器跳走）
       setError(null);
       setSuccessMsg(null);
@@ -126,7 +168,7 @@ export default function RegisterForm() {
         // redirect=true — signIn 内部会 window.location.href = "/"
         // 浏览器会离开 Register 页，组件卸载，loadingMsg 自然消失
         await signIn("credentials", {
-          email,
+          email: normalizedEmail,
           password,
           redirect: true,
           callbackUrl: "/",
@@ -143,7 +185,7 @@ export default function RegisterForm() {
       setLoadingMsg(null);
       setError("网络异常，请稍后重试");
     } finally {
-      // 成功跳转时保持 loading=true（按钮一直灰色）直到整页离开
+      // 成功跳转时保持 loading=true 直到整页离开
       if (!redirecting) setLoading(false);
     }
   }
@@ -282,7 +324,6 @@ export default function RegisterForm() {
               }}
               placeholder="密码"
               autoComplete="new-password"
-              required
               aria-invalid={!!error}
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
@@ -303,7 +344,6 @@ export default function RegisterForm() {
               }}
               placeholder="确认密码"
               autoComplete="new-password"
-              required
               aria-invalid={passwordMismatch}
               className={`h-11 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                 passwordMismatch
@@ -321,8 +361,7 @@ export default function RegisterForm() {
           {/* 主操作按钮 — 与登录页完全一致 */}
           <Button
             type="submit"
-            disabled={loading || !canSubmit}
-            className="mt-2 h-[48px] w-full rounded-[14px] bg-brand-600 text-[15px] font-bold text-white shadow-lg shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 disabled:translate-y-0 disabled:opacity-60"
+            className="mt-2 h-[48px] w-full rounded-[14px] bg-brand-600 text-[15px] font-bold text-white shadow-lg shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30"
           >
             创建账号
           </Button>

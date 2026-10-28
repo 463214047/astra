@@ -34,14 +34,15 @@ function validateInput(body: RegisterBody): ValidationError[] {
     errors.push({ field: "email", message: "邮箱长度不能超过 254 字符" });
   }
 
-  if (!password) {
-    errors.push({ field: "password", message: "请填写密码" });
-  }
-
-  if (password && confirmPassword && password !== confirmPassword) {
-    errors.push({ field: "confirmPassword", message: "两次输入的密码不一致" });
-  } else if (password && !confirmPassword) {
-    errors.push({ field: "confirmPassword", message: "请再次输入密码" });
+  // 密码可选；填写密码时要求确认密码一致
+  if (password || confirmPassword) {
+    if (!password) {
+      errors.push({ field: "password", message: "请填写密码" });
+    } else if (!confirmPassword) {
+      errors.push({ field: "confirmPassword", message: "请再次输入密码" });
+    } else if (password !== confirmPassword) {
+      errors.push({ field: "confirmPassword", message: "两次输入的密码不一致" });
+    }
   }
 
   if (name && name.length > 50) {
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
   }
 
   const email = String(body.email).trim().toLowerCase();
-  const password = String(body.password);
+  const password = String(body.password ?? "");
   const name = String(body.name ?? "").trim() || null;
   const code = String(body.code).trim();
 
@@ -121,8 +122,8 @@ export async function POST(request: Request) {
       codes[0].id,
     ]);
 
-    // 5. 哈希密码
-    const passwordHash = await hashPassword(password);
+    // 5. 哈希密码；未填写密码时保存 NULL（与 GitHub-only 账号一致）
+    const passwordHash = password ? await hashPassword(password) : null;
 
     // 6. 写入数据库
     const rows = await query<{
@@ -147,7 +148,7 @@ export async function POST(request: Request) {
           email: user.email,
           name: user.name,
         },
-        message: "注册成功，请使用邮箱密码登录",
+        message: password ? "注册成功，请使用邮箱密码登录" : "注册成功，请使用 GitHub 登录",
       },
       { status: 201 },
     );

@@ -574,6 +574,7 @@ export const EN_MESSAGES: Record<string, string> = {
   主创: "Creators",
   注册: "Sign up",
   "注册成功，请使用邮箱密码登录": "Registered. Please sign in with your email and password.",
+  "注册成功，请使用 GitHub 登录": "Registered. Please sign in with GitHub.",
   "注册成功，正在登录…": "Registered. Signing you in…",
   "注册失败，请稍后重试": "Sign-up failed. Please try again later.",
   "注册中…": "Signing up…",

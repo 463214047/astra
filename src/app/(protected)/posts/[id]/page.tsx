@@ -197,7 +197,7 @@ function sanitizeHtml(html: string): string {
 }
 
 export async function generateMetadata() {
-  return { title: "种子详情" };
+  return { title: "资源详情" };
 }
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {

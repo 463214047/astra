@@ -177,12 +177,7 @@ export default function UploadPage() {
   ];
 
   const canSubmit =
-    title.trim().length > 0 &&
-    category !== null &&
-    rulesAgreed &&
-    tmdbLinkValid &&
-    torrentName.length > 0 &&
-    !submitting;
+    title.trim().length > 0 && category !== null && rulesAgreed && tmdbLinkValid && !submitting;
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
@@ -257,7 +252,7 @@ export default function UploadPage() {
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
       <div className="space-y-5">
         <Card
-          section={editing ? "编辑作品" : "发布种子"}
+          section={editing ? "编辑作品" : "发布"}
           icon="📝"
           headerRight={
             <button
@@ -339,7 +334,7 @@ export default function UploadPage() {
         >
           <div className="space-y-5">
             {/* 种子文件 */}
-            <Field label="种子文件" required>
+            <Field label="种子文件" hint="可选">
               {torrentName ? (
                 <div className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-white px-4 py-3 transition-all hover:border-slate-300 hover:shadow-sm">
                   <div className="min-w-0 flex items-center gap-3">

@@ -254,7 +254,6 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     const category = url.searchParams.get("category");
-    const resourceType = url.searchParams.get("type");
     const mine = url.searchParams.get("mine") === "1";
     const sort = url.searchParams.get("sort") === "hot" ? "hot" : "latest";
     const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "20", 10), 1), 100);
@@ -287,11 +286,6 @@ export async function GET(req: Request) {
     } else {
       where.push(`status = 'published'`);
       where.push(`post_type = 'torrent'`);
-      if (resourceType === "torrent") {
-        where.push(`torrent_name IS NOT NULL AND torrent_name <> ''`);
-      } else if (resourceType === "other") {
-        where.push(`(torrent_name IS NULL OR torrent_name = '')`);
-      }
     }
 
     if (category) {

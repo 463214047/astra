@@ -100,7 +100,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ui
   };
 
   const session = await auth();
-  const isOwner = session.user.email === user.email;
+  const isOwner = session?.user?.email === user.email;
 
   return isOwner ? (
     <OwnerProfile user={user} stats={stats} />
@@ -131,7 +131,7 @@ export function ProfileBanner({
   const rainbow = isRainbowName(user);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white [[data-background=tohru]_&]:bg-transparent">
       <div className="h-28 bg-gradient-to-r from-brand-100 via-brand-50 to-brand-100" />
 
       {topRight && <div className="absolute right-6 top-4">{topRight}</div>}

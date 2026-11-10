@@ -78,7 +78,7 @@ export default function ProfileTabs() {
   const loading = loadingTab === tab;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       {/* Tab 头 */}
       <div className="flex border-b border-slate-200 px-5">
         <TabButton active={tab === "torrents"} onClick={() => setTab("torrents")}>

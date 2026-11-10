@@ -8,6 +8,7 @@ export default function GameClient(props: {
   initialPity5: number;
   initialPity4: number;
   initialTotal: number;
+  initialTohru: number;
   initialHistory: unknown[];
   initialRainbowIds: unknown[];
 }) {
@@ -47,12 +48,14 @@ export default function GameClient(props: {
     /* ============ 奖励池 ============ */
     type PoolItem =
       | { name: string; type: "magic"; min: number; max: number; w: number }
-      | { name: string; type: "rainbow"; dayMin: number; dayMax: number; w: number };
+      | { name: string; type: "rainbow"; dayMin: number; dayMax: number; w: number }
+      | { name: string; type: "tohru"; w: number };
 
     const POOL: Record<number, PoolItem[]> = {
       5: [
-        { name: "彩虹ID", type: "rainbow", dayMin: 30, dayMax: 365, w: 1.0 },
-        { name: "魔力", type: "magic", min: 800, max: 2000, w: 1.8 },
+        { name: "彩虹ID", type: "rainbow", dayMin: 30, dayMax: 365, w: 0 },
+        { name: "魔力", type: "magic", min: 800, max: 2000, w: 0 },
+        { name: "托尔", type: "tohru", w: 1.0 },
       ],
       4: [
         { name: "彩虹ID", type: "rainbow", dayMin: 7, dayMax: 90, w: 1.0 },
@@ -93,6 +96,9 @@ export default function GameClient(props: {
         if (n5 > 73) rate5 = 0.006 + 0.06 * (n5 - 73);
         if (n5 >= 90) rate5 = 1;
 
+        // TEMP 调试：五星必中，便于查看托尔奖品卡
+        rate5 = 1;
+
         if (Math.random() < rate5) {
           rarity = 5;
           this.pity5 = 0;
@@ -130,6 +136,7 @@ export default function GameClient(props: {
     const WISH_COST = 160;
     let magic = props.initialMagic;
     const inventory = {
+      tohru: Number(props.initialTohru) || 0,
       rainbowIds: (Array.isArray(props.initialRainbowIds) ? props.initialRainbowIds : []) as {
         days: number;
         ts: number;
@@ -213,7 +220,7 @@ export default function GameClient(props: {
     let W = 0,
       H = 0;
 
-    function resizeCanvas() {
+    const resizeCanvas = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = root.getBoundingClientRect();
       W = rect.width;
@@ -223,7 +230,7 @@ export default function GameClient(props: {
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    };
     resizeCanvas();
 
     const ro = new ResizeObserver(() => resizeCanvas());
@@ -240,9 +247,9 @@ export default function GameClient(props: {
 
     /* ============ 动画时序 ============ */
     const blackout = $("blackout");
-    const cardsEl = $("cards");
     const resultView = $("resultView");
-    const closeBtn = $("closeBtn") as HTMLButtonElement;
+    const cardsEl = $("cards");
+    const closeBtn = $<HTMLButtonElement>("closeBtn");
 
     let skipResolve: (() => void) | null = null;
     let animating = false;
@@ -265,11 +272,10 @@ export default function GameClient(props: {
       if (skipResolve) skipResolve();
     }
 
-    const onPointerDown = (e: PointerEvent) => {
-      if (animating) {
-        if (resultView.contains(e.target as Node)) return;
-        requestSkip();
-      }
+    // 揭示动画期间点击可加速
+    const onPointerDown = () => {
+      if (!animating) return;
+      requestSkip();
     };
     document.addEventListener("pointerdown", onPointerDown, true);
 
@@ -295,6 +301,7 @@ export default function GameClient(props: {
     }
 
     /* ============ 结果展示 ============ */
+
     function createCard(item: any) {
       const el = document.createElement("div");
       el.className = "card r" + item.rarity;
@@ -304,7 +311,7 @@ export default function GameClient(props: {
         iconHtml = `<svg viewBox="0 0 24 24">${ICON_MAGIC}</svg>`;
         iconColor = "#a8e0ff";
         nameText = "魔力";
-        subText = "+" + item.value;
+        subText = String(item.value);
       } else if (item.type === "rainbow") {
         iconHtml = rainbowIconSvg();
         iconColor = "#fff";
@@ -317,6 +324,22 @@ export default function GameClient(props: {
         subText = "";
       }
 
+      // 托尔：独立五星奖品，整张卡面铺满立绘
+      if (item.type === "tohru") {
+        el.className = "card r5 full";
+        el.innerHTML = `
+          <div class="cardInner">
+            <div class="cardFace cardBack"></div>
+            <div class="cardFace cardFront fullArt">
+              <img class="cardArt" src="/wallpaper/tohru-avatar.jpg?v=3" alt="托尔" />
+              <div class="cardBottom">
+                <div class="cardName">托尔</div>
+              </div>
+            </div>
+          </div>`;
+        return el;
+      }
+
       el.innerHTML = `
         <div class="cardInner">
           <div class="cardFace cardBack"></div>
@@ -324,7 +347,6 @@ export default function GameClient(props: {
             <div class="cardIcon" style="color:${iconColor}">${iconHtml}</div>
             <div class="cardBottom">
               <div class="cardName">${nameText}</div>
-              <div class="cardStars">${"★".repeat(item.rarity)}</div>
               <div class="cardSub">${subText}</div>
             </div>
           </div>
@@ -332,26 +354,27 @@ export default function GameClient(props: {
       return el;
     }
 
-    // 提前准备好 DOM（在黑幕覆盖期间），避免 resultView 激活后才清空 + 填充导致闪烁
+    // 黑幕覆盖期间提前把卡片 DOM 准备好（opacity:0）
     function prepareCards(results: any[]) {
       cardsEl.innerHTML = "";
       cardsEl.className = "cards " + (results.length > 1 ? "grid" : "single");
+      resultView.classList.toggle("single", results.length === 1);
       closeBtn.classList.remove("show");
       results.forEach((item) => cardsEl.appendChild(createCard(item)));
     }
 
     async function showResults(results: any[]) {
-      // playAnimation 已经让 resultView 可见 + 卡片已准备好（opacity:0，等待 .show）
-      const els = cardsEl.querySelectorAll(".card");
-      const interval = results.length > 1 ? 145 : 320;
+      // 逐张揭示：十连间隔 130ms，单抽 320ms
+      const els = Array.from(cardsEl.querySelectorAll<HTMLElement>(".card"));
+      const interval = results.length > 1 ? 130 : 320;
 
       for (let i = 0; i < els.length; i++) {
         els[i].classList.add("show");
-        sfxChime(results[i].rarity);
+        sfxChime(results[i]?.rarity ?? 3);
         await wait(interval);
       }
 
-      await wait(420);
+      await wait(400);
       closeBtn.classList.add("show");
 
       return new Promise<void>((resolve) => {
@@ -409,6 +432,7 @@ export default function GameClient(props: {
         results.push(r);
         if (r.type === "magic") magic += r.value;
         else if (r.type === "rainbow") inventory.rainbowIds.push({ days: r.days, ts: Date.now() });
+        else if (r.type === "tohru") inventory.tohru++;
       }
 
       refreshUI();
@@ -441,9 +465,9 @@ export default function GameClient(props: {
         </p>
         <p style="font-size:12.5px;color:#93a8c4">
           <b style="color:#ffd98a">奖励一览：</b><br>
-          ★★★★★　彩虹ID（30~365 天） · 魔力 800~2000<br>
-          ★★★★　彩虹ID（7~90 天） · 魔力 200~600<br>
-          ★★★　魔力 20~100
+          ★★★★★　贵宾、随机奖品、魔力<br>
+          ★★★★　彩虹ID、魔力<br>
+          ★★★　魔力
         </p>`);
     });
 
@@ -483,6 +507,7 @@ export default function GameClient(props: {
         gacha.total = s.total ?? 0;
         gacha.history = Array.isArray(s.history) ? s.history : [];
         inventory.rainbowIds = Array.isArray(s.rainbowIds) ? s.rainbowIds : [];
+        inventory.tohru = Number(s.tohru) || 0;
         return true;
       } catch (e) {
         console.warn("[wish] load save failed:", e);
@@ -506,6 +531,7 @@ export default function GameClient(props: {
               total: gacha.total,
               history: gacha.history,
               rainbowIds: inventory.rainbowIds,
+              tohru: inventory.tohru,
             }),
           });
         } catch (e) {
@@ -523,6 +549,298 @@ export default function GameClient(props: {
       if (disposed) return;
       refreshUI();
     })();
+
+    /* ============ 市场（玩家间交易） ============ */
+    const marketView = $("marketView");
+    const marketBodyEl = $("marketBody");
+    const mToastEl = $("mToast");
+    const marketMagicEl = $("marketMagic");
+    const mTabBtns = root.querySelectorAll<HTMLButtonElement>("#marketTabs .mTab");
+    const mPaneEls = root.querySelectorAll<HTMLElement>(".mPane");
+    const btnMarket = $("btnMarket");
+    const btnMarketClose = $("marketClose");
+
+    type MineState = {
+      magic: number;
+      tohru: number;
+      rainbowIds: { days: number; ts: number }[];
+      rainbowDays: number;
+    };
+    type PriceInfo = { buy: number; sell: number };
+    type SystemPrices = Record<"tohru" | "rainbow", PriceInfo>;
+    let marketData: {
+      mine: MineState;
+      prices: SystemPrices | null;
+    } = {
+      prices: null,
+      mine: {
+        magic,
+        tohru: inventory.tohru,
+        rainbowIds: inventory.rainbowIds,
+        rainbowDays: inventory.rainbowIds.reduce((sum, item) => sum + Math.max(0, item.days), 0),
+      },
+    };
+    let marketBusy = false;
+    let marketFailed = false;
+    let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function toast(text: string) {
+      if (!mToastEl) return;
+      mToastEl.textContent = text;
+      mToastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => mToastEl.classList.remove("show"), 2200);
+    }
+
+    function renderMarket() {
+      const { mine, prices } = marketData;
+      if (marketMagicEl) marketMagicEl.textContent = String(mine.magic);
+
+      const browseEl = $("mBrowse");
+      const invEl = $("mInventory");
+
+      if (!prices) {
+        const placeholder = marketFailed
+          ? '<div class="mEmpty">加载失败，请稍后重试</div>'
+          : '<div class="mEmpty"><span class="mSpin" aria-hidden="true"></span>加载中</div>';
+        browseEl.innerHTML = placeholder;
+        invEl.innerHTML = placeholder;
+        return;
+      }
+
+      /** 系统商店卡：按行情价买入 */
+      const shopCard = (
+        title: string,
+        type: "tohru" | "rainbow",
+        unit: string,
+        info: PriceInfo,
+      ) => `
+        <div class="mSell" data-price="${info.buy}" data-unit="${unit}">
+          <div class="mSellHead">
+            <div class="mSellTitle">${title}</div>
+            <div class="mSellBadge">售价 ${info.buy} 魔力/${unit}</div>
+          </div>
+          <div class="mSellForm">
+            <div class="mField">
+              <label>数量（${unit}）</label>
+              <input class="mQtyInput" type="number" inputmode="numeric" min="1" placeholder="0" aria-label="购买${title}数量" />
+            </div>
+            <div class="mMeta mMetaEnd">
+              <div class="mSum">合计 <b>0</b> 魔力</div>
+            </div>
+            <button class="mBtn mSellBtn" data-buy-item="${type}" type="button">购买</button>
+          </div>
+        </div>`;
+
+      /** 背包出售卡：按系统收购价折算实收 */
+      const sellCard = (
+        title: string,
+        type: "tohru" | "rainbow",
+        unit: string,
+        held: number,
+        info: PriceInfo,
+      ) => `
+        <div class="mSell" data-price="${info.sell}" data-unit="${unit}">
+          <div class="mSellHead">
+            <div class="mSellTitle">${title}</div>
+            <div class="mSellBadge">持有 ${held} ${unit}</div>
+          </div>
+          <div class="mSellForm">
+            <div class="mField">
+              <label>数量（${unit}）</label>
+              <input class="mQtyInput" type="number" inputmode="numeric" min="1" max="${held}" placeholder="0" aria-label="出售${title}数量" />
+            </div>
+            <div class="mMeta">
+              <div class="mRef">收购 ${info.sell} 魔力/${unit}</div>
+              <div class="mSum">实收 <b>0</b> 魔力</div>
+            </div>
+            <button class="mBtn mSellBtn" data-sell-item="${type}" type="button">出售</button>
+          </div>
+        </div>`;
+
+      browseEl.innerHTML = `<div class="mSellGrid">
+        ${shopCard("托尔", "tohru", "张", prices.tohru)}
+        ${shopCard("彩虹ID", "rainbow", "天", prices.rainbow)}
+      </div>`;
+
+      const sellCards =
+        (mine.tohru > 0 ? sellCard("托尔", "tohru", "张", mine.tohru, prices.tohru) : "") +
+        (mine.rainbowDays > 0
+          ? sellCard("彩虹ID", "rainbow", "天", mine.rainbowDays, prices.rainbow)
+          : "");
+      invEl.innerHTML = sellCards
+        ? `<div class="mSellGrid">${sellCards}</div>`
+        : '<div class="mEmpty">背包暂时没有可出售的奖品</div>';
+    }
+
+    function syncMine(mine: MineState) {
+      marketData.mine = mine;
+      magic = mine.magic;
+      inventory.tohru = mine.tohru;
+      inventory.rainbowIds = mine.rainbowIds;
+      marketData.mine.rainbowDays =
+        mine.rainbowDays ?? mine.rainbowIds.reduce((sum, item) => sum + Math.max(0, item.days), 0);
+      refreshUI();
+      saveSave();
+    }
+
+    async function loadMarket() {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+      try {
+        const res = await fetch("/api/game/market", {
+          credentials: "same-origin",
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || "加载失败");
+        marketData = {
+          mine: data.mine,
+          prices: data.prices ?? null,
+        };
+        marketFailed = false;
+        syncMine(data.mine);
+        renderMarket();
+      } catch (e) {
+        console.warn("[market] load failed:", e);
+        marketFailed = true;
+        renderMarket();
+        toast("市场加载失败，请稍后重试");
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function marketAction(payload: Record<string, unknown>, okText: string) {
+      if (marketBusy) {
+        toast("上一个操作还在处理中，请稍候");
+        return;
+      }
+      marketBusy = true;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+      try {
+        const res = await fetch("/api/game/market", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          toast(data.message || "操作失败");
+          // 失败后刷新，避免可购数量/库存停留在过期数据
+          void loadMarket();
+          return;
+        }
+        if (data.mine) syncMine(data.mine);
+        await loadMarket();
+        toast(
+          data.cost
+            ? `${okText}（花费 ${data.cost} 魔力）`
+            : data.gained
+              ? `${okText}，+${data.gained} 魔力`
+              : okText,
+        );
+      } catch (e) {
+        console.warn("[market] action failed:", e);
+        toast(
+          e instanceof DOMException && e.name === "AbortError"
+            ? "请求超时，请稍后重试"
+            : "网络错误，请稍后重试",
+        );
+        // 恢复按钮状态并同步最新数据
+        void loadMarket();
+      } finally {
+        clearTimeout(timer);
+        marketBusy = false;
+      }
+    }
+
+    /** 操作按钮进入等待态，避免重复点击 */
+    function markBtnBusy(target: HTMLElement) {
+      if (marketBusy) return;
+      const btn = target.closest<HTMLButtonElement>(".mBtn");
+      if (!btn) return;
+      btn.classList.add("mBtnBusy");
+      btn.disabled = true;
+    }
+
+    const onMarketClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      const buyType = target.getAttribute("data-buy-item");
+      if (buyType === "tohru" || buyType === "rainbow") {
+        const panel = target.closest<HTMLElement>(".mSell");
+        const qtyInput = panel?.querySelector<HTMLInputElement>(".mQtyInput");
+        const qty = parseInt(qtyInput?.value ?? "", 10);
+        if (!Number.isFinite(qty) || qty < 1) {
+          toast("请填写有效的购买数量");
+          qtyInput?.focus();
+          return;
+        }
+        markBtnBusy(target);
+        void marketAction(
+          { action: "buy", itemType: buyType, units: qty },
+          "购买成功，奖品已放入背包",
+        );
+        return;
+      }
+
+      const sellType = target.getAttribute("data-sell-item");
+      if (sellType === "tohru" || sellType === "rainbow") {
+        const panel = target.closest<HTMLElement>(".mSell");
+        const qtyInput = panel?.querySelector<HTMLInputElement>(".mQtyInput");
+        const qty = parseInt(qtyInput?.value ?? "", 10);
+        const maxQty = sellType === "rainbow" ? marketData.mine.rainbowDays : marketData.mine.tohru;
+        const unit = sellType === "rainbow" ? "天" : "张";
+        if (!Number.isFinite(qty) || qty < 1 || qty > maxQty) {
+          toast(`出售数量需在 1 - ${maxQty} ${unit}之间`);
+          qtyInput?.focus();
+          return;
+        }
+        markBtnBusy(target);
+        void marketAction({ action: "sell", itemType: sellType, units: qty }, "出售成功");
+      }
+    };
+    marketBodyEl.addEventListener("click", onMarketClick);
+
+    const onMarketInput = (e: Event) => {
+      const input = e.target;
+      if (!(input instanceof HTMLInputElement)) return;
+
+      // 数量 × 单价 = 合计 / 实收
+      const panel = input.closest<HTMLElement>(".mSell");
+      if (!panel) return;
+      const qty = parseInt(panel.querySelector<HTMLInputElement>(".mQtyInput")?.value ?? "", 10);
+      const unit = parseFloat(panel.dataset.price ?? "");
+      const total = Number.isFinite(qty) && Number.isFinite(unit) ? Math.max(0, qty * unit) : 0;
+      const totalEl = panel.querySelector(".mSum b");
+      if (totalEl) totalEl.textContent = String(total);
+    };
+    marketBodyEl.addEventListener("input", onMarketInput);
+
+    const openMarket = () => {
+      marketView.classList.add("active");
+      marketView.setAttribute("aria-hidden", "false");
+      renderMarket();
+      void loadMarket();
+    };
+    const closeMarket = () => {
+      marketView.classList.remove("active");
+      marketView.setAttribute("aria-hidden", "true");
+    };
+    btnMarket.addEventListener("click", openMarket);
+    btnMarketClose.addEventListener("click", closeMarket);
+
+    const onMarketTab = (e: Event) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      const tab = btn.dataset.tab || "browse";
+      mTabBtns.forEach((b) => b.classList.toggle("active", b === btn));
+      mPaneEls.forEach((pane) => pane.classList.toggle("active", pane.dataset.pane === tab));
+    };
+    mTabBtns.forEach((btn) => btn.addEventListener("click", onMarketTab));
 
     /* ============ 防止移动端双击缩放 ============ */
     let lastTouch = 0;
@@ -543,6 +861,12 @@ export default function GameClient(props: {
       document.removeEventListener("touchend", onTouchEnd);
       modal.removeEventListener("click", onModalClick);
       wishBtns.forEach((btn) => btn.removeEventListener("click", onWishClick));
+      marketBodyEl.removeEventListener("click", onMarketClick);
+      marketBodyEl.removeEventListener("input", onMarketInput);
+      btnMarket.removeEventListener("click", openMarket);
+      btnMarketClose.removeEventListener("click", closeMarket);
+      mTabBtns.forEach((btn) => btn.removeEventListener("click", onMarketTab));
+      if (toastTimer) clearTimeout(toastTimer);
       if (saveTimer) clearTimeout(saveTimer);
       if (AC) {
         try {
@@ -556,7 +880,7 @@ export default function GameClient(props: {
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center px-4 py-4 sm:px-6">
       <div
         ref={rootRef}
-        className="games-page-root overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]"
+        className="games-page-root overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent"
         style={{ height: "min(calc(100vh - 7rem), 720px)" }}
       >
         {/* ============ 主界面 ============ */}
@@ -568,7 +892,13 @@ export default function GameClient(props: {
           <div className="topBar">
             <div className="pageTitle">祈 愿</div>
             <div className="wallet">
-              <div className="currency magic">
+              <button
+                className="currency magic marketEntry"
+                id="btnMarket"
+                type="button"
+                aria-label="打开市场"
+                title="市场"
+              >
                 <div className="magicIcon">
                   <svg viewBox="0 0 24 24">
                     <defs>
@@ -584,7 +914,7 @@ export default function GameClient(props: {
                   </svg>
                 </div>
                 <b id="magicCount">16000</b>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -639,6 +969,45 @@ export default function GameClient(props: {
         <div id="resultView">
           <div className="cards" id="cards" />
           <button id="closeBtn">点 击 继 续</button>
+        </div>
+
+        {/* ============ 市场（玩家间交易） ============ */}
+        <div id="marketView" aria-hidden="true">
+          <div className="marketShell">
+            <div className="marketHead">
+              <div className="marketHeadLeft">
+                <div className="marketTitle">交 易</div>
+                <div className="marketHint">价格随行情浮动</div>
+              </div>
+              <div className="marketHeadRight">
+                <button
+                  id="marketClose"
+                  className="marketClose"
+                  type="button"
+                  aria-label="关闭市场"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="marketTabs" id="marketTabs">
+              <button className="mTab active" data-tab="browse" type="button">
+                市场
+              </button>
+              <button className="mTab" data-tab="inventory" type="button">
+                我的背包
+              </button>
+            </div>
+            <div className="marketBody" id="marketBody">
+              <div className="mPane active" data-pane="browse">
+                <div className="mGrid" id="mBrowse" />
+              </div>
+              <div className="mPane" data-pane="inventory">
+                <div className="mGrid" id="mInventory" />
+              </div>
+            </div>
+            <div className="mToast" id="mToast" />
+          </div>
         </div>
 
         {/* ============ 弹窗 ============ */}

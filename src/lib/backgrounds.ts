@@ -41,6 +41,16 @@ export const BACKGROUNDS = [
       backgroundSize: "32px 32px",
     },
   },
+  {
+    id: "tohru",
+    label: "托尔·动态",
+    style: {
+      backgroundColor: "#eaf3fa",
+      backgroundImage: "none",
+      backgroundAttachment: "fixed",
+      backgroundSize: "auto",
+    },
+  },
 ] as const satisfies readonly Background[];
 
 export type BackgroundId = (typeof BACKGROUNDS)[number]["id"];
@@ -58,6 +68,16 @@ export function backgroundStyle(background: Pick<Background, "style">): CSSPrope
 export function backgroundPreviewStyle(
   background: Pick<Background, "id" | "style">,
 ): CSSProperties {
+  if (background.id === "tohru") {
+    return {
+      ...background.style,
+      backgroundImage: 'url("/wallpaper/tohru-bg.jpg")',
+      backgroundAttachment: "scroll",
+      backgroundPosition: "center",
+      backgroundSize: "cover",
+    };
+  }
+
   return {
     ...background.style,
     backgroundAttachment: "scroll",

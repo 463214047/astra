@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { renderBBCode } from "@/lib/bbcode";
 import { useLocale } from "@/components/language-provider";
 import ImagePickerDialog from "@/components/image-picker-dialog";
@@ -38,7 +38,6 @@ export default function Editor({
   onChange,
   placeholder = "写点什么…",
   compact = false,
-  minimal = false,
 }: {
   content: string;
   onChange: (html: string) => void;
@@ -46,8 +45,6 @@ export default function Editor({
   placeholder?: string;
   /** 紧凑模式：更矮的编辑区与更小的内边距 */
   compact?: boolean;
-  /** 精简工具栏：仅保留引用、链接、截图 */
-  minimal?: boolean;
 }) {
   // 用于强制 React 重渲染 — tiptap 的 isActive 只在组件重渲染时才重新计算
   const [, forceRender] = useState(0);
@@ -59,6 +56,7 @@ export default function Editor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        codeBlock: false,
       }),
       Image.configure({
         inline: false,
@@ -113,185 +111,94 @@ export default function Editor({
     editor.view.dispatch(editor.state.tr);
   }, [editor, localizedPlaceholder]);
 
-  // ---------- 内联插入条状态（替代 window.prompt）----------
-  const [insertMode, setInsertMode] = useState<"image" | "link" | null>(null);
-  const [insertValue, setInsertValue] = useState("");
+  // ---------- 链接 / 图片插入弹窗 ----------
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 打开插入条时自动聚焦并预填当前 link href（如果是编辑链接）
-  const openInsert = useCallback(
-    (mode: "image" | "link") => {
-      if (!editor) return;
-      if (mode === "link") {
-        const existing = editor.getAttributes("link").href as string | undefined;
-        setInsertValue(existing ?? "");
-      } else {
-        setInsertValue("");
-      }
-      setInsertMode(mode);
-      // 等 DOM 渲染后聚焦（preventScroll 避免页面跳动）
-      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
-    },
-    [editor],
-  );
-
-  const closeInsert = useCallback(() => {
-    setInsertMode(null);
-    setInsertValue("");
-    editor?.chain().focus().run();
-  }, [editor]);
-
-  const confirmInsert = useCallback(() => {
-    if (!editor || !insertMode) return;
-    const url = insertValue.trim();
-    if (!url) {
-      closeInsert();
-      return;
-    }
-
-    if (insertMode === "image") {
-      editor.chain().focus().setImage({ src: url }).run();
-    } else {
-      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-    }
-    closeInsert();
-  }, [editor, insertMode, insertValue, closeInsert]);
-
-  // 键盘：Esc 取消、Enter 确认
-  useEffect(() => {
-    if (!insertMode) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeInsert();
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        confirmInsert();
-      }
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [insertMode, closeInsert, confirmInsert]);
-
-  // 点击外部关闭
-  useEffect(() => {
-    if (!insertMode) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest("[data-insert-bar]")) closeInsert();
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [insertMode, closeInsert]);
-
-  // 切换按钮行为：打开 / 关闭（替代原来的 addImage / addLink）
   const toggleImage = useCallback(() => {
-    if (minimal) {
-      if (insertMode) closeInsert();
-      setLinkDialogOpen(false);
-      setImageDialogOpen(true);
-      return;
-    }
-    if (insertMode === "image") closeInsert();
-    else openInsert("image");
-  }, [minimal, insertMode, openInsert, closeInsert]);
+    setLinkDialogOpen(false);
+    setImageDialogOpen((open) => !open);
+  }, []);
 
   const toggleLink = useCallback(() => {
-    if (minimal) {
-      if (insertMode) closeInsert();
-      setImageDialogOpen(false);
-      setLinkDialogOpen(true);
-      return;
-    }
-    if (insertMode === "link") closeInsert();
-    else openInsert("link");
-  }, [minimal, insertMode, openInsert, closeInsert]);
+    setImageDialogOpen(false);
+    setLinkDialogOpen((open) => !open);
+  }, []);
 
   if (!editor) return null;
 
   return (
     <>
-      <div
-        ref={wrapperRef}
-        className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
-      >
-        {/* 工具栏 + 插入条共用 relative 容器 */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white [[data-background=tohru]_&]:bg-transparent">
         <div className="relative">
           <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 bg-slate-50/70 px-2 py-2">
-            {!minimal && (
-              <>
-                <ToolbarButton
-                  active={editor.isActive("bold")}
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  label="加粗"
-                >
-                  <strong>B</strong>
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("bold")}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              label="加粗"
+            >
+              <strong>B</strong>
+            </ToolbarButton>
 
-                <ToolbarButton
-                  active={editor.isActive("italic")}
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  label="斜体"
-                >
-                  <em>I</em>
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("italic")}
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              label="斜体"
+            >
+              <em>I</em>
+            </ToolbarButton>
 
-                <ToolbarButton
-                  active={editor.isActive("strike")}
-                  onClick={() => editor.chain().focus().toggleStrike().run()}
-                  label="删除线"
-                >
-                  <span className="line-through">S</span>
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("strike")}
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              label="删除线"
+            >
+              <span className="line-through">S</span>
+            </ToolbarButton>
 
-                <Divider />
+            <Divider />
 
-                <ToolbarButton
-                  active={editor.isActive("heading", { level: 1 })}
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                  label="标题 1"
-                >
-                  H1
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("heading", { level: 1 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+              label="标题 1"
+            >
+              H1
+            </ToolbarButton>
 
-                <ToolbarButton
-                  active={editor.isActive("heading", { level: 2 })}
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                  label="标题 2"
-                >
-                  H2
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("heading", { level: 2 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              label="标题 2"
+            >
+              H2
+            </ToolbarButton>
 
-                <ToolbarButton
-                  active={editor.isActive("heading", { level: 3 })}
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                  label="标题 3"
-                >
-                  H3
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("heading", { level: 3 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+              label="标题 3"
+            >
+              H3
+            </ToolbarButton>
 
-                <Divider />
+            <Divider />
 
-                <ToolbarButton
-                  active={editor.isActive("bulletList")}
-                  onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  label="无序列表"
-                >
-                  <IconList />
-                </ToolbarButton>
+            <ToolbarButton
+              active={editor.isActive("bulletList")}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              label="无序列表"
+            >
+              <IconList />
+            </ToolbarButton>
 
-                <ToolbarButton
-                  active={editor.isActive("orderedList")}
-                  onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                  label="有序列表"
-                >
-                  <IconOrderedList />
-                </ToolbarButton>
-              </>
-            )}
+            <ToolbarButton
+              active={editor.isActive("orderedList")}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              label="有序列表"
+            >
+              <IconOrderedList />
+            </ToolbarButton>
 
             <ToolbarButton
               active={editor.isActive("blockquote")}
@@ -301,109 +208,44 @@ export default function Editor({
               <IconQuote />
             </ToolbarButton>
 
-            {!minimal && (
-              <>
-                <ToolbarButton
-                  active={editor.isActive("codeBlock")}
-                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                  label="代码块"
-                >
-                  <IconCode />
-                </ToolbarButton>
-
-                <Divider />
-              </>
-            )}
+            <Divider />
 
             <ToolbarButton
               onClick={toggleLink}
-              active={minimal ? linkDialogOpen : editor.isActive("link") || insertMode === "link"}
+              active={linkDialogOpen || editor.isActive("link")}
               label="链接"
             >
               <IconLink />
             </ToolbarButton>
 
-            <ToolbarButton
-              onClick={toggleImage}
-              active={minimal ? imageDialogOpen : insertMode === "image"}
-              label={minimal ? "插入截图" : "插入图片链接"}
-            >
+            <ToolbarButton onClick={toggleImage} active={imageDialogOpen} label="插入图片">
               <IconImage />
             </ToolbarButton>
 
-            {!minimal && (
-              <div className="ml-auto flex items-center gap-1">
-                <ToolbarButton
-                  onClick={() => editor.chain().focus().undo().run()}
-                  active={false}
-                  label="撤销"
-                  disabled={!editor.can().undo()}
-                >
-                  <IconUndo />
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => editor.chain().focus().redo().run()}
-                  active={false}
-                  label="重做"
-                  disabled={!editor.can().redo()}
-                >
-                  <IconRedo />
-                </ToolbarButton>
-              </div>
-            )}
-          </div>
-
-          {/* 内联插入条（图片 / 链接 URL 输入） — absolute 定位避免推挤内容 */}
-          {insertMode && (
-            <div
-              data-insert-bar
-              className="absolute left-0 right-0 top-full z-10 flex items-center gap-2 border border-slate-100 bg-white px-3 py-2 shadow-md"
-            >
-              <span className="shrink-0 text-[11px] font-medium text-slate-500">
-                {insertMode === "image" ? "图片 URL" : "🔗 链接"}
-              </span>
-              <input
-                ref={inputRef}
-                type="url"
-                value={insertValue}
-                onChange={(e) => setInsertValue(e.target.value)}
-                placeholder={insertMode === "image" ? "https://example.com/image.jpg" : ""}
-                className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10"
-                spellCheck={false}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    confirmInsert();
-                  } else if (e.key === "Escape") {
-                    e.preventDefault();
-                    closeInsert();
-                  }
-                }}
-              />
-              <div className="flex shrink-0 items-center gap-1">
-                <button
-                  type="button"
-                  onClick={confirmInsert}
-                  disabled={!insertValue.trim()}
-                  className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  插入
-                </button>
-                <button
-                  type="button"
-                  onClick={closeInsert}
-                  className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-                >
-                  取消
-                </button>
-              </div>
+            <div className="ml-auto flex items-center gap-1">
+              <ToolbarButton
+                onClick={() => editor.chain().focus().undo().run()}
+                active={false}
+                label="撤销"
+                disabled={!editor.can().undo()}
+              >
+                <IconUndo />
+              </ToolbarButton>
+              <ToolbarButton
+                onClick={() => editor.chain().focus().redo().run()}
+                active={false}
+                label="重做"
+                disabled={!editor.can().redo()}
+              >
+                <IconRedo />
+              </ToolbarButton>
             </div>
-          )}
+          </div>
         </div>
 
         <EditorContent editor={editor} />
       </div>
-      {minimal && imageDialogOpen && (
+      {imageDialogOpen && (
         <ImagePickerDialog
           title="插入图片"
           kind="screenshot"
@@ -424,7 +266,7 @@ export default function Editor({
           }}
         />
       )}
-      {minimal && linkDialogOpen && (
+      {linkDialogOpen && (
         <LinkPickerDialog
           onClose={() => setLinkDialogOpen(false)}
           onConfirm={({ title, href }) => {
@@ -531,20 +373,6 @@ function IconQuote() {
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function IconCode() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className="size-4">
-      <path
-        d="M7 6l-4 4 4 4M13 6l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );

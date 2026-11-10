@@ -110,7 +110,9 @@ function sanitizeCommentHtml(html: string): string {
           : "<a>";
       }
       if (tag === "img") {
-        const src = safeUrl(extractAttr(rest, "src"));
+        const raw = extractAttr(rest, "src");
+        // 站内上传的图片是 /uploads/... 相对路径，与 http(s) 链接一并放行
+        const src = raw && /^\/(?!\/)/.test(raw) && !/["'<>\s]/.test(raw) ? raw : safeUrl(raw);
         return src ? `<img src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer">` : "";
       }
       return `<${tag}>`;
@@ -203,7 +205,7 @@ export default function CommentsSection({ postId }: Props) {
   const hasContent = !isBlank(contentHtml);
 
   return (
-    <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       {/* 标题栏 */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3">
         <div className="flex items-center gap-2">

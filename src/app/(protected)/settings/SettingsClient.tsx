@@ -21,6 +21,12 @@ import {
 import { useLocale } from "@/components/language-provider";
 import { UserName } from "@/components/rainbow-name";
 import { useTheme } from "@/components/theme-provider";
+import {
+  useWallpaperMotion,
+  useWallpaperOpacity,
+  writeWallpaperMotion,
+  writeWallpaperOpacity,
+} from "@/components/wallpaper-background";
 import { backgroundPreviewStyle } from "@/lib/backgrounds";
 
 export type SettingsProfile = {
@@ -40,7 +46,7 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 ];
 
 const CARD =
-  "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]";
+  "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent";
 const ACTION_BUTTON =
   "inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-600/90 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -64,7 +70,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: Set
 
       <div className="grid gap-6 min-[900px]:grid-cols-[220px_minmax(0,1fr)] min-[900px]:items-start">
         <nav aria-label="设置分类" className="min-[900px]:sticky min-[900px]:top-24">
-          <div className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm shadow-slate-900/[0.03] min-[900px]:flex-col">
+          <div className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm shadow-slate-900/[0.03] min-[900px]:flex-col [[data-background=tohru]_&]:bg-transparent">
             {TABS.map(({ key, label, icon: Icon }) => {
               const active = tab === key;
               return (
@@ -616,6 +622,9 @@ function AppearancePanel() {
     backgrounds,
   } = useTheme();
 
+  const wallpaperOpacity = useWallpaperOpacity();
+  const wallpaperMotion = useWallpaperMotion();
+
   return (
     <div className="space-y-4">
       <section className={CARD}>
@@ -687,6 +696,56 @@ function AppearancePanel() {
               );
             })}
           </div>
+
+          {activeBackground === "tohru" && (
+            <div className="mt-4 space-y-2.5 border-t border-slate-100 pt-4">
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="wallpaper-opacity" className="text-sm font-medium text-slate-700">
+                  动态背景强度
+                </label>
+                <span className="text-xs font-medium tabular-nums text-slate-500">
+                  {Math.round(wallpaperOpacity * 100)}%
+                </span>
+              </div>
+              <input
+                id="wallpaper-opacity"
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={Math.round(wallpaperOpacity * 100)}
+                onChange={(event) => writeWallpaperOpacity(Number(event.target.value) / 100)}
+                className="w-full cursor-pointer accent-brand-600"
+              />
+              <p className="text-xs leading-relaxed text-slate-500">
+                控制托尔动态壁纸的显示强度，0% 时完全隐藏，只保留页面底色。
+              </p>
+
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-700">动态效果</p>
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    关闭后保留静态壁纸，不再播放粒子、光柱与鼠标视差。
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={wallpaperMotion}
+                  onClick={() => writeWallpaperMotion(!wallpaperMotion)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    wallpaperMotion ? "bg-brand-600" : "bg-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`absolute left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${
+                      wallpaperMotion ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>
@@ -777,7 +836,7 @@ function SecurityPanel() {
 
 function DangerPanel() {
   return (
-    <section className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <section className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       <div className="p-5 sm:p-6">
         <h2 className="text-base font-semibold text-red-900">注销账号</h2>
         <p className="mt-1 text-sm text-slate-500">此操作不可逆，账号和所有数据将被永久删除。</p>

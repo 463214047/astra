@@ -17,6 +17,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [totp, setTotp] = useState("");
   const [remember, setRemember] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [credentialLoading, setCredentialLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
@@ -201,6 +202,18 @@ export default function LoginForm() {
     }
   }
 
+  /**
+   * 点「忘记密码？」：整页跳转到 GitHub 授权验证身份，
+   * 授权完成后回到重置密码页设置新密码。
+   */
+  function handleResetPasswordVerify() {
+    setError(null);
+    setSuccessMsg(null);
+    setLoadingMsg("正在通过 GitHub 验证身份…");
+    setGithubLoading(true);
+    void signIn("github", { callbackUrl: "/reset-password" });
+  }
+
   return (
     <Card className="relative z-10 w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-slate-900/[0.08] bg-white/80 py-0 shadow-[0_24px_60px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
       <CardContent className="flex flex-col items-center px-8 pb-7 pt-10">
@@ -208,16 +221,16 @@ export default function LoginForm() {
         <div className="mb-7 flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-400 p-[3px] shadow-lg shadow-brand-600/25">
           <Image
             src="/icon.png"
-            alt="Astra PT Logo"
+            alt="DeepSeed Logo"
             width={96}
             height={96}
             priority
             unoptimized
-            className="h-full w-full rounded-full border-[3px] border-white object-cover"
+            className="h-full w-full rounded-full border-[3px] border-white bg-white object-cover"
           />
         </div>
 
-        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">Astra PT</h1>
+        <h1 className="mb-2 text-[26px] font-bold tracking-[-0.03em] text-[#0b1220]">DeepSeed</h1>
 
         {/* ✅ 修复：补全了缺失的文案内容和闭合标签 */}
         <p
@@ -290,22 +303,29 @@ export default function LoginForm() {
                 <label htmlFor="login-password" className="sr-only">
                   密码
                 </label>
-                <input
-                  id="login-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError(null);
-                  }}
-                  placeholder="密码"
-                  autoComplete="current-password"
-                  aria-invalid={!!error && !showTotp}
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-                />
+                <div className="relative">
+                  <input
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    placeholder="密码"
+                    autoComplete="current-password"
+                    aria-invalid={!!error && !showTotp}
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-4 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 [&::-ms-clear]:hidden [&::-ms-reveal]:hidden"
+                  />
+                  <EyeButton
+                    visible={showPassword}
+                    onToggle={() => setShowPassword((v) => !v)}
+                    label={showPassword ? "隐藏密码" : "显示密码"}
+                  />
+                </div>
               </div>
 
-              {/* 记住我 + 忘记密码 */}
+              {/* 记住我 + 重置密码 */}
               <div className="flex items-center justify-between text-xs">
                 <label className="flex cursor-pointer select-none items-center gap-2 text-slate-600">
                   <input
@@ -316,12 +336,14 @@ export default function LoginForm() {
                   />
                   记住我
                 </label>
-                <a
-                  href="/forgot-password"
-                  className="font-medium text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
+                <button
+                  type="button"
+                  onClick={handleResetPasswordVerify}
+                  disabled={isAnyLoading}
+                  className="font-medium text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded disabled:opacity-60"
                 >
                   忘记密码？
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -400,16 +422,7 @@ export default function LoginForm() {
             disabled={isAnyLoading || (showTotp && totp.length !== 6)}
             className="disabled-primary h-[48px] w-full rounded-[14px] bg-brand-600 text-[15px] font-bold text-white shadow-lg shadow-brand-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30 disabled:translate-y-0"
           >
-            {credentialLoading ? (
-              <span className="inline-flex items-center gap-2">
-                <Spinner />
-                {showTotp ? "验证中…" : "登录中…"}
-              </span>
-            ) : showTotp ? (
-              "验证并登录"
-            ) : (
-              "登录"
-            )}
+            登录
           </Button>
         </form>
 
@@ -436,15 +449,6 @@ export default function LoginForm() {
             </Button>
 
             {/* ====== 去注册 ====== */}
-            <p className="mt-5 text-center text-xs text-slate-500">
-              还没有账号？{" "}
-              <Link
-                href="/register"
-                className="font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:rounded"
-              >
-                立即注册
-              </Link>
-            </p>
           </>
         )}
       </CardContent>
@@ -489,6 +493,41 @@ function Spinner() {
         opacity={0.75}
       />
     </svg>
+  );
+}
+
+/* ---------- 密码显示/隐藏按钮 ---------- */
+function EyeButton({
+  visible,
+  onToggle,
+  label,
+}: {
+  visible: boolean;
+  onToggle: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={label}
+      title={label}
+      tabIndex={-1}
+      className="absolute right-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none"
+    >
+      <svg viewBox="0 0 24 24" fill="none" className="size-[18px]" aria-hidden="true">
+        <path
+          d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6" />
+        {visible && (
+          <path d="M4 4l16 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        )}
+      </svg>
+    </button>
   );
 }
 

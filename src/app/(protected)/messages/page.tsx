@@ -200,6 +200,7 @@ export default function MessagesPage() {
       );
       setConvs((prev) => prev.map((c) => ({ ...c, unread: 0 })));
       setConvUnread(0);
+      window.dispatchEvent(new Event("ds:unread-refresh"));
       router.refresh();
     } catch {
       setActionError("操作失败，请稍后重试");
@@ -226,6 +227,7 @@ export default function MessagesPage() {
         prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n)),
       );
       setNotifUnread((prev) => Math.max(0, prev - 1));
+      window.dispatchEvent(new Event("ds:unread-refresh"));
       router.refresh();
     } catch {
       setActionError("标记已读失败，请稍后重试");
@@ -287,7 +289,7 @@ export default function MessagesPage() {
 
       <div className="grid gap-5 min-[900px]:grid-cols-[220px_minmax(0,1fr)] min-[900px]:items-start min-[900px]:gap-6">
         <nav aria-label="消息分类" className="min-[900px]:sticky min-[900px]:top-24">
-          <div className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm shadow-slate-900/[0.03] min-[900px]:flex-col">
+          <div className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm shadow-slate-900/[0.03] min-[900px]:flex-col [[data-background=tohru]_&]:bg-transparent">
             {TABS.map(({ key, label, icon: Icon }) => {
               const active = tab === key;
 
@@ -317,7 +319,7 @@ export default function MessagesPage() {
         <section
           aria-busy={loading}
           aria-label="消息列表"
-          className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]"
+          className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent"
         >
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-2">

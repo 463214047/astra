@@ -25,7 +25,7 @@ export default function ContactForm() {
       });
       const data = await res.json();
       if (data.ok) {
-        setStatus({ ok: true, msg: "已送达，管理会尽快处理。可在「消息」里查看回复。" });
+        setStatus({ ok: true, msg: "已送达，管理会尽快处理。" });
         setTitle("");
         setBody("");
       } else {

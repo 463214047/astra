@@ -8,7 +8,7 @@ import { query, ensureSchema } from "@/lib/db";
  */
 export default async function ProfileRedirect() {
   const session = await auth();
-  const email = session.user.email;
+  const email = session?.user?.email ?? "";
 
   await ensureSchema();
 

@@ -114,7 +114,7 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
       <ProfileStats title="分享数据" subtitle="仅展示公开数据" metrics={metrics} />
 
       {/* 公开种子 */}
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm shadow-slate-900/[0.03]">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
         <h2 className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-slate-900 px-2">
           发布的种子
           <span className="text-xs font-normal text-slate-400">· {posts.length}</span>
@@ -180,7 +180,7 @@ export default async function GuestProfile({ user, stats }: { user: UserRow; sta
 
       {/* 公开论坛帖子 */}
       {forums.length > 0 && (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm shadow-slate-900/[0.03]">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
           <h2 className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-slate-900 px-2">
             论坛帖子
             <span className="text-xs font-normal text-slate-400">· {forums.length}</span>

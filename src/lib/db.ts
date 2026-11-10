@@ -368,6 +368,52 @@ export async function ensureSchema(): Promise<void> {
     ALTER TABLE public.game_wish_save ADD COLUMN IF NOT EXISTS magic INTEGER NOT NULL DEFAULT 16000;
     ALTER TABLE public.game_wish_save ADD COLUMN IF NOT EXISTS rainbow_ids JSONB NOT NULL DEFAULT '[]'::jsonb;
 
+    -- 游戏：托尔（五星限定）持有数量
+    ALTER TABLE public.account_users ADD COLUMN IF NOT EXISTS wish_tohru INTEGER NOT NULL DEFAULT 0;
+
+    -- 游戏：玩家间奖品交易市场（挂单即扣留奖品，成交/撤单再转移/归还）
+    CREATE TABLE IF NOT EXISTS public.game_market_listings (
+      id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      seller_email  TEXT NOT NULL REFERENCES public.account_users(email) ON DELETE CASCADE,
+      item_type     TEXT NOT NULL CHECK (item_type IN ('tohru', 'rainbow')),
+      item_days     INTEGER,               -- 彩虹ID 天数（托尔为 NULL）
+      price         INTEGER NOT NULL CHECK (price > 0),
+      status        TEXT NOT NULL DEFAULT 'active',   -- active | sold | cancelled
+      buyer_email   TEXT REFERENCES public.account_users(email) ON DELETE SET NULL,
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      sold_at       TIMESTAMPTZ
+    );
+    -- 挂单进度：总量、已售数量/天数、累计成交魔力
+    ALTER TABLE public.game_market_listings
+      ADD COLUMN IF NOT EXISTS total_days INTEGER;
+    ALTER TABLE public.game_market_listings
+      ADD COLUMN IF NOT EXISTS sold_days INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE public.game_market_listings
+      ADD COLUMN IF NOT EXISTS earned INTEGER NOT NULL DEFAULT 0;
+    -- 已收取的收益：成交后不再自动到账，卖家在「我的出售」手动收取
+    ALTER TABLE public.game_market_listings
+      ADD COLUMN IF NOT EXISTS paid INTEGER;
+    UPDATE public.game_market_listings SET paid = earned WHERE paid IS NULL;
+    CREATE INDEX IF NOT EXISTS game_market_status_idx
+      ON public.game_market_listings (status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS game_market_seller_idx
+      ON public.game_market_listings (seller_email, created_at DESC);
+
+    -- ====== 系统市场交易流水（用于动态定价） ======
+
+    CREATE TABLE IF NOT EXISTS public.game_market_trades (
+      id          BIGSERIAL PRIMARY KEY,
+      user_email  TEXT NOT NULL,
+      item_type   TEXT NOT NULL CHECK (item_type IN ('tohru', 'rainbow')),
+      direction   TEXT NOT NULL CHECK (direction IN ('buy', 'sell')),
+      units       INTEGER NOT NULL,
+      unit_price  INTEGER NOT NULL,
+      magic       INTEGER NOT NULL,          -- 本次交易涉及的魔力总额
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS game_market_trades_time_idx
+      ON public.game_market_trades (created_at DESC);
+
     -- ====== TMDB 作品介绍缓存 ======
 
     -- 按「影视」维度持久缓存（movie/tv + id），引用同一部作品的所有种子复用

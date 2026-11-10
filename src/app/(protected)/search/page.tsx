@@ -88,7 +88,7 @@ export default async function SearchPage({
   const term = q?.trim();
 
   const session = await auth();
-  const userEmail = session.user.email;
+  const userEmail = session?.user?.email;
 
   const validScope = scope && ["mine", "seeded", "favorites"].includes(scope) ? scope : null;
   const validContent = ["torrent", "forum"].includes(content ?? "")

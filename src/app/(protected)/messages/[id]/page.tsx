@@ -73,7 +73,11 @@ async function requestConversation(id: string): Promise<ConversationData> {
 }
 
 function markConversationRead(id: string) {
-  return fetch(`/api/messages/${id}`, { method: "PATCH" }).catch(() => undefined);
+  return fetch(`/api/messages/${id}`, { method: "PATCH" })
+    .then(() => {
+      window.dispatchEvent(new Event("ds:unread-refresh"));
+    })
+    .catch(() => undefined);
 }
 
 function groupByDay(messages: Msg[]): { dateLabel: string; items: Msg[] }[] {
@@ -161,7 +165,7 @@ export default function ConversationPage() {
   if (error && !conv) {
     return (
       <div className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-4xl flex-col px-4 py-4 sm:px-6 sm:py-6">
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
           <header className="flex shrink-0 items-center gap-3 border-b border-slate-100 px-3 py-3 sm:px-4">
             <Link
               href="/messages"

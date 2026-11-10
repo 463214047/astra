@@ -177,7 +177,12 @@ export default function UploadPage() {
   ];
 
   const canSubmit =
-    title.trim().length > 0 && category !== null && rulesAgreed && tmdbLinkValid && !submitting;
+    title.trim().length > 0 &&
+    category !== null &&
+    rulesAgreed &&
+    tmdbLinkValid &&
+    torrentName.length > 0 &&
+    !submitting;
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return;
@@ -334,7 +339,7 @@ export default function UploadPage() {
         >
           <div className="space-y-5">
             {/* 种子文件 */}
-            <Field label="种子文件" hint="可选">
+            <Field label="种子文件">
               {torrentName ? (
                 <div className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-white px-4 py-3 transition-all hover:border-slate-300 hover:shadow-sm">
                   <div className="min-w-0 flex items-center gap-3">
@@ -442,7 +447,7 @@ export default function UploadPage() {
             {/* 介绍（正文编辑器）*/}
             <Field label="介绍">
               <div className="rounded-2xl transition focus-within:ring-4 focus-within:ring-slate-900/5">
-                <Editor content={content} onChange={setContent} minimal />
+                <Editor content={content} onChange={setContent} />
               </div>
             </Field>
             {/* MediaInfo */}
@@ -586,7 +591,7 @@ function Card({
   footer?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       {/* 标题栏 */}
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
         <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 text-sm ring-1 ring-inset ring-slate-200">

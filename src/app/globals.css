@@ -254,12 +254,16 @@ button:disabled,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* 加载指示器仍需旋转，避免用户误以为操作卡死 */
-  *:not(.animate-spin),
+  /* 加载指示器（.animate-spin / .mSpin）仍需旋转，避免用户误以为操作卡死 */
+  *:not(.animate-spin):not(.mSpin),
   *::before,
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+  /* 按钮内的等待转圈同样保留动画 */
+  .mBtnBusy::after {
+    animation: mSpin 0.7s linear infinite !important;
   }
 }
 

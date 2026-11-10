@@ -4,14 +4,15 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import { LanguageProvider } from "@/components/language-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import WallpaperBackground from "@/components/wallpaper-background";
 import { BACKGROUND_COOKIE, backgroundStyle, getBackground } from "@/lib/backgrounds";
 import { LOCALE_COOKIE, getLocale } from "@/lib/i18n";
 import { THEME_COOKIE, getTheme, themeStyle } from "@/lib/themes";
 
 export const metadata: Metadata = {
   title: {
-    default: "Astra PT",
-    template: "%s - Astra PT",
+    default: "DeepSeed",
+    template: "%s - DeepSeed",
   },
 };
 
@@ -30,8 +31,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       style={themeStyle(theme)}
       suppressHydrationWarning
     >
-      <body className="min-h-dvh" style={backgroundStyle(background)}>
+      <body
+        className="min-h-dvh [[data-background=tohru]_&_input]:bg-transparent! [[data-background=tohru]_&_textarea]:bg-transparent! [[data-background=tohru]_&_select]:bg-transparent!"
+        style={backgroundStyle(background)}
+      >
         <ThemeProvider initialTheme={theme.id} initialBackground={background.id}>
+          <WallpaperBackground />
           <LanguageProvider initialLocale={locale}>
             <Navbar />
             {children}

@@ -244,7 +244,7 @@ export default function SecurityClient({ mode }: { mode: SecurityMode }) {
       )}
 
       {isPasswordMode && (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm [[data-background=tohru]_&]:bg-transparent">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -332,7 +332,7 @@ export default function SecurityClient({ mode }: { mode: SecurityMode }) {
 
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <a
-                    href="/forgot-password"
+                    href="/reset-password"
                     className="text-xs text-slate-500 transition hover:text-brand-700 hover:underline"
                   >
                     忘记当前密码？通过邮箱重置
@@ -379,7 +379,7 @@ export default function SecurityClient({ mode }: { mode: SecurityMode }) {
 
       {!isPasswordMode && (
         <>
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm [[data-background=tohru]_&]:bg-transparent">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">

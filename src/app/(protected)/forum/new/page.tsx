@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Send } from "lucide-react";
 import Editor from "@/components/editor";
 
 type TopicTag = "求助" | "邀请" | "分享" | "讨论" | "公告";
@@ -58,109 +59,129 @@ export default function ForumNewPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <header className="mb-6 sm:mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">发新帖</h1>
-        <p className="mt-1 text-sm text-slate-500">写下你的想法，让同好们看到</p>
-      </header>
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+      <div className="space-y-5">
+        <Card
+          section="发帖"
+          icon="📝"
+          footer={
+            <div className="flex justify-end">
+              <button
+                type="button"
+                disabled={!canSubmit}
+                onClick={handleSubmit}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-brand-500/30 focus-visible:ring-offset-2 active:scale-[0.98] sm:w-auto sm:min-w-[8.5rem] ${
+                  submitting
+                    ? "cursor-wait bg-brand-600 text-white shadow-lg shadow-brand-600/20"
+                    : canSubmit
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-600/20 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30"
+                      : "cursor-not-allowed bg-slate-100 text-slate-400 ring-1 ring-inset ring-slate-200"
+                }`}
+              >
+                {submitting ? (
+                  <>
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    发布中…
+                  </>
+                ) : (
+                  <>
+                    <Send className="size-4" strokeWidth={2} />
+                    发布帖子
+                  </>
+                )}
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-5">
+            {/* 标题 */}
+            <Field label="标题">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE))}
+                className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-900/5"
+              />
+            </Field>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] sm:p-6 space-y-6">
-        {/* 标题 */}
-        <div>
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <label className="text-sm font-medium text-slate-700">
-              标题 <span className="text-rose-500">*</span>
-            </label>
-            <span
-              className={`text-xs tabular-nums ${
-                title.length > MAX_TITLE
-                  ? "text-rose-500"
-                  : title.length >= MAX_TITLE * 0.8
-                    ? "text-amber-500"
-                    : "text-slate-400"
-              }`}
-            >
-              {title.length}/{MAX_TITLE}
-            </span>
+            {/* 分类 */}
+            <Field label="分类">
+              <div className="flex flex-wrap gap-2">
+                {TAG_OPTIONS.map((t) => {
+                  const active = tag === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setTag(active ? null : t.key)}
+                      className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-all duration-200 active:scale-[0.96] ${
+                        active
+                          ? `${t.style} shadow-sm`
+                          : "bg-slate-50 text-slate-600 ring-slate-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      {t.key}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            {/* 正文 */}
+            <Field label="正文">
+              <div className="rounded-2xl transition focus-within:ring-4 focus-within:ring-slate-900/5">
+                <Editor content={content} onChange={setContent} />
+              </div>
+            </Field>
+
+            {error && (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+                {error}
+              </div>
+            )}
           </div>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE))}
-
-            className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-900/5"
-          />
-        </div>
-
-        {/* Tag */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            分类 <span className="text-rose-500">*</span>
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {TAG_OPTIONS.map((t) => {
-              const active = tag === t.key;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => setTag(active ? null : t.key)}
-                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-all active:scale-95 ${
-                    active
-                      ? `${t.style} shadow-sm`
-                      : "bg-slate-50 text-slate-600 ring-slate-200 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                >
-                  {t.key}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 正文 */}
-        <div>
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <label className="text-sm font-medium text-slate-700">
-              正文 <span className="text-rose-500">*</span>
-            </label>
-            <span
-              className={`text-xs tabular-nums ${
-                content.length > MAX_CONTENT ? "text-rose-500" : "text-slate-400"
-              }`}
-            >
-              {content.length}/{MAX_CONTENT}
-            </span>
-          </div>
-          <div className="rounded-xl border border-slate-200 overflow-hidden focus-within:border-slate-400 focus-within:ring-4 focus:ring-slate-900/5 transition">
-            <Editor content={content} onChange={setContent} />
-          </div>
-        </div>
-
-        {/* 错误 */}
-        {error && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
-            {error}
-          </div>
-        )}
-
-        {/* 操作行 */}
-        <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-          <p className="text-xs text-slate-500">发帖后可编辑，请仔细检查</p>
-          <button
-            type="button"
-            disabled={!canSubmit}
-            onClick={handleSubmit}
-            className={`rounded-full px-7 py-2.5 text-sm font-semibold transition active:scale-[0.98] ${
-              canSubmit
-                ? "bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20"
-                : "cursor-not-allowed bg-slate-200 text-slate-400"
-            }`}
-          >
-            {submitting ? "提交中…" : "发帖"}
-          </button>
-        </div>
+        </Card>
       </div>
+    </div>
+  );
+}
+
+function Card({
+  section,
+  icon,
+  children,
+  footer,
+}: {
+  section: string;
+  icon: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
+      <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
+        <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 text-sm ring-1 ring-inset ring-slate-200">
+          {icon}
+        </span>
+        <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">{section}</h2>
+      </div>
+      <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
+      {footer && (
+        <div className="rounded-b-2xl border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+          {footer}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5 md:flex-row md:items-start md:gap-4">
+      <label className="text-sm font-medium leading-6 text-slate-700 md:w-28 md:shrink-0 md:pt-1.5 md:text-right">
+        {label}
+      </label>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

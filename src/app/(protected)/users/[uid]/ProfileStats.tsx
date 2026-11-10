@@ -32,7 +32,7 @@ export default function ProfileStats({
   const spanLast = metrics.length % 2 === 1;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div>
           <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">{title}</h2>

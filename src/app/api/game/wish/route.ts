@@ -7,6 +7,7 @@ type WishSave = {
   pity5: number;
   pity4: number;
   total: number;
+  tohru: number;
   history: unknown[];
   rainbowIds: unknown[];
 };
@@ -16,6 +17,7 @@ const DEFAULT_SAVE: WishSave = {
   pity5: 0,
   pity4: 0,
   total: 0,
+  tohru: 0,
   history: [],
   rainbowIds: [],
 };
@@ -40,8 +42,9 @@ export async function GET() {
     wish_pity5: number;
     wish_pity4: number;
     wish_total: number;
+    wish_tohru: number;
   }>(
-    `SELECT wish_magic, wish_pity5, wish_pity4, wish_total
+    `SELECT wish_magic, wish_pity5, wish_pity4, wish_total, wish_tohru
      FROM public.account_users WHERE email = $1`,
     [email],
   );
@@ -50,6 +53,7 @@ export async function GET() {
   let pity5 = DEFAULT_SAVE.pity5;
   let pity4 = DEFAULT_SAVE.pity4;
   let total = DEFAULT_SAVE.total;
+  let tohru = DEFAULT_SAVE.tohru;
 
   if (users.length > 0) {
     const u = users[0];
@@ -57,6 +61,7 @@ export async function GET() {
     pity5 = Number(u.wish_pity5) || 0;
     pity4 = Number(u.wish_pity4) || 0;
     total = Number(u.wish_total) || 0;
+    tohru = Number(u.wish_tohru) || 0;
   }
 
   // history / rainbow_ids — 继续从 game_wish_save 读（兼容旧数据）
@@ -74,7 +79,7 @@ export async function GET() {
 
   return NextResponse.json({
     ok: true,
-    save: { magic, pity5, pity4, total, history, rainbowIds },
+    save: { magic, pity5, pity4, total, tohru, history, rainbowIds },
   });
 }
 
@@ -103,13 +108,17 @@ export async function PUT(req: Request) {
   const total = typeof body.total === "number" ? body.total : DEFAULT_SAVE.total;
   const history = Array.isArray(body.history) ? body.history : [];
   const rainbowIds = Array.isArray(body.rainbowIds) ? body.rainbowIds : [];
+  const tohru =
+    typeof body.tohru === "number" && Number.isFinite(body.tohru)
+      ? Math.max(0, Math.floor(body.tohru))
+      : DEFAULT_SAVE.tohru;
 
-  // 魔力/保底/累计 — 写 account_users
+  // 魔力/保底/累计/托尔 — 写 account_users
   await query(
     `UPDATE public.account_users
-     SET wish_magic = $2, wish_pity5 = $3, wish_pity4 = $4, wish_total = $5
+     SET wish_magic = $2, wish_pity5 = $3, wish_pity4 = $4, wish_total = $5, wish_tohru = $6
      WHERE email = $1`,
-    [email, magic, pity5, pity4, total],
+    [email, magic, pity5, pity4, total, tohru],
   );
 
   // history / rainbow_ids — 写 game_wish_save

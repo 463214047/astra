@@ -230,7 +230,7 @@ export function translateText(text: string, locale: Locale): string | null {
 }
 
 export function translateDocumentTitle(title: string, locale: Locale): string | null {
-  const suffix = " - Astra PT";
+  const suffix = " - DeepSeed";
   if (!title.endsWith(suffix)) return translateText(title, locale);
 
   let base = title.slice(0, -suffix.length);

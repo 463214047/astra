@@ -197,7 +197,7 @@ function sanitizeHtml(html: string): string {
 }
 
 export async function generateMetadata() {
-  return { title: "资源详情" };
+  return { title: "种子详情" };
 }
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -209,12 +209,12 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
   if (post.post_type === "forum") redirect(`/forum/${id}`);
 
   const session = await auth();
-  const currentEmail = session.user.email;
+  const currentEmail = session?.user?.email;
   const isAuthor = currentEmail === post.author_email;
 
-  // PT 下载链接：带 passkey（有种子时）
+  // PT 下载链接：带 passkey（有种子且已登录时）
   let torrentHref: string | null = null;
-  if (post.torrent_name) {
+  if (post.torrent_name && currentEmail) {
     const passkey = await ensureUserPasskey(currentEmail);
     // 优先用 env，fallback 到当前请求 host
     let origin = process.env.NEXT_PUBLIC_TRACKER_URL;
@@ -245,7 +245,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       {/* 主卡 */}
-      <article className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+      <article className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
         <div className="p-5 sm:p-7">
           {/* 标题 + 分类 + 操作按钮 */}
           <header>
@@ -402,7 +402,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
       </article>
       {/* 正文 */}
       {post.content ? (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] p-5 sm:p-7">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] p-5 sm:p-7 [[data-background=tohru]_&]:bg-transparent">
           <div
             className="prose prose-slate prose-lg max-w-none break-words text-[15px] leading-[2] text-slate-800 prose-p:my-4 prose-p:leading-[2] prose-headings:mt-8 prose-headings:mb-3 prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-ul:my-4 prose-ol:my-4 prose-li:my-1 prose-blockquote:my-5 prose-img:my-6 prose-img:rounded-xl prose-img:border prose-img:border-slate-200 prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-slate-900 prose-pre:text-slate-100 sm:text-base sm:leading-[2.1] sm:prose-p:my-5"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
@@ -487,7 +487,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
           if (overallBitrate) rows.push({ label: "总码率", value: overallBitrate });
 
           return (
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] overflow-hidden">
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] overflow-hidden [[data-background=tohru]_&]:bg-transparent">
               {/* 标题栏 */}
               <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3">
                 <div className="flex items-center gap-2">

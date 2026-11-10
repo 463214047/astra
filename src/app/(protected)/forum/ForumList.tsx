@@ -83,7 +83,7 @@ export default function ForumList({ topics }: { topics: ForumTopic[] }) {
             {/* 外层 Link — 整张卡片 */}
             <Link
               href={`/forum/${t.id}`}
-              className="group block rounded-2xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5"
+              className="group block rounded-2xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5 [[data-background=tohru]_&]:bg-transparent"
             >
               <div className="flex items-start gap-4">
                 {/* 头像 */}

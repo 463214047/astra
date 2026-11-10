@@ -9,12 +9,13 @@ export const metadata: Metadata = {
 
 export default async function GamesPage() {
   const session = await auth();
-  const email = session.user.email;
+  const email = session?.user?.email;
 
   let magic = 16000;
   let pity5 = 0;
   let pity4 = 0;
   let total = 0;
+  let tohru = 0;
   let history: unknown[] = [];
   let rainbowIds: unknown[] = [];
 
@@ -25,8 +26,9 @@ export default async function GamesPage() {
       wish_pity5: number;
       wish_pity4: number;
       wish_total: number;
+      wish_tohru: number;
     }>(
-      `SELECT wish_magic, wish_pity5, wish_pity4, wish_total
+      `SELECT wish_magic, wish_pity5, wish_pity4, wish_total, wish_tohru
        FROM public.account_users WHERE email = $1`,
       [email],
     );
@@ -36,6 +38,7 @@ export default async function GamesPage() {
       pity5 = Number(u.wish_pity5) || 0;
       pity4 = Number(u.wish_pity4) || 0;
       total = Number(u.wish_total) || 0;
+      tohru = Number(u.wish_tohru) || 0;
     }
     const rows = await query<{ history: unknown; rainbow_ids: unknown }>(
       `SELECT history, rainbow_ids FROM public.game_wish_save WHERE user_email = $1`,
@@ -53,6 +56,7 @@ export default async function GamesPage() {
       initialPity5={pity5}
       initialPity4={pity4}
       initialTotal={total}
+      initialTohru={tohru}
       initialHistory={history}
       initialRainbowIds={rainbowIds}
     />

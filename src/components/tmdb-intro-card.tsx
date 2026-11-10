@@ -18,7 +18,7 @@ export default function TmdbIntroCard({ info }: { info: TmdbInfo }) {
   const hasMeta = info.credits.length > 0 || Boolean(info.duration) || info.genres.length > 0;
 
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+    <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
       {/* 标题栏 */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-5 py-3">
         <div className="flex items-center gap-2">

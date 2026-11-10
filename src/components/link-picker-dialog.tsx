@@ -87,6 +87,8 @@ export default function LinkPickerDialog({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [close]);
 
+  const canSubmit = !!linkTitle.trim() && !!normalizeHref(href);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
@@ -154,11 +156,7 @@ export default function LinkPickerDialog({
 
         <form onSubmit={submit} noValidate>
           <div className="px-6 py-6">
-            <label
-              htmlFor={titleInputId}
-              className="flex items-center gap-1 text-sm font-medium text-slate-700"
-            >
-              <span className="text-red-500">*</span>
+            <label htmlFor={titleInputId} className="block text-sm font-medium text-slate-700">
               标题
             </label>
             <input
@@ -177,11 +175,7 @@ export default function LinkPickerDialog({
               className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             />
 
-            <label
-              htmlFor={hrefInputId}
-              className="mt-5 flex items-center gap-1 text-sm font-medium text-slate-700"
-            >
-              <span className="text-red-500">*</span>
+            <label htmlFor={hrefInputId} className="mt-5 block text-sm font-medium text-slate-700">
               链接
             </label>
             <input
@@ -195,7 +189,6 @@ export default function LinkPickerDialog({
               }}
               disabled={busy}
               maxLength={2048}
-              placeholder="https://"
               autoComplete="url"
               spellCheck={false}
               aria-required="true"
@@ -211,7 +204,7 @@ export default function LinkPickerDialog({
             <div className="mt-6 flex justify-end">
               <button
                 type="submit"
-                disabled={busy}
+                disabled={busy || !canSubmit}
                 className="inline-flex min-w-[88px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (

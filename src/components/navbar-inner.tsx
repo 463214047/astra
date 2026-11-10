@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import SearchInput from "./search-input";
 
 type Props = {
@@ -15,26 +16,61 @@ type Props = {
 
 export default function NavbarInner({ loggedIn, userImage, userName, myUid, unreadTotal }: Props) {
   const pathname = usePathname();
+  const [unread, setUnread] = useState(unreadTotal);
+
+  // 未读数实时刷新：定时轮询 + 页面重新可见/聚焦时立即拉取
+  useEffect(() => {
+    if (!loggedIn) return;
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const res = await fetch("/api/unread", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { total?: number };
+        if (!cancelled && typeof data.total === "number") setUnread(data.total);
+      } catch {
+        // 网络抖动时保留上一次结果
+      }
+    };
+
+    void load();
+    const timer = window.setInterval(load, 20000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", load);
+    window.addEventListener("ds:unread-refresh", load);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", load);
+      window.removeEventListener("ds:unread-refresh", load);
+    };
+  }, [loggedIn]);
+
   // 未登录时不显示顶部导航栏；登录、注册、重置密码页也不显示
   if (
     !loggedIn ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
-    pathname.startsWith("/forgot-password")
+    pathname.startsWith("/reset-password")
   ) {
     return null;
   }
-
-  const hasNew = unreadTotal > 0;
+  const hasNew = unread > 0;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 [[data-background=tohru]_&]:bg-transparent! [[data-background=tohru]_&]:backdrop-blur-[0px]!">
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
         {/* 左侧：站点图标 + 名称 */}
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Image
             src="/icon.png"
-            alt="Astra PT"
+            alt="DeepSeed"
             width={28}
             height={28}
             priority
@@ -42,23 +78,23 @@ export default function NavbarInner({ loggedIn, userImage, userName, myUid, unre
             className="size-7"
           />
           <span className="hidden text-lg font-bold tracking-tight text-slate-900 sm:inline">
-            Astra PT
+            DeepSeed
           </span>
         </Link>
 
-        {/* 中间：资源 + 游戏 + 论坛 + 搜索 */}
+        {/* 中间：种子资源 + 游戏 + 论坛 + 搜索 */}
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-          {/* 资源入口 */}
+          {/* 种子资源入口 */}
           <Link
-            href="/resources"
-            aria-label="资源"
-            className="group/resources grid size-10 shrink-0 place-items-center rounded-full text-slate-500 outline-none ring-offset-2 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-900 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-400"
+            href="/torrents"
+            aria-label="种子资源"
+            className="group/torrents grid size-10 shrink-0 place-items-center rounded-full text-slate-500 outline-none ring-offset-2 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-900 active:scale-95 focus-visible:ring-2 focus-visible:ring-slate-400"
           >
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
               fill="none"
-              className="size-7 transition-transform duration-300 group-hover/resources:-translate-y-0.5"
+              className="size-7 transition-transform duration-300 group-hover/torrents:-translate-y-0.5"
             >
               <rect
                 x="2.5"

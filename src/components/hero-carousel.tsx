@@ -15,7 +15,7 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    badge: "Astra PT",
+    badge: "DeepSeed",
     title: "发现同好，分享热爱",
     subtitle: "游戏、动漫、漫画、影视等等 一切你感兴趣的内容，都能在这里找到同好。",
     gradient: "bg-gradient-to-br from-slate-900 via-brand-900 to-brand-950",
@@ -64,7 +64,10 @@ export default function HeroCarousel() {
         }}
       >
         {SLIDES.map((s, i) => (
-          <div key={i} className={`relative w-full shrink-0 ${s.gradient}`}>
+          <div
+            key={i}
+            className={`relative w-full shrink-0 ${s.gradient} [[data-background=tohru]_&]:bg-none!`}
+          >
             {/* 背景光斑 */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               {s.blobs.map((b, bi) => (
@@ -78,26 +81,28 @@ export default function HeroCarousel() {
             {/* 内容 */}
             <div className="relative p-6 sm:p-10">
               {s.badge && (
-                <p className="text-xs font-medium uppercase tracking-widest text-brand-300/80">
+                <p className="text-xs font-medium uppercase tracking-widest text-brand-300/80 [[data-background=tohru]_&]:text-brand-700!">
                   {s.badge}
                 </p>
               )}
-              <h1 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-4xl">
+              <h1 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-4xl [[data-background=tohru]_&]:text-slate-900!">
                 {s.title}
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-300 sm:text-base">{s.subtitle}</p>
+              <p className="mt-2 max-w-xl text-sm text-slate-300 sm:text-base [[data-background=tohru]_&]:text-slate-700!">
+                {s.subtitle}
+              </p>
 
               {s.duoButtons ? (
                 <div className="mt-5 flex items-center gap-3">
                   <a
                     href="/rules"
-                    className="rounded-full bg-white px-5 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-100 active:scale-95"
+                    className="rounded-full bg-white px-5 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-100 active:scale-95 [[data-background=tohru]_&]:border [[data-background=tohru]_&]:border-slate-400 [[data-background=tohru]_&]:bg-transparent!"
                   >
                     规则
                   </a>
                   <a
                     href="/contact"
-                    className="rounded-full border border-white/30 px-5 py-2 text-sm font-medium text-white transition hover:bg-white/10 active:scale-95"
+                    className="rounded-full border border-white/30 px-5 py-2 text-sm font-medium text-white transition hover:bg-white/10 active:scale-95 [[data-background=tohru]_&]:border-slate-400 [[data-background=tohru]_&]:text-slate-900!"
                   >
                     联系管理
                   </a>
@@ -160,7 +165,9 @@ export default function HeroCarousel() {
                 aria-label={`跳到第 ${i + 1} 张`}
                 onClick={() => setIdx(i)}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === idx ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                  i === idx
+                    ? "w-6 bg-white [[data-background=tohru]_&]:bg-slate-900!"
+                    : "w-1.5 bg-white/40 hover:bg-white/70 [[data-background=tohru]_&]:bg-slate-900/40!"
                 }`}
               />
             ))}
@@ -172,7 +179,7 @@ export default function HeroCarousel() {
       {hasMultiple && !paused && (
         <div
           key={idx}
-          className="absolute bottom-0 left-0 z-20 h-0.5 origin-left bg-white/50 animate-[shrink_5000ms_linear_forwards]"
+          className="absolute bottom-0 left-0 z-20 h-0.5 origin-left bg-white/50 animate-[shrink_5000ms_linear_forwards] [[data-background=tohru]_&]:bg-slate-900/40!"
         />
       )}
 

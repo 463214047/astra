@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     }
     if (!rows[0].password_hash) {
       return NextResponse.json(
-        { ok: false, message: "当前账号未设置密码，请先在账号与绑定中设置密码" },
+        { ok: false, message: "当前账号未设置密码，请先在账号设置中设置密码" },
         { status: 400 },
       );
     }

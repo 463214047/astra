@@ -411,6 +411,9 @@
 .cards.grid .card {
   aspect-ratio: 3 / 4.15;
 }
+.cards.single {
+  width: min(93%, 1020px);
+}
 .cards.single .card {
   width: min(58%, 268px);
   aspect-ratio: 3 / 4.15;
@@ -467,7 +470,6 @@
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  position: relative;
 }
 .cardFront::before {
   content: "";
@@ -550,11 +552,27 @@
   backdrop-filter: blur(2px);
   position: relative;
   z-index: 2;
+  margin-bottom: clamp(14px, 2vw, 26px);
 }
 .cardIcon svg {
   width: 62%;
   height: 62%;
   filter: drop-shadow(0 0 9px currentColor);
+}
+.cardFront.fullArt {
+  padding: 0;
+  background: #e6b458;
+}
+.cardFront.fullArt::before {
+  display: none;
+}
+.cardArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 38% 30%;
 }
 .r3 .cardIcon {
   background: rgba(255, 255, 255, 0.35);
@@ -579,16 +597,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0 4px;
-}
-.cardStars {
-  font-size: clamp(7px, 1.05vw, 12px);
-  letter-spacing: 1px;
-  color: #c48800;
-  text-shadow:
-    0 0 8px rgba(255, 200, 90, 0.55),
-    0 1px 3px rgba(255, 255, 255, 0.7);
-  margin-top: 1px;
-  line-height: 1.1;
 }
 .cardSub {
   font-size: clamp(8px, 1.15vw, 12.5px);
@@ -629,6 +637,10 @@
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+}
+/* 单抽结果：继续按钮下移，更靠近页面底部 */
+#resultView.single #closeBtn {
+  margin-top: clamp(20px, 10vh, 110px);
 }
 #closeBtn:hover {
   border-color: #6996d8;
@@ -755,5 +767,347 @@
   }
   .bannerInfo {
     top: 20%;
+  }
+}
+
+/* ============ 市场（玩家间交易） ============ */
+/* 魔力胶囊即市场入口（按钮元素，去掉原生外观） */
+.marketEntry {
+  font-family: inherit;
+  color: #2c3748;
+  cursor: pointer;
+  transition: 0.22s;
+}
+.marketEntry:active {
+  transform: scale(0.97);
+}
+
+#marketView {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 2vw, 26px);
+  background: rgba(233, 242, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+#marketView.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.marketShell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(130, 180, 240, 0.4);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 24px 60px rgba(50, 90, 150, 0.25),
+    inset 0 1px 0 #fff;
+}
+.marketHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(130, 180, 240, 0.25);
+}
+.marketHeadLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.marketHint {
+  color: #93a8c4;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.marketTitle {
+  font-size: clamp(16px, 2vw, 19px);
+  font-weight: 700;
+  letter-spacing: 6px;
+  background: linear-gradient(180deg, #243042 0%, #456492 55%, #6996d8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.marketHeadRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.marketMagic {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(120, 180, 255, 0.12);
+  color: #3a5c86;
+  font-size: 13px;
+}
+.marketClose {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(130, 180, 240, 0.4);
+  border-radius: 50%;
+  background: #fff;
+  color: #5a7896;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.marketClose:hover {
+  background: #eaf2ff;
+  color: #2c3748;
+}
+.marketTabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px 0;
+}
+.mTab {
+  padding: 9px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: #6b7f96;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.mTab.active {
+  border-bottom-color: #6996d8;
+  background: rgba(120, 180, 255, 0.14);
+  color: #2c3748;
+  font-weight: 600;
+}
+.marketBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 14px 16px;
+}
+.mPane {
+  display: none;
+}
+.mPane.active {
+  display: block;
+}
+.mGrid {
+  display: grid;
+  gap: 10px;
+}
+.mBtn {
+  padding: 7px 16px;
+  border: 1px solid rgba(105, 150, 220, 0.5);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #77a8e8, #4a7fc9);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.mBtn:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 0 16px rgba(110, 170, 240, 0.4);
+}
+/* 操作进行中：文字隐藏，按钮内转圈等待结果 */
+.mBtnBusy {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+.mBtnBusy::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: mSpin 0.7s linear infinite;
+}
+/* 列表刷新时的过渡 */
+.mSell {
+  animation: mFadeIn 0.28s ease-out both;
+}
+@keyframes mFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ====== 出售上传 ====== */
+.mSellGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.mSell {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  border: 1px solid rgba(130, 180, 240, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.mSellHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mSellTitle {
+  color: #2c3748;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.mSellBadge {
+  padding: 3px 9px;
+  border: 1px solid rgba(130, 180, 240, 0.35);
+  border-radius: 999px;
+  color: #5f7793;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.mSellForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.mField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mField label {
+  color: #7b8ea6;
+  font-size: 11px;
+}
+.mMeta {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mMetaEnd {
+  justify-content: flex-end;
+}
+.mRef {
+  min-width: 0;
+  color: #93a8c4;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.mQtyInput {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid rgba(150, 180, 215, 0.5);
+  border-radius: 10px;
+  background: #fff;
+  color: #2c3748;
+  font-family: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+.mSum {
+  color: #7d90ab;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.mSum b {
+  color: #3f7bd0;
+  font-size: 15px;
+}
+.mSellBtn {
+  grid-column: 1 / -1;
+}
+.mQtyInput:focus {
+  border-color: #6996d8;
+  box-shadow: 0 0 0 3px rgba(110, 170, 240, 0.18);
+}
+.mEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 26px 12px;
+  text-align: center;
+  color: #8aa0b8;
+  font-size: 12.5px;
+}
+.mSpin {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(130, 180, 240, 0.32);
+  border-top-color: #4a7fc9;
+  border-radius: 50%;
+  animation: mSpin 0.8s linear infinite;
+}
+@keyframes mSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mToast {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(44, 55, 72, 0.9);
+  color: #fff;
+  font-size: 12.5px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 10px);
+  transition: 0.25s;
+}
+.mToast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+@media (max-width: 560px) {
+  .mSellGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mSell {
+    padding: 12px;
+  }
+  .mSellForm {
+    gap: 8px;
+  }
+  .mBtn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }

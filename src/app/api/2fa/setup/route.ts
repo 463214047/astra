@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     const secret = generateSecret();
     const secretEnc = encryptSecret(secret);
     const authUrl = generateAuthUrl({
-      issuer: "Astra PT",
+      issuer: "DeepSeed",
       label: email,
       secret,
     });

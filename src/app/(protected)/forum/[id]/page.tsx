@@ -10,14 +10,6 @@ import NextImage from "next/image";
 
 type TopicTag = "求助" | "邀请" | "分享" | "讨论" | "公告";
 
-const TAG_STYLES: Record<TopicTag, string> = {
-  求助: "bg-blue-50 text-blue-700 ring-blue-200",
-  分享: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  邀请: "bg-violet-50 text-violet-700 ring-violet-200",
-  讨论: "bg-amber-50 text-amber-700 ring-amber-200",
-  公告: "bg-rose-50 text-rose-700 ring-rose-200",
-};
-
 type ForumDetail = {
   id: string;
   title: string;
@@ -127,7 +119,10 @@ function sanitizeHtml(html: string): string {
             const name = a[1].toLowerCase();
             const value = a[2] ?? a[3] ?? a[4] ?? "";
             if (allowedForTag.has(name)) {
-              if ((tagLower === "img" && name === "src") || (tagLower === "a" && name === "href")) {
+              if (tagLower === "img" && name === "src") {
+                // 站内上传的图片是 /uploads/... 相对路径，需一并放行
+                if (!/^(https?:\/\/|\/(?!\/))[^\s"<>]+$/i.test(value)) continue;
+              } else if (tagLower === "a" && name === "href") {
                 if (!/^https?:\/\/[^\s"<>]+$/i.test(value)) continue;
               }
               cleanAttrs += ` ${name}="${value.replace(/"/g, "&quot;")}"`;
@@ -168,7 +163,7 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
   if (!post) notFound();
 
   const session = await auth();
-  const currentEmail = session.user.email;
+  const currentEmail = session?.user?.email;
   const isAuthor = currentEmail === post.author_email;
 
   const displayName = post.anonymous
@@ -182,25 +177,15 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
       rainbow_until: post.author_rainbow_until,
     });
 
-  const tagStyle = TAG_STYLES[post.category] ?? "bg-slate-100 text-slate-700 ring-slate-200";
-
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       {/* 主卡 */}
-      <article className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
+      <article className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] [[data-background=tohru]_&]:bg-transparent">
         <div className="p-5 sm:p-7">
           <header>
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${tagStyle}`}
-              >
-                {post.category}
-              </span>
-            </div>
-
             <h1
               data-no-translate
-              className="mt-3 text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
+              className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
             >
               {post.title}
             </h1>
@@ -280,7 +265,7 @@ export default async function ForumDetailPage({ params }: { params: Promise<{ id
 
       {/* 正文 */}
       {post.content && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] p-5 sm:p-7">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] p-5 sm:p-7 [[data-background=tohru]_&]:bg-transparent">
           <div
             className="prose prose-slate max-w-none break-words text-[15px] leading-[2] text-slate-800 prose-p:my-3 prose-headings:mt-6 prose-headings:mb-2 prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-ul:my-3 prose-ol:my-3 prose-li:my-0.5 prose-blockquote:my-4 prose-img:my-4 prose-img:rounded-xl prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-slate-900 prose-pre:text-slate-100"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}

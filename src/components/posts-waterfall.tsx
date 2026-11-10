@@ -6,7 +6,6 @@ import type { HomePost } from "@/app/(protected)/page";
 import PostTag from "./post-tag";
 
 type CategoryMeta = { label: string; tagBg: string; tagText: string };
-type ResourceType = "torrent" | "other";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -26,21 +25,13 @@ interface Props {
   posts: HomePost[];
   categoryMeta: Record<string, CategoryMeta>;
   fallbackGradient: Record<string, string>;
-  resourceType?: ResourceType;
 }
 
-function PostsWaterfall({
-  posts,
-  categoryMeta,
-  fallbackGradient,
-  resourceType = "torrent",
-}: Props) {
-  const isTorrent = resourceType === "torrent";
-
+function PostsWaterfall({ posts, categoryMeta, fallbackGradient }: Props) {
   if (posts.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center">
-        <p className="text-sm text-slate-400">暂无内容，成为第一个发布者吧 ✨</p>
+      <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center [[data-background=tohru]_&]:bg-transparent">
+        <p className="text-sm text-slate-400">暂无内容</p>
       </div>
     );
   }
@@ -56,7 +47,7 @@ function PostsWaterfall({
           <Link
             key={post.id}
             href={`/posts/${post.id}`}
-            className="mb-3 block break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md"
+            className="mb-3 block break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md [[data-background=tohru]_&]:bg-transparent"
           >
             {/* 封面区 — 高度随内容变化，形成瀑布流 */}
             {cover ? (
@@ -112,19 +103,14 @@ function PostsWaterfall({
                 </div>
               )}
 
-              {/* 种子资源显示做种 / 大小，其他资源只显示时间 */}
+              {/* 一行：左=做种  右=大小 + 时间 — 风格统一 */}
               <div className="mt-1 flex items-center justify-between gap-x-3 text-[12px]">
-                {isTorrent ? (
-                  <span className="inline-flex items-center gap-1 tabular-nums text-slate-600">
-                    <span className="text-emerald-600">↑</span>
-                    <span className="text-slate-700 font-medium">{post.seed_count ?? 0}</span>
-                  </span>
-                ) : (
-                  <span className="text-[11px] text-slate-400">其他资源</span>
-                )}
+                <span className="inline-flex items-center gap-1 tabular-nums text-slate-600">
+                  <span className="text-emerald-600">↑</span>
+                  <span className="text-slate-700 font-medium">{post.seed_count ?? 0}</span>
+                </span>
                 <div className="flex items-center gap-x-2 text-slate-400">
-                  {isTorrent &&
-                    post.torrent_size != null &&
+                  {post.torrent_size != null &&
                     post.torrent_size > 0 &&
                     (() => {
                       const units = ["B", "KB", "MB", "GB", "TB"];
@@ -164,6 +150,5 @@ export default memo(
   (prev, next) =>
     postsShallowEqual(prev.posts, next.posts) &&
     prev.categoryMeta === next.categoryMeta &&
-    prev.fallbackGradient === next.fallbackGradient &&
-    prev.resourceType === next.resourceType,
+    prev.fallbackGradient === next.fallbackGradient,
 );

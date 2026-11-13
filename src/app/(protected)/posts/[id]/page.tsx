@@ -17,6 +17,18 @@ import TmdbIntroCard from "@/components/tmdb-intro-card";
 import Popover from "@/components/popover";
 import PostTag from "@/components/post-tag";
 
+/** 分类徽标配色（与列表页保持一致） */
+const CATEGORY_META: Record<string, { label: string; tagBg: string; tagText: string }> = {
+  游戏: { label: "游戏", tagBg: "bg-blue-600", tagText: "text-white" },
+  漫画: { label: "漫画", tagBg: "bg-emerald-600", tagText: "text-white" },
+  动漫: { label: "动漫", tagBg: "bg-violet-600", tagText: "text-white" },
+  电影: { label: "电影", tagBg: "bg-amber-500", tagText: "text-white" },
+  剧集: { label: "剧集", tagBg: "bg-rose-500", tagText: "text-white" },
+  音乐: { label: "音乐", tagBg: "bg-cyan-600", tagText: "text-white" },
+  体育: { label: "体育", tagBg: "bg-lime-600", tagText: "text-white" },
+  综艺: { label: "综艺", tagBg: "bg-fuchsia-500", tagText: "text-white" },
+};
+
 type DetailPost = {
   id: string;
   post_type: string;
@@ -137,6 +149,10 @@ const ALLOWED_TAGS = new Set([
   "img",
   "a",
   "hr",
+  "span",
+  "div",
+  "details",
+  "summary",
 ]);
 const ALLOWED_ATTRS: Record<string, Set<string>> = {
   img: new Set(["src", "alt", "class"]),
@@ -146,7 +162,26 @@ const ALLOWED_ATTRS: Record<string, Set<string>> = {
   blockquote: new Set(["class"]),
   strong: new Set(["class"]),
   em: new Set(["class"]),
+  span: new Set(["style"]),
+  div: new Set(["class", "data-type"]),
+  details: new Set(["class", "open"]),
+  summary: new Set(["class"]),
 };
+
+/** 内联样式白名单 — 仅保留 color / font-size */
+function sanitizeInlineStyle(value: string): string | null {
+  const kept: string[] = [];
+  for (const part of value.split(";")) {
+    const idx = part.indexOf(":");
+    if (idx === -1) continue;
+    const prop = part.slice(0, idx).trim().toLowerCase();
+    const val = part.slice(idx + 1).trim();
+    if (prop === "color" && /^(#[0-9a-f]{3,8}|[a-z]{3,20})$/i.test(val)) kept.push(`color:${val}`);
+    else if (prop === "font-size" && /^\d{1,2}(?:\.\d+)?px$/.test(val))
+      kept.push(`font-size:${val}`);
+  }
+  return kept.length ? kept.join(";") : null;
+}
 
 function sanitizeHtml(html: string): string {
   if (!html) return "";
@@ -175,11 +210,17 @@ function sanitizeHtml(html: string): string {
         const allowedForTag = ALLOWED_ATTRS[tagLower] ?? new Set();
         if (attrs) {
           // 解析属性
-          const attrMatches = attrs.matchAll(/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
+          const attrMatches = attrs.matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
           for (const a of attrMatches) {
             const name = a[1].toLowerCase();
             const value = a[2] ?? a[3] ?? a[4] ?? "";
             if (allowedForTag.has(name)) {
+              // style 只保留安全的 color / font-size
+              if (name === "style") {
+                const safeStyle = sanitizeInlineStyle(value);
+                if (safeStyle) cleanAttrs += ` style="${safeStyle}"`;
+                continue;
+              }
               // URL 检查：img/src 和 a/href 必须是 http(s)
               if ((tagLower === "img" && name === "src") || (tagLower === "a" && name === "href")) {
                 if (!/^https?:\/\/[^\s"<>]+$/i.test(value)) continue;
@@ -258,25 +299,36 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
                     </span>
                   )}
                 </div>
-                <h1
-                  data-no-translate
-                  className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
-                >
-                  {post.title}
-                </h1>
+                <div className="flex min-w-0 items-center gap-2">
+                  <h1
+                    data-no-translate
+                    className="min-w-0 text-xl font-bold leading-tight text-slate-900 sm:text-2xl"
+                  >
+                    {post.title}
+                  </h1>
+                  {CATEGORY_META[post.category] && (
+                    <span
+                      className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${CATEGORY_META[post.category].tagBg} ${CATEGORY_META[post.category].tagText}`}
+                    >
+                      {CATEGORY_META[post.category].label}
+                    </span>
+                  )}
+                </div>
                 {(post.subtitle || (post.tags && post.tags.length > 0)) && (
-                  <p data-no-translate className="mt-2 text-sm leading-relaxed text-slate-600">
-                    {post.subtitle}
+                  <div className="mt-2 flex min-w-0 items-center gap-1.5 text-sm text-slate-600">
                     {post.tags && post.tags.length > 0 && (
-                      <span
-                        className={`inline-flex flex-wrap items-center gap-1 align-middle ${post.subtitle ? "ml-2" : ""}`}
-                      >
+                      <span className="flex shrink-0 items-center gap-1">
                         {post.tags.map((t, i) => (
                           <PostTag key={i} tag={t} />
                         ))}
                       </span>
                     )}
-                  </p>
+                    {post.subtitle && (
+                      <span data-no-translate className="min-w-0 truncate" title={post.subtitle}>
+                        {post.subtitle}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 

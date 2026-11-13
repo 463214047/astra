@@ -154,31 +154,35 @@ function PostsTable({ posts, categoryMeta }: Props) {
                       >
                         {post.title}
                       </span>
+                      {meta && (
+                        <span
+                          className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}
+                        >
+                          {meta.label}
+                        </span>
+                      )}
                       {post.hot && (
                         <span className="shrink-0 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">
                           🔥 HOT
                         </span>
                       )}
                     </div>
-                    {(meta || post.subtitle || tags.length > 0) && (
-                      <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-slate-500">
-                        {meta && (
-                          <span
-                            className={`shrink-0 rounded-md px-1.5 py-0.5 text-[12px] font-medium ${meta.tagBg} ${meta.tagText}`}
-                          >
-                            {meta.label}
-                          </span>
-                        )}
-                        {post.subtitle && (
-                          <span data-no-translate className="truncate">
-                            {post.subtitle}
-                          </span>
-                        )}
+                    {(post.subtitle || tags.length > 0) && (
+                      <div className="mt-0.5 flex min-w-0 items-center gap-x-1.5 text-[13px] text-slate-500">
                         {tags.length > 0 && (
                           <span className="flex shrink-0 items-center gap-1">
                             {tags.map((t: string, i: number) => (
                               <PostTag key={i} tag={t} />
                             ))}
+                          </span>
+                        )}
+                        {post.subtitle && (
+                          <span
+                            data-no-translate
+                            className="min-w-0 flex-1 truncate"
+                            title={post.subtitle}
+                          >
+                            {post.subtitle}
                           </span>
                         )}
                       </div>

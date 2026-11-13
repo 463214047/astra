@@ -273,9 +273,7 @@ export default function CommentsSection({ postId }: Props) {
         <p className="py-10 text-center text-sm text-slate-400">加载中…</p>
       ) : error ? (
         <p className="py-10 text-center text-sm text-rose-500">{error}</p>
-      ) : totalCount === 0 ? (
-        <p className="py-12 text-center text-sm text-slate-400">还没有评论，来抢沙发吧 ✨</p>
-      ) : (
+      ) : totalCount === 0 ? null : (
         <div className="divide-y divide-slate-100">
           {comments.map((c) => (
             <CommentItem

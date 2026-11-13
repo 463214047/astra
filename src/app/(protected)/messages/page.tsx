@@ -2,19 +2,22 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
-  ChevronRight,
+  Inbox,
   MessageCircle,
   RefreshCw,
+  Send,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { UserName } from "@/components/rainbow-name";
+import Editor from "@/components/editor";
+import { isRichText, richTextToPlainText, sanitizeRichHtml } from "@/lib/rich-text";
 
-type TabKey = "notifications" | "conversations";
+type TabKey = "notifications" | "inbox" | "outbox";
 
 type Notification = {
   id: string;
@@ -30,25 +33,33 @@ type Notification = {
   created_at: string;
 };
 
-type Conversation = {
+type InboxMessage = {
   id: string;
-  other_email: string;
-  other_name: string;
-  other_avatar: string | null;
-  other_rainbow: boolean;
-  last_message: string;
-  last_message_time: string;
-  last_sender_email: string | null;
-  unread: number;
+  conversation_id: string;
+  sender_email: string;
+  sender_name: string;
+  sender_avatar: string | null;
+  sender_rainbow: boolean;
+  content: string;
+  created_at: string;
+  unread: boolean;
 };
 
-type FeedItem =
-  | { kind: "notification"; time: string; notification: Notification }
-  | { kind: "conversation"; time: string; conversation: Conversation };
+type OutboxMessage = {
+  id: string;
+  recipient_email: string;
+  recipient_name: string;
+  recipient_avatar: string | null;
+  recipient_rainbow: boolean;
+  content: string;
+  created_at: string;
+  seen: boolean;
+};
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "notifications", label: "通知", icon: Bell },
-  { key: "conversations", label: "私信", icon: MessageCircle },
+  { key: "inbox", label: "收件箱", icon: Inbox },
+  { key: "outbox", label: "发件箱", icon: Send },
 ];
 
 const EMPTY_COPY: Record<TabKey, { title: string; description: string; icon: LucideIcon }> = {
@@ -57,10 +68,15 @@ const EMPTY_COPY: Record<TabKey, { title: string; description: string; icon: Luc
     description: "新的系统通知和回复会显示在这里",
     icon: Bell,
   },
-  conversations: {
-    title: "暂无私信",
-    description: "与站内用户的私信会显示在这里",
-    icon: MessageCircle,
+  inbox: {
+    title: "暂无收件",
+    description: "其他人发给你的消息会显示在这里",
+    icon: Inbox,
+  },
+  outbox: {
+    title: "暂无发件",
+    description: "你发出的消息会显示在这里",
+    icon: Send,
   },
 };
 
@@ -79,16 +95,16 @@ function timeAgo(iso: string): string {
   return date.toLocaleDateString("zh-CN");
 }
 
-type InboxData = {
+type MessageData = {
   notifications: Notification[];
   notificationUnread: number;
-  conversations: Conversation[];
-  conversationUnread: number;
+  inbox: InboxMessage[];
+  outbox: OutboxMessage[];
 };
 
-/** 拉取收件箱数据，不直接修改组件状态 */
-async function requestInbox(): Promise<InboxData> {
-  const [notifRes, convRes] = await Promise.all([
+/** 拉取消息中心数据，不直接修改组件状态 */
+async function requestMessages(): Promise<MessageData> {
+  const [notifRes, msgRes] = await Promise.all([
     fetch("/api/notifications", { cache: "no-store" }),
     fetch("/api/messages", { cache: "no-store" }),
   ]);
@@ -99,23 +115,22 @@ async function requestInbox(): Promise<InboxData> {
     items?: Notification[];
     unread?: { total?: number };
   };
-  const cd = (await convRes.json().catch(() => ({}))) as {
+  const md = (await msgRes.json().catch(() => ({}))) as {
     ok?: boolean;
     message?: string;
-    conversations?: Conversation[];
+    inbox?: InboxMessage[];
+    outbox?: OutboxMessage[];
   };
 
-  if (!notifRes.ok || !nd.ok || !convRes.ok || !cd.ok) {
-    throw new Error(nd.message ?? cd.message ?? "消息加载失败");
+  if (!notifRes.ok || !nd.ok || !msgRes.ok || !md.ok) {
+    throw new Error(nd.message ?? md.message ?? "消息加载失败");
   }
-
-  const conversations = cd.conversations ?? [];
 
   return {
     notifications: nd.items ?? [],
     notificationUnread: Number(nd.unread?.total ?? 0),
-    conversations,
-    conversationUnread: conversations.reduce((sum, conversation) => sum + conversation.unread, 0),
+    inbox: md.inbox ?? [],
+    outbox: md.outbox ?? [],
   };
 }
 
@@ -125,37 +140,38 @@ export default function MessagesPage() {
   const [tab, setTab] = useState<TabKey>("notifications");
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [notifUnread, setNotifUnread] = useState(0);
-  const [convs, setConvs] = useState<Conversation[]>([]);
-  const [convUnread, setConvUnread] = useState(0);
+  const [inbox, setInbox] = useState<InboxMessage[]>([]);
+  const [outbox, setOutbox] = useState<OutboxMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
+  const [activeInbox, setActiveInbox] = useState<InboxMessage | null>(null);
 
-  const applyInbox = useCallback((data: InboxData) => {
+  const applyData = useCallback((data: MessageData) => {
     setNotifs(data.notifications);
     setNotifUnread(data.notificationUnread);
-    setConvs(data.conversations);
-    setConvUnread(data.conversationUnread);
+    setInbox(data.inbox);
+    setOutbox(data.outbox);
   }, []);
 
   const loadMessages = useCallback(async () => {
     try {
-      const data = await requestInbox();
-      applyInbox(data);
+      const data = await requestMessages();
+      applyData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "消息加载失败");
     } finally {
       setLoading(false);
     }
-  }, [applyInbox]);
+  }, [applyData]);
 
   useEffect(() => {
     let active = true;
 
-    requestInbox()
+    requestMessages()
       .then((data) => {
-        if (active) applyInbox(data);
+        if (active) applyData(data);
       })
       .catch((err: unknown) => {
         if (active) {
@@ -169,7 +185,7 @@ export default function MessagesPage() {
     return () => {
       active = false;
     };
-  }, [applyInbox]);
+  }, [applyData]);
 
   function handleRetry() {
     setLoading(true);
@@ -184,22 +200,19 @@ export default function MessagesPage() {
     setActionError(null);
 
     try {
-      const notificationsRes = await fetch("/api/notifications/read-all", {
-        method: "PATCH",
-      });
-      if (!notificationsRes.ok) throw new Error("标记通知失败");
+      const [notificationsRes, messagesRes] = await Promise.all([
+        fetch("/api/notifications/read-all", { method: "PATCH" }),
+        fetch("/api/messages", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ all: true }),
+        }),
+      ]);
+      if (!notificationsRes.ok || !messagesRes.ok) throw new Error("标记失败");
 
       setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setNotifUnread(0);
-
-      const unreadConversations = convs.filter((c) => c.unread > 0);
-      await Promise.all(
-        unreadConversations.map((c) =>
-          fetch(`/api/messages/${c.id}`, { method: "PATCH" }).catch(() => undefined),
-        ),
-      );
-      setConvs((prev) => prev.map((c) => ({ ...c, unread: 0 })));
-      setConvUnread(0);
+      setInbox((prev) => prev.map((m) => ({ ...m, unread: false })));
       window.dispatchEvent(new Event("ds:unread-refresh"));
       router.refresh();
     } catch {
@@ -234,31 +247,39 @@ export default function MessagesPage() {
     }
   }
 
+  /** 单条收件标记已读 */
+  async function markInboxRead(message: InboxMessage) {
+    if (!message.unread) return;
+    setActionError(null);
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_id: message.conversation_id,
+          read_at: message.created_at,
+        }),
+      });
+      if (!res.ok) {
+        setActionError("标记已读失败，请稍后重试");
+        return;
+      }
+
+      setInbox((prev) => prev.map((m) => (m.id === message.id ? { ...m, unread: false } : m)));
+      window.dispatchEvent(new Event("ds:unread-refresh"));
+      router.refresh();
+    } catch {
+      setActionError("标记已读失败，请稍后重试");
+    }
+  }
+
   const activeTab = TABS.find((item) => item.key === tab) ?? TABS[0];
   const ActiveIcon = activeTab.icon;
-  const totalUnread = notifUnread + convUnread;
-
-  const notificationItems: FeedItem[] =
-    tab === "conversations"
-      ? []
-      : notifs.map((notification) => ({
-          kind: "notification",
-          time: notification.created_at,
-          notification,
-        }));
-
-  const conversationItems: FeedItem[] =
-    tab === "notifications"
-      ? []
-      : convs.map((conversation) => ({
-          kind: "conversation",
-          time: conversation.last_message_time,
-          conversation,
-        }));
-
-  const feedItems = [...notificationItems, ...conversationItems].sort(
-    (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
-  );
+  const inboxUnread = inbox.reduce((sum, message) => sum + (message.unread ? 1 : 0), 0);
+  const totalUnread = notifUnread + inboxUnread;
+  const itemCount =
+    tab === "notifications" ? notifs.length : tab === "inbox" ? inbox.length : outbox.length;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
@@ -326,35 +347,56 @@ export default function MessagesPage() {
               <ActiveIcon className="size-4 shrink-0 text-slate-400" strokeWidth={1.8} />
               <h2 className="text-sm font-semibold text-slate-900">{activeTab.label}</h2>
             </div>
+            {!loading && itemCount > 0 && (
+              <span className="shrink-0 text-[11px] text-slate-400">共 {itemCount} 条</span>
+            )}
           </div>
 
           {loading ? (
             <FeedSkeleton />
           ) : error ? (
             <ErrorState message={error} onRetry={handleRetry} />
-          ) : feedItems.length === 0 ? (
+          ) : itemCount === 0 ? (
             <EmptyState tab={tab} />
+          ) : tab === "notifications" ? (
+            <ul className="divide-y divide-slate-100">
+              {notifs.map((notification) => (
+                <NotificationRow
+                  key={`n-${notification.id}`}
+                  notification={notification}
+                  onMarkRead={markNotifRead}
+                  onNavigate={(href) => router.push(href)}
+                />
+              ))}
+            </ul>
+          ) : tab === "inbox" ? (
+            <ul className="divide-y divide-slate-100">
+              {inbox.map((message) => (
+                <InboxRow
+                  key={`i-${message.id}`}
+                  message={message}
+                  onRead={markInboxRead}
+                  onOpen={(m) => setActiveInbox(m)}
+                />
+              ))}
+            </ul>
           ) : (
             <ul className="divide-y divide-slate-100">
-              {feedItems.map((item) =>
-                item.kind === "notification" ? (
-                  <NotificationRow
-                    key={`n-${item.notification.id}`}
-                    notification={item.notification}
-                    onMarkRead={markNotifRead}
-                    onNavigate={(href) => router.push(href)}
-                  />
-                ) : (
-                  <ConversationRow
-                    key={`c-${item.conversation.id}`}
-                    conversation={item.conversation}
-                  />
-                ),
-              )}
+              {outbox.map((message) => (
+                <OutboxRow key={`o-${message.id}`} message={message} />
+              ))}
             </ul>
           )}
         </section>
       </div>
+
+      {activeInbox && (
+        <InboxDetailDialog
+          message={activeInbox}
+          onClose={() => setActiveInbox(null)}
+          onReplied={() => void loadMessages()}
+        />
+      )}
     </div>
   );
 }
@@ -502,51 +544,59 @@ function NotificationRow({
             </span>
           )}
         </span>
-
-        {href && (
-          <ChevronRight
-            className="mt-3 size-4 shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-slate-500"
-            strokeWidth={1.8}
-          />
-        )}
       </button>
     </li>
   );
 }
 
-function ConversationRow({ conversation }: { conversation: Conversation }) {
-  const unread = conversation.unread > 0;
-  const sentByMe =
-    conversation.last_sender_email && conversation.last_sender_email !== conversation.other_email;
+function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
+  if (avatar) {
+    return (
+      <Image
+        src={avatar}
+        alt={name}
+        width={44}
+        height={44}
+        unoptimized
+        className="size-11 rounded-full object-cover ring-2 ring-white"
+      />
+    );
+  }
+
+  return (
+    <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 text-sm font-semibold text-slate-600 ring-2 ring-white">
+      {name[0]?.toUpperCase() ?? "U"}
+    </span>
+  );
+}
+
+function InboxRow({
+  message,
+  onRead,
+  onOpen,
+}: {
+  message: InboxMessage;
+  onRead: (message: InboxMessage) => Promise<void>;
+  onOpen: (message: InboxMessage) => void;
+}) {
+  function handleClick() {
+    void onRead(message);
+    onOpen(message);
+  }
 
   return (
     <li>
-      <Link
-        href={`/messages/${conversation.id}`}
-        className={`group flex items-center gap-3.5 px-5 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/30 sm:px-6 ${
-          unread ? "bg-brand-50/30 hover:bg-brand-50/60" : "hover:bg-slate-50"
+      <button
+        type="button"
+        onClick={handleClick}
+        className={`group flex w-full items-start gap-3.5 px-5 py-4 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/30 sm:px-6 ${
+          message.unread ? "bg-brand-50/30 hover:bg-brand-50/60" : "hover:bg-slate-50"
         }`}
       >
-        <span className="relative shrink-0">
-          {conversation.other_avatar ? (
-            <Image
-              src={conversation.other_avatar}
-              alt={conversation.other_name}
-              width={44}
-              height={44}
-              unoptimized
-              className="size-11 rounded-full object-cover ring-2 ring-white"
-            />
-          ) : (
-            <span className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 text-sm font-semibold text-slate-600 ring-2 ring-white">
-              {conversation.other_name[0]?.toUpperCase() ?? "U"}
-            </span>
-          )}
-          {unread && (
-            <span
-              aria-hidden="true"
-              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-brand-500 ring-2 ring-white"
-            />
+        <span className="relative mt-0.5 shrink-0">
+          <Avatar name={message.sender_name} avatar={message.sender_avatar} />
+          {message.unread && (
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-brand-500 ring-2 ring-white" />
           )}
         </span>
 
@@ -554,38 +604,215 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
           <span className="flex items-start justify-between gap-3">
             <span
               className={`truncate text-sm leading-6 ${
-                unread ? "font-semibold text-slate-900" : "font-medium text-slate-700"
+                message.unread ? "font-semibold text-slate-900" : "font-medium text-slate-700"
               }`}
             >
-              <UserName name={conversation.other_name} rainbow={conversation.other_rainbow} />
+              <UserName name={message.sender_name} rainbow={message.sender_rainbow} />
             </span>
             <time
-              dateTime={conversation.last_message_time}
+              dateTime={message.created_at}
               className="shrink-0 pt-0.5 text-[11px] text-slate-400"
             >
-              {timeAgo(conversation.last_message_time)}
+              {timeAgo(message.created_at)}
             </time>
           </span>
 
           <span
-            className={`mt-0.5 block truncate text-xs leading-5 ${
-              unread ? "font-medium text-slate-600" : "text-slate-500"
+            data-no-translate
+            className={`mt-0.5 line-clamp-2 block break-words text-xs leading-5 ${
+              message.unread ? "text-slate-600" : "text-slate-500"
             }`}
           >
-            {sentByMe && <span className="text-slate-400">你：</span>}
-            {conversation.last_message ? (
-              <span data-no-translate>{conversation.last_message}</span>
-            ) : (
-              "（暂无消息）"
-            )}
+            {richTextToPlainText(message.content)}
           </span>
         </span>
-
-        <ChevronRight
-          className="size-4 shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-slate-500"
-          strokeWidth={1.8}
-        />
-      </Link>
+      </button>
     </li>
+  );
+}
+
+function OutboxRow({ message }: { message: OutboxMessage }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        aria-expanded={expanded}
+        className="group flex w-full items-start gap-3.5 px-5 py-4 text-left outline-none transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/30 sm:px-6"
+      >
+        <span className="mt-0.5 shrink-0">
+          <Avatar name={message.recipient_name} avatar={message.recipient_avatar} />
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="flex items-start justify-between gap-3">
+            <span className="truncate text-sm leading-6 font-medium text-slate-700">
+              <span className="text-slate-400">收件人：</span>
+              <UserName name={message.recipient_name} rainbow={message.recipient_rainbow} />
+            </span>
+            <time
+              dateTime={message.created_at}
+              className="shrink-0 pt-0.5 text-[11px] text-slate-400"
+            >
+              {timeAgo(message.created_at)}
+            </time>
+          </span>
+
+          <span
+            data-no-translate
+            className={`mt-0.5 block break-words text-xs leading-5 ${
+              expanded ? "whitespace-pre-wrap" : "line-clamp-2"
+            } text-slate-500`}
+          >
+            {richTextToPlainText(message.content)}
+          </span>
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/** 收件详情弹窗 —— 查看全文并可直接回复 */
+function InboxDetailDialog({
+  message,
+  onClose,
+  onReplied,
+}: {
+  message: InboxMessage;
+  onClose: () => void;
+  onReplied: () => void;
+}) {
+  const [reply, setReply] = useState("");
+  const [replyKey, setReplyKey] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState<null | { ok: boolean; msg: string }>(null);
+
+  const trimmedReply = reply.trim();
+  const hasReply = trimmedReply.length > 0 && !/^<p>\s*<\/p>$/i.test(trimmedReply);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  async function handleReply() {
+    if (!hasReply || sending) return;
+
+    setSending(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: message.sender_email, content: trimmedReply }),
+      });
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        message?: string;
+      } | null;
+
+      if (!res.ok || !data?.ok) {
+        setFeedback({ ok: false, msg: data?.message ?? "回复失败，请稍后重试" });
+        return;
+      }
+
+      setReply("");
+      setReplyKey((key) => key + 1);
+      setFeedback({ ok: true, msg: "回复已发送" });
+      onReplied();
+    } catch {
+      setFeedback({ ok: false, msg: "网络错误，请稍后重试" });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-sm sm:items-center sm:p-6"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="收件详情"
+        onClick={(event) => event.stopPropagation()}
+        className="flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+      >
+        <div className="flex items-start gap-3.5 border-b border-slate-100 px-5 py-4 sm:px-6">
+          <Avatar name={message.sender_name} avatar={message.sender_avatar} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-slate-900">
+              <UserName name={message.sender_name} rainbow={message.sender_rainbow} />
+            </p>
+            <p className="mt-0.5 text-[11px] text-slate-400">
+              {new Date(message.created_at).toLocaleString("zh-CN")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="关闭"
+            className="grid size-8 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X className="size-4" strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+          {isRichText(message.content) ? (
+            <div
+              data-no-translate
+              className="prose prose-sm prose-slate max-w-none break-words text-slate-700"
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(message.content) }}
+            />
+          ) : (
+            <p
+              data-no-translate
+              className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-700"
+            >
+              {message.content}
+            </p>
+          )}
+        </div>
+
+        <div className="border-t border-slate-100 px-5 py-4 sm:px-6">
+          <Editor
+            key={replyKey}
+            content={reply}
+            onChange={setReply}
+            compact
+            collapsibleToolbar
+            placeholder={`回复 ${message.sender_name}…`}
+          />
+
+          {feedback && (
+            <p
+              role="status"
+              className={`mt-2 text-xs ${feedback.ok ? "text-emerald-600" : "text-red-500"}`}
+            >
+              {feedback.msg}
+            </p>
+          )}
+
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={handleReply}
+              disabled={sending || !hasReply}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Send className="size-4" strokeWidth={1.8} />
+              {sending ? "发送中…" : "回复"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -6,16 +6,70 @@
  *   [i]...[/i]        斜体
  *   [u]...[/u]        下划线
  *   [s]...[/s]        删除线
- *   [color=#xxx]...   文字颜色（仅允许 #rrggbb）
+ *   [color=#xxx]...   文字颜色（#rrggbb 或常用颜色名）
+ *   [size=1-7]...     字号（对应 10px - 32px）
  *   [url=...]...[/url]  超链接
  *   [quote]...[/quote]  引用块
+ *   [spoiler="标题"]... 折叠块
  *   [code]...[/code]    等宽代码（防解析）
  *   [img]...[/img]      图片 URL
  *
  * 安全：所有输出经过 escapeHtml，不输出裸 HTML；url/img 仅允许 http(s) + data:image/svg+xml。
  */
 
-const ALLOWED_TAGS = new Set(["b", "i", "u", "s", "color", "url", "quote", "code", "img"]);
+const ALLOWED_TAGS = new Set([
+  "b",
+  "i",
+  "u",
+  "s",
+  "color",
+  "size",
+  "url",
+  "quote",
+  "spoiler",
+  "code",
+  "img",
+]);
+
+/** 允许的 CSS 颜色名（防止 style 注入） */
+const NAMED_COLORS = new Set([
+  "black",
+  "silver",
+  "gray",
+  "grey",
+  "white",
+  "maroon",
+  "red",
+  "purple",
+  "fuchsia",
+  "magenta",
+  "green",
+  "lime",
+  "olive",
+  "yellow",
+  "navy",
+  "blue",
+  "teal",
+  "aqua",
+  "cyan",
+  "orange",
+  "pink",
+  "brown",
+  "gold",
+  "violet",
+  "indigo",
+]);
+
+/** 字号档位（vBulletin 风格 1-7） */
+const FONT_SIZES: Record<string, string> = {
+  "1": "10px",
+  "2": "12px",
+  "3": "14px",
+  "4": "16px",
+  "5": "18px",
+  "6": "24px",
+  "7": "32px",
+};
 
 /** 转义 HTML */
 function escapeHtml(s: string): string {
@@ -36,7 +90,7 @@ function sanitizeUrl(u: string): string | null {
   return null;
 }
 
-/** 颜色校验 — 仅允许 #rrggbb 或 6 位/3 位十六进制 */
+/** 颜色校验 — 仅允许 #rrggbb / #rgb 或白名单颜色名 */
 function sanitizeColor(c: string): string | null {
   const t = c.trim();
   if (/^#[0-9a-fA-F]{6}$/.test(t)) return t;
@@ -44,7 +98,33 @@ function sanitizeColor(c: string): string | null {
     // 扩展为 6 位
     return "#" + t[1] + t[1] + t[2] + t[2] + t[3] + t[3];
   }
+  const lower = t.toLowerCase();
+  if (NAMED_COLORS.has(lower)) return lower;
   return null;
+}
+
+/** 字号校验 — 仅允许 1-7，返回对应 px */
+function sanitizeSize(s: string): string | null {
+  const t = s.trim();
+  return FONT_SIZES[t] ?? null;
+}
+
+/** 去掉属性两侧的引号 */
+function unquote(s?: string): string {
+  if (!s) return "";
+  const t = s.trim();
+  const m = t.match(/^"([\s\S]*)"$/) ?? t.match(/^'([\s\S]*)'$/);
+  return m ? m[1] : t;
+}
+
+/** 统一 [img]url[/img] / [url]url[/url] 写法，方便后续按 key=value 解析 */
+function normalizeImplicitAttr(src: string): string {
+  return src
+    .replace(/\[img\]\s*([^[\]]+?)\s*\[\/img\]/gi, (_m, url: string) => `[img=${url.trim()}][/img]`)
+    .replace(
+      /\[url\]\s*(https?:\/\/[^\s[\]]+)\s*\[\/url\]/gi,
+      (_m, url: string) => `[url=${url}]${url}[/url]`,
+    );
 }
 
 type Token =
@@ -113,7 +193,7 @@ function tokenize(src: string): Token[] {
  */
 export function renderBBCode(src: string): string {
   if (!src) return "";
-  const tokens = tokenize(src);
+  const tokens = tokenize(normalizeImplicitAttr(src));
   const stack: { tag: string; attr?: string }[] = [];
   let out = "";
   let inCode = false;
@@ -128,7 +208,7 @@ export function renderBBCode(src: string): string {
         out += "<em>";
         break;
       case "u":
-        out += '<span style="text-decoration:underline">';
+        out += "<u>";
         break;
       case "s":
         out += "<del>";
@@ -136,6 +216,11 @@ export function renderBBCode(src: string): string {
       case "color": {
         const c = sanitizeColor(attr ?? "");
         out += c ? `<span style="color:${c}">` : "";
+        break;
+      }
+      case "size": {
+        const size = sanitizeSize(attr ?? "");
+        out += size ? `<span style="font-size:${size}">` : "";
         break;
       }
       case "url": {
@@ -148,6 +233,14 @@ export function renderBBCode(src: string): string {
       case "quote":
         out += '<blockquote class="border-l-4 border-slate-300 pl-3 text-slate-600 italic my-1">';
         break;
+      case "spoiler": {
+        const title = escapeHtml(unquote(attr) || "展开");
+        out +=
+          '<details class="my-2 rounded-xl border border-slate-200 px-3 py-2">' +
+          `<summary class="cursor-pointer select-none text-sm font-semibold text-slate-700">${title}</summary>` +
+          '<div data-type="detailsContent" class="mt-2">';
+        break;
+      }
       case "code":
         inCode = true;
         out += '<code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-sm">';
@@ -181,7 +274,10 @@ export function renderBBCode(src: string): string {
         out += "</em>";
         break;
       case "u":
+        out += "</u>";
+        break;
       case "color":
+      case "size":
         out += "</span>";
         break;
       case "s":
@@ -192,6 +288,9 @@ export function renderBBCode(src: string): string {
         break;
       case "quote":
         out += "</blockquote>";
+        break;
+      case "spoiler":
+        out += "</div></details>";
         break;
       case "code":
         inCode = false;
@@ -236,7 +335,7 @@ export function validateBBCode(src: string, maxLen = 500): string | null {
   // 不能含裸 HTML 标签
   if (/<\/?[a-z][^>]*>/i.test(src)) return "不允许直接使用 HTML 标签";
 
-  const tokens = tokenize(src);
+  const tokens = tokenize(normalizeImplicitAttr(src));
   const stack: string[] = [];
 
   for (const tok of tokens) {
@@ -248,7 +347,11 @@ export function validateBBCode(src: string, maxLen = 500): string | null {
       }
       if (tok.tag === "color") {
         if (!tok.attr) return "[color=...] 需要颜色值";
-        if (!sanitizeColor(tok.attr)) return "[color=...] 必须是 #rrggbb 格式";
+        if (!sanitizeColor(unquote(tok.attr))) return "[color=...] 必须是 #rrggbb 或颜色名";
+      }
+      if (tok.tag === "size") {
+        if (!tok.attr) return "[size=...] 需要字号";
+        if (!sanitizeSize(unquote(tok.attr))) return "[size=...] 仅支持 1-7";
       }
       stack.push(tok.tag);
     } else if (tok.type === "close") {

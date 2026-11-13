@@ -6,6 +6,8 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Color, FontSize, TextStyle } from "@tiptap/extension-text-style";
+import { Details, DetailsContent, DetailsSummary } from "@tiptap/extension-details";
 import { useCallback, useEffect, useState } from "react";
 import { renderBBCode } from "@/lib/bbcode";
 import { useLocale } from "@/components/language-provider";
@@ -38,6 +40,7 @@ export default function Editor({
   onChange,
   placeholder = "写点什么…",
   compact = false,
+  collapsibleToolbar = false,
 }: {
   content: string;
   onChange: (html: string) => void;
@@ -45,11 +48,16 @@ export default function Editor({
   placeholder?: string;
   /** 紧凑模式：更矮的编辑区与更小的内边距 */
   compact?: boolean;
+  /** 工具栏默认隐藏，点击「格式」按钮展开 */
+  collapsibleToolbar?: boolean;
 }) {
   // 用于强制 React 重渲染 — tiptap 的 isActive 只在组件重渲染时才重新计算
   const [, forceRender] = useState(0);
   const { locale } = useLocale();
   const localizedPlaceholder = translateText(placeholder, locale) ?? placeholder;
+
+  // 可折叠工具栏：由「格式」按钮控制展开 / 收起
+  const [toolbarOpen, setToolbarOpen] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -71,6 +79,22 @@ export default function Editor({
       Placeholder.configure({
         placeholder: localizedPlaceholder,
       }),
+      // BBCode 粘贴会带来颜色 / 字号，需要对应的 mark 才能识别
+      TextStyle,
+      Color,
+      FontSize,
+      // [spoiler] 折叠块
+      Details.configure({
+        HTMLAttributes: { class: "my-2 rounded-xl border border-slate-200 px-3 py-2" },
+      }),
+      DetailsSummary.configure({
+        HTMLAttributes: {
+          class: "cursor-pointer select-none text-sm font-semibold text-slate-700",
+        },
+      }),
+      DetailsContent.configure({
+        HTMLAttributes: { class: "mt-2" },
+      }),
     ],
     content,
     editorProps: {
@@ -81,7 +105,7 @@ export default function Editor({
         const text = event.clipboardData?.getData("text/plain") ?? "";
         if (!text) return false;
 
-        if (!/\[(b|i|u|s|color|url|quote|code|img|\/[a-z]+)(?:=|\])/i.test(text)) {
+        if (!/\[(b|i|u|s|color|size|url|quote|spoiler|code|img|\/[a-z]+)(?:=|\])/i.test(text)) {
           return false;
         }
 
@@ -127,121 +151,155 @@ export default function Editor({
 
   if (!editor) return null;
 
+  // 工具栏何时可见：非折叠模式一直显示；折叠模式由按钮控制
+  const showToolbar = !collapsibleToolbar || toolbarOpen;
+
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white [[data-background=tohru]_&]:bg-transparent">
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 bg-slate-50/70 px-2 py-2">
-            <ToolbarButton
-              active={editor.isActive("bold")}
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              label="加粗"
+        {collapsibleToolbar && !showToolbar && (
+          <div className="flex justify-end px-2 py-1">
+            <button
+              type="button"
+              onClick={() => setToolbarOpen(true)}
+              aria-expanded={false}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
             >
-              <strong>B</strong>
-            </ToolbarButton>
+              <span aria-hidden="true" className="font-serif text-sm leading-none">
+                Aa
+              </span>
+              格式
+            </button>
+          </div>
+        )}
 
-            <ToolbarButton
-              active={editor.isActive("italic")}
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              label="斜体"
-            >
-              <em>I</em>
-            </ToolbarButton>
-
-            <ToolbarButton
-              active={editor.isActive("strike")}
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              label="删除线"
-            >
-              <span className="line-through">S</span>
-            </ToolbarButton>
-
-            <Divider />
-
-            <ToolbarButton
-              active={editor.isActive("heading", { level: 1 })}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              label="标题 1"
-            >
-              H1
-            </ToolbarButton>
-
-            <ToolbarButton
-              active={editor.isActive("heading", { level: 2 })}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              label="标题 2"
-            >
-              H2
-            </ToolbarButton>
-
-            <ToolbarButton
-              active={editor.isActive("heading", { level: 3 })}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              label="标题 3"
-            >
-              H3
-            </ToolbarButton>
-
-            <Divider />
-
-            <ToolbarButton
-              active={editor.isActive("bulletList")}
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              label="无序列表"
-            >
-              <IconList />
-            </ToolbarButton>
-
-            <ToolbarButton
-              active={editor.isActive("orderedList")}
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              label="有序列表"
-            >
-              <IconOrderedList />
-            </ToolbarButton>
-
-            <ToolbarButton
-              active={editor.isActive("blockquote")}
-              onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              label="引用"
-            >
-              <IconQuote />
-            </ToolbarButton>
-
-            <Divider />
-
-            <ToolbarButton
-              onClick={toggleLink}
-              active={linkDialogOpen || editor.isActive("link")}
-              label="链接"
-            >
-              <IconLink />
-            </ToolbarButton>
-
-            <ToolbarButton onClick={toggleImage} active={imageDialogOpen} label="插入图片">
-              <IconImage />
-            </ToolbarButton>
-
-            <div className="ml-auto flex items-center gap-1">
+        {showToolbar && (
+          <div className="relative">
+            <div className="flex flex-wrap items-center gap-1 border-b border-slate-100 bg-slate-50/70 px-2 py-2">
               <ToolbarButton
-                onClick={() => editor.chain().focus().undo().run()}
-                active={false}
-                label="撤销"
-                disabled={!editor.can().undo()}
+                active={editor.isActive("bold")}
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                label="加粗"
               >
-                <IconUndo />
+                <strong>B</strong>
               </ToolbarButton>
+
               <ToolbarButton
-                onClick={() => editor.chain().focus().redo().run()}
-                active={false}
-                label="重做"
-                disabled={!editor.can().redo()}
+                active={editor.isActive("italic")}
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                label="斜体"
               >
-                <IconRedo />
+                <em>I</em>
               </ToolbarButton>
+
+              <ToolbarButton
+                active={editor.isActive("strike")}
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                label="删除线"
+              >
+                <span className="line-through">S</span>
+              </ToolbarButton>
+
+              <Divider />
+
+              <ToolbarButton
+                active={editor.isActive("heading", { level: 1 })}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                label="标题 1"
+              >
+                H1
+              </ToolbarButton>
+
+              <ToolbarButton
+                active={editor.isActive("heading", { level: 2 })}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                label="标题 2"
+              >
+                H2
+              </ToolbarButton>
+
+              <ToolbarButton
+                active={editor.isActive("heading", { level: 3 })}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                label="标题 3"
+              >
+                H3
+              </ToolbarButton>
+
+              <Divider />
+
+              <ToolbarButton
+                active={editor.isActive("bulletList")}
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                label="无序列表"
+              >
+                <IconList />
+              </ToolbarButton>
+
+              <ToolbarButton
+                active={editor.isActive("orderedList")}
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                label="有序列表"
+              >
+                <IconOrderedList />
+              </ToolbarButton>
+
+              <ToolbarButton
+                active={editor.isActive("blockquote")}
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                label="引用"
+              >
+                <IconQuote />
+              </ToolbarButton>
+
+              <Divider />
+
+              <ToolbarButton
+                onClick={toggleLink}
+                active={linkDialogOpen || editor.isActive("link")}
+                label="链接"
+              >
+                <IconLink />
+              </ToolbarButton>
+
+              <ToolbarButton onClick={toggleImage} active={imageDialogOpen} label="插入图片">
+                <IconImage />
+              </ToolbarButton>
+
+              <div className="ml-auto flex items-center gap-1">
+                <ToolbarButton
+                  onClick={() => editor.chain().focus().undo().run()}
+                  active={false}
+                  label="撤销"
+                  disabled={!editor.can().undo()}
+                >
+                  <IconUndo />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => editor.chain().focus().redo().run()}
+                  active={false}
+                  label="重做"
+                  disabled={!editor.can().redo()}
+                >
+                  <IconRedo />
+                </ToolbarButton>
+
+                {collapsibleToolbar && (
+                  <button
+                    type="button"
+                    onClick={() => setToolbarOpen(false)}
+                    aria-expanded={true}
+                    aria-label="收起格式工具栏"
+                    title="收起格式工具栏"
+                    className="ml-1 grid size-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-200/70 hover:text-slate-900"
+                  >
+                    <IconChevronUp />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <EditorContent editor={editor} />
       </div>
@@ -326,6 +384,20 @@ function Divider() {
 }
 
 /* ---------- 图标 ---------- */
+function IconChevronUp() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="size-4">
+      <path
+        d="M5 12.5 10 7.5l5 5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function IconList() {
   return (
     <svg viewBox="0 0 20 20" fill="none" className="size-4">

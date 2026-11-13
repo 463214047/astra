@@ -61,6 +61,21 @@ async function fetchForumPost(id: string): Promise<ForumDetail | null> {
   };
 }
 
+/** 内联样式白名单 — 仅保留 color / font-size */
+function sanitizeInlineStyle(value: string): string | null {
+  const kept: string[] = [];
+  for (const part of value.split(";")) {
+    const idx = part.indexOf(":");
+    if (idx === -1) continue;
+    const prop = part.slice(0, idx).trim().toLowerCase();
+    const val = part.slice(idx + 1).trim();
+    if (prop === "color" && /^(#[0-9a-f]{3,8}|[a-z]{3,20})$/i.test(val)) kept.push(`color:${val}`);
+    else if (prop === "font-size" && /^\d{1,2}(?:\.\d+)?px$/.test(val))
+      kept.push(`font-size:${val}`);
+  }
+  return kept.length ? kept.join(";") : null;
+}
+
 function sanitizeHtml(html: string): string {
   if (!html) return "";
   const stripped = html
@@ -97,6 +112,10 @@ function sanitizeHtml(html: string): string {
     "img",
     "a",
     "hr",
+    "span",
+    "div",
+    "details",
+    "summary",
   ]);
   const ALLOWED_ATTRS: Record<string, Set<string>> = {
     img: new Set(["src", "alt", "class"]),
@@ -104,6 +123,10 @@ function sanitizeHtml(html: string): string {
     code: new Set(["class"]),
     pre: new Set(["class"]),
     blockquote: new Set(["class"]),
+    span: new Set(["style"]),
+    div: new Set(["class", "data-type"]),
+    details: new Set(["class", "open"]),
+    summary: new Set(["class"]),
   };
   return stripped.replace(
     /<(\/?)([a-zA-Z][a-zA-Z0-9]*)(\s[^>]*)?\s*>/g,
@@ -114,11 +137,16 @@ function sanitizeHtml(html: string): string {
         let cleanAttrs = "";
         const allowedForTag = ALLOWED_ATTRS[tagLower] ?? new Set();
         if (attrs) {
-          const attrMatches = attrs.matchAll(/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
+          const attrMatches = attrs.matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g);
           for (const a of attrMatches) {
             const name = a[1].toLowerCase();
             const value = a[2] ?? a[3] ?? a[4] ?? "";
             if (allowedForTag.has(name)) {
+              if (name === "style") {
+                const safeStyle = sanitizeInlineStyle(value);
+                if (safeStyle) cleanAttrs += ` style="${safeStyle}"`;
+                continue;
+              }
               if (tagLower === "img" && name === "src") {
                 // 站内上传的图片是 /uploads/... 相对路径，需一并放行
                 if (!/^(https?:\/\/|\/(?!\/))[^\s"<>]+$/i.test(value)) continue;

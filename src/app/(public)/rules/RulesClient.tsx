@@ -17,7 +17,7 @@ const SECTIONS: RuleSection[] = [
     key: "general",
     label: "总则",
     icon: ScrollText,
-    items: ["为了网站能够稳定运行，请避免在能够被搜索引擎检索到以及正规的公共场合提及本站。"],
+    items: ["为了网站能够稳定运行，请避免在被监管的公共场合提及本站。"],
   },
   {
     key: "publish",
@@ -25,7 +25,6 @@ const SECTIONS: RuleSection[] = [
     icon: Upload,
     items: [
       "转种请勿重新制种，种子内文件不要包含与资源无关的内容或广告信息。",
-      "发布规范参照有严谨规则、严格审核的其他站点即可。",
     ],
   },
 ];
